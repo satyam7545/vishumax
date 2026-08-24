@@ -10,6 +10,12 @@ import {
   validateInquiryInput,
 } from './api/security.ts';
 import {
+  saveUploadedMedia,
+  listMediaFiles,
+  deleteMediaFile,
+  deleteMultipleMediaFiles,
+} from './api/mediaManager.ts';
+import {
   getPublicCMSData,
   getAllCMSData,
   saveSettings,
@@ -32,6 +38,7 @@ import {
 
 const PORT = parseInt(process.env.PORT || '3000', 10);
 const DIST_DIR = path.resolve(process.cwd(), 'dist');
+const PUBLIC_DIR = path.resolve(process.cwd(), 'public');
 
 // MIME types for static asset serving
 const MIME_TYPES: Record<string, string> = {
@@ -79,18 +86,18 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // Helper to parse JSON body with strict 2MB limit
+  // Helper to parse JSON body with 50MB limit
   const getBody = async (): Promise<any> => {
     return new Promise((resolve, reject) => {
       let body = '';
       let bytes = 0;
-      const maxBytes = 2 * 1024 * 1024; // 2MB
+      const maxBytes = 50 * 1024 * 1024; // 50MB
 
       req.on('data', (chunk) => {
         bytes += chunk.length;
         if (bytes > maxBytes) {
           res.statusCode = 413;
-          res.end(JSON.stringify({ success: false, error: 'Payload too large (max 2MB)' }));
+          res.end(JSON.stringify({ success: false, error: 'Payload too large (max 50MB)' }));
           reject(new Error('Payload too large'));
           return;
         }
@@ -412,6 +419,53 @@ const server = http.createServer(async (req, res) => {
         return;
       }
 
+      // 23. ADMIN: GET /api/cms/media
+      if (pathname === '/api/cms/media' && method === 'GET') {
+        const files = listMediaFiles();
+        res.statusCode = 200;
+        res.end(JSON.stringify({ success: true, files }));
+        return;
+      }
+
+      // 24. ADMIN: POST /api/cms/upload
+      if (pathname === '/api/cms/upload' && method === 'POST') {
+        const { name, type, data } = await getBody();
+        if (!name || !data) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ success: false, error: 'File name and data are required' }));
+          return;
+        }
+
+        const result = saveUploadedMedia(name, type || 'image/png', data);
+        res.statusCode = result.success ? 200 : 400;
+        res.end(JSON.stringify(result));
+        return;
+      }
+
+      // 25. ADMIN: DELETE /api/cms/media/:filename
+      if (pathname.startsWith('/api/cms/media/') && method === 'DELETE') {
+        const filename = pathname.replace('/api/cms/media/', '');
+        const deleted = deleteMediaFile(filename);
+        res.statusCode = deleted ? 200 : 404;
+        res.end(JSON.stringify({ success: deleted }));
+        return;
+      }
+
+      // 26. ADMIN: POST /api/cms/media/batch-delete
+      if (pathname === '/api/cms/media/batch-delete' && method === 'POST') {
+        const { filenames } = await getBody();
+        if (!Array.isArray(filenames) || filenames.length === 0) {
+          res.statusCode = 400;
+          res.end(JSON.stringify({ success: false, error: 'Array of filenames required' }));
+          return;
+        }
+
+        const result = deleteMultipleMediaFiles(filenames);
+        res.statusCode = 200;
+        res.end(JSON.stringify({ success: true, deletedCount: result.deletedCount }));
+        return;
+      }
+
       // Route not matched
       res.statusCode = 404;
       res.end(JSON.stringify({ error: 'API endpoint not found' }));
@@ -425,13 +479,21 @@ const server = http.createServer(async (req, res) => {
   }
 
   // -------------------------------------------------------------
-  // STATIC ASSET SERVING (Production SPA)
+  // STATIC ASSET SERVING (Production SPA & Uploads)
   // -------------------------------------------------------------
   const sanitizedPath = path.normalize(pathname).replace(/^(\.\.[/\\])+/, '');
   let filePath = path.resolve(DIST_DIR, sanitizedPath === '/' || sanitizedPath === '\\' ? 'index.html' : `.${sanitizedPath}`);
 
-  // Prevent path traversal outside DIST_DIR
-  if (!filePath.startsWith(DIST_DIR)) {
+  // If file not in DIST_DIR and is in /uploads/, check PUBLIC_DIR
+  if (!fs.existsSync(filePath) && sanitizedPath.startsWith('/uploads/')) {
+    const publicUploadPath = path.resolve(PUBLIC_DIR, `.${sanitizedPath}`);
+    if (fs.existsSync(publicUploadPath) && publicUploadPath.startsWith(PUBLIC_DIR)) {
+      filePath = publicUploadPath;
+    }
+  }
+
+  // Prevent path traversal outside allowed directories
+  if (!filePath.startsWith(DIST_DIR) && !filePath.startsWith(PUBLIC_DIR)) {
     res.statusCode = 403;
     res.end('Forbidden');
     return;

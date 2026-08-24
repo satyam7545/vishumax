@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
@@ -27,7 +27,15 @@ import {
   TrendingUp,
   AlertCircle,
   Palette,
-  Check
+  Check,
+  Upload,
+  UploadCloud,
+  Images,
+  Copy,
+  Eye,
+  Loader2,
+  CheckSquare,
+  Square,
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { THEMES, DEFAULT_THEME_ID } from '../types/theme';
@@ -41,6 +49,15 @@ import type {
   CMSSiteSettings,
 } from '../types/cms';
 
+export interface MediaFile {
+  id: string;
+  name: string;
+  url: string;
+  size: number;
+  type: string;
+  createdAt: string;
+}
+
 export const AdminDashboard: React.FC = () => {
   const {
     isAdminOpen,
@@ -53,7 +70,7 @@ export const AdminDashboard: React.FC = () => {
   } = useSiteData();
 
   const [activeNav, setActiveNav] = useState<
-    'overview' | 'projects' | 'clients' | 'testimonials' | 'leaders' | 'services' | 'inquiries' | 'settings' | 'security'
+    'overview' | 'projects' | 'clients' | 'testimonials' | 'leaders' | 'services' | 'media' | 'inquiries' | 'settings' | 'security'
   >('overview');
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -71,6 +88,16 @@ export const AdminDashboard: React.FC = () => {
     services: CMSService[];
     inquiries: CMSContactInquiry[];
   } | null>(null);
+
+  // Media Library State
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [isUploadingMedia, setIsUploadingMedia] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState<{ current: number; total: number } | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<string[]>([]);
+  const [mediaSearch, setMediaSearch] = useState('');
+  const [copiedUrl, setCopiedUrl] = useState<string | null>(null);
+  const [previewMedia, setPreviewMedia] = useState<MediaFile | null>(null);
+  const [mediaPickerCallback, setMediaPickerCallback] = useState<((url: string) => void) | null>(null);
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
@@ -99,7 +126,177 @@ export const AdminDashboard: React.FC = () => {
 
   const getAuthToken = () => localStorage.getItem('vishumax_auth_token') || '';
 
-  // Fetch full CMS data
+  // Fetch full CMS data and media files
+  const fetchMediaFiles = useCallback(async () => {
+    try {
+      const res = await fetch('/api/cms/media', {
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.success && Array.isArray(json.files)) {
+          setMediaFiles(json.files);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to load media files:', err);
+    }
+  }, []);
+
+  const handleUploadSingleFile = async (file: File): Promise<string | null> => {
+    // 50MB limit
+    if (file.size > 50 * 1024 * 1024) {
+      notify(`"${file.name}" exceeds 50MB size limit`, 'error');
+      return null;
+    }
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64 = reader.result as string;
+        try {
+          const res = await fetch('/api/cms/upload', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${getAuthToken()}`,
+            },
+            body: JSON.stringify({
+              name: file.name,
+              type: file.type,
+              data: base64,
+            }),
+          });
+          const json = await res.json();
+          if (res.ok && json.success && json.url) {
+            resolve(json.url);
+          } else {
+            notify(json.error || `Failed to upload ${file.name}`, 'error');
+            resolve(null);
+          }
+        } catch {
+          notify(`Network error uploading ${file.name}`, 'error');
+          resolve(null);
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const handleMultiFileUpload = async (files: FileList | File[]) => {
+    const fileArray = Array.from(files);
+    if (fileArray.length === 0) return;
+
+    setIsUploadingMedia(true);
+    setUploadProgress({ current: 0, total: fileArray.length });
+
+    let successCount = 0;
+    let completed = 0;
+
+    // Process concurrent uploads in batches of 4
+    const CHUNK_SIZE = 4;
+    for (let i = 0; i < fileArray.length; i += CHUNK_SIZE) {
+      const chunk = fileArray.slice(i, i + CHUNK_SIZE);
+      const results = await Promise.all(chunk.map((f) => handleUploadSingleFile(f)));
+      results.forEach((url) => {
+        if (url) successCount++;
+      });
+      completed += chunk.length;
+      setUploadProgress({ current: Math.min(completed, fileArray.length), total: fileArray.length });
+    }
+
+    setIsUploadingMedia(false);
+    setUploadProgress(null);
+    if (successCount > 0) {
+      notify(`Successfully uploaded ${successCount} of ${fileArray.length} image(s)!`);
+      await fetchMediaFiles();
+    }
+  };
+
+  const handleToggleSelectMedia = (filename: string) => {
+    setSelectedMedia((prev) =>
+      prev.includes(filename) ? prev.filter((id) => id !== filename) : [...prev, filename]
+    );
+  };
+
+  const handleSelectAllMedia = () => {
+    const visibleFiles = mediaFiles
+      .filter((f) => !mediaSearch || f.name.toLowerCase().includes(mediaSearch.toLowerCase()))
+      .map((f) => f.id);
+
+    if (visibleFiles.length === 0) return;
+
+    const allSelected = visibleFiles.every((id) => selectedMedia.includes(id));
+    if (allSelected) {
+      // Deselect all visible
+      setSelectedMedia((prev) => prev.filter((id) => !visibleFiles.includes(id)));
+    } else {
+      // Select all visible
+      setSelectedMedia((prev) => Array.from(new Set([...prev, ...visibleFiles])));
+    }
+  };
+
+  const handleBatchDeleteMedia = async () => {
+    if (selectedMedia.length === 0) return;
+    if (!window.confirm(`Permanently delete ${selectedMedia.length} selected image(s) from server?`)) return;
+
+    try {
+      const res = await fetch('/api/cms/media/batch-delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ filenames: selectedMedia }),
+      });
+
+      if (res.ok) {
+        notify(`Deleted ${selectedMedia.length} image(s) from server`);
+        setSelectedMedia([]);
+        await fetchMediaFiles();
+      } else {
+        notify('Failed to delete selected images', 'error');
+      }
+    } catch {
+      notify('Batch delete network error', 'error');
+    }
+  };
+
+  const handleBatchCopyUrls = () => {
+    if (selectedMedia.length === 0) return;
+    const urls = mediaFiles
+      .filter((f) => selectedMedia.includes(f.id))
+      .map((f) => f.url)
+      .join('\n');
+    navigator.clipboard.writeText(urls);
+    notify(`Copied ${selectedMedia.length} image URL(s) to clipboard!`);
+  };
+
+  const handleDeleteMedia = async (filename: string) => {
+    if (!window.confirm(`Delete image "${filename}" from server?`)) return;
+    try {
+      const res = await fetch(`/api/cms/media/${encodeURIComponent(filename)}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${getAuthToken()}` },
+      });
+      if (res.ok) {
+        notify('Image deleted from server');
+        setSelectedMedia((prev) => prev.filter((id) => id !== filename));
+        await fetchMediaFiles();
+      } else {
+        notify('Failed to delete image', 'error');
+      }
+    } catch {
+      notify('Network error', 'error');
+    }
+  };
+
+  const handleCopyUrl = (url: string) => {
+    navigator.clipboard.writeText(url);
+    setCopiedUrl(url);
+    notify('Image URL copied to clipboard!');
+    setTimeout(() => setCopiedUrl(null), 2500);
+  };
+
   const fetchAllCMSData = async () => {
     setIsLoading(true);
     try {
@@ -112,6 +309,7 @@ export const AdminDashboard: React.FC = () => {
           setAllData(json.data);
         }
       }
+      await fetchMediaFiles();
     } catch {
       notify('Failed to connect to backend', 'error');
     }
@@ -372,6 +570,112 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  const ImageFieldInput = ({
+    label,
+    value,
+    onChange,
+    placeholder,
+    aspect = 'video',
+  }: {
+    label: string;
+    value?: string;
+    onChange: (val: string) => void;
+    placeholder?: string;
+    aspect?: 'video' | 'square' | 'portrait';
+  }) => {
+    const [uploading, setUploading] = useState(false);
+    const fileRef = useRef<HTMLInputElement>(null);
+
+    const onFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      setUploading(true);
+      const uploadedUrl = await handleUploadSingleFile(file);
+      if (uploadedUrl) {
+        onChange(uploadedUrl);
+      }
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = '';
+    };
+
+    const aspectClass =
+      aspect === 'portrait'
+        ? 'w-10 aspect-[3/4] rounded-lg'
+        : aspect === 'square'
+        ? 'w-10 h-10 rounded-full'
+        : 'w-14 aspect-video rounded-lg';
+
+    return (
+      <div>
+        <label className="block text-xs text-slate-400 mb-1">{label}</label>
+        <div className="flex items-center gap-2">
+          <div className={`${aspectClass} bg-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0`}>
+            {value ? (
+              <img
+                src={value}
+                alt=""
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <ImageIcon className="w-4 h-4 text-slate-600" />
+            )}
+          </div>
+
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder || 'Paste URL or Upload ->'}
+            className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono placeholder:text-slate-600 focus:border-indigo-500 focus:outline-none"
+          />
+
+          <input
+            type="file"
+            ref={fileRef}
+            onChange={onFilePick}
+            accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,image/avif"
+            className="hidden"
+          />
+
+          <button
+            type="button"
+            disabled={uploading}
+            onClick={() => fileRef.current?.click()}
+            className="px-3 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-colors cursor-pointer shadow-sm"
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              fetchMediaFiles();
+              setMediaPickerCallback(() => (url: string) => onChange(url));
+            }}
+            className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium flex items-center gap-1 shrink-0 transition-colors cursor-pointer border border-slate-700/60"
+            title="Choose from Media Library"
+          >
+            <Images className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Library</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="fixed inset-0 z-[1000] flex bg-[#0f172a] text-slate-100 font-sans overflow-hidden">
       {/* Toast Notification */}
@@ -536,6 +840,27 @@ export const AdminDashboard: React.FC = () => {
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-300">
                 {allData?.services.length || 0}
+              </span>
+            </button>
+
+            <button
+              onClick={() => {
+                setActiveNav('media');
+                fetchMediaFiles();
+                setIsMobileSidebarOpen(false);
+              }}
+              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all ${
+                activeNav === 'media'
+                  ? 'bg-indigo-600 text-white shadow-md font-semibold'
+                  : 'text-slate-400 hover:text-white hover:bg-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-3">
+                <Images className="w-4 h-4 text-indigo-400" />
+                <span>Media & Uploads</span>
+              </div>
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-900 text-slate-300">
+                {mediaFiles.length}
               </span>
             </button>
 
@@ -1325,6 +1650,308 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
+              {/* 7. MEDIA & UPLOADS LIBRARY */}
+              {activeNav === 'media' && (() => {
+                const visibleFiles = mediaFiles.filter(
+                  (f) => !mediaSearch || f.name.toLowerCase().includes(mediaSearch.toLowerCase())
+                );
+                const isAllSelected =
+                  visibleFiles.length > 0 && visibleFiles.every((f) => selectedMedia.includes(f.id));
+
+                return (
+                  <div className="space-y-6 max-w-5xl">
+                    {/* Top Header Card */}
+                    <div className="p-6 rounded-2xl bg-[#1e293b] border border-slate-700/60 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400">
+                            <Images className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-sm text-white">Media & Asset Library</h3>
+                            <p className="text-xs text-slate-400">
+                              Upload, batch-manage, and select multiple images up to 50MB for thumbnails and branding.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs font-mono text-indigo-400 font-semibold">
+                          {mediaFiles.length} Assets Stored
+                        </span>
+                        <button
+                          onClick={fetchMediaFiles}
+                          className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                          title="Refresh Assets"
+                        >
+                          <RotateCcw className="w-3.5 h-3.5" />
+                          <span>Refresh</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Drag & Drop Multi-Image Upload Zone */}
+                    <div
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                      }}
+                      onDrop={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                          handleMultiFileUpload(e.dataTransfer.files);
+                        }
+                      }}
+                      className="p-8 rounded-3xl bg-gradient-to-b from-[#1e293b]/90 to-[#0f172a] border-2 border-dashed border-indigo-500/40 hover:border-indigo-400 transition-all flex flex-col items-center justify-center text-center gap-3 relative overflow-hidden group shadow-xl"
+                    >
+                      <input
+                        type="file"
+                        id="media-file-input"
+                        multiple
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,image/avif"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleMultiFileUpload(e.target.files);
+                          }
+                        }}
+                        className="hidden"
+                      />
+
+                      <div className="w-14 h-14 rounded-2xl bg-indigo-600/10 border border-indigo-500/30 flex items-center justify-center text-indigo-400 group-hover:scale-110 group-hover:bg-indigo-600/20 transition-all">
+                        {isUploadingMedia ? (
+                          <Loader2 className="w-7 h-7 animate-spin text-indigo-400" />
+                        ) : (
+                          <UploadCloud className="w-7 h-7" />
+                        )}
+                      </div>
+
+                      <div className="space-y-1">
+                        <h4 className="font-bold text-sm text-white">
+                          {isUploadingMedia
+                            ? 'Uploading image assets simultaneously to server...'
+                            : 'Drag & drop multiple image files here'}
+                        </h4>
+                        <p className="text-xs text-slate-400 max-w-md">
+                          Supports PNG, JPG, JPEG, WebP, SVG, GIF, AVIF up to <strong>50MB</strong> per file. Select multiple files to upload simultaneously.
+                        </p>
+                      </div>
+
+                      {/* Real-time Progress Bar */}
+                      {uploadProgress && (
+                        <div className="w-full max-w-md space-y-1.5 mt-2">
+                          <div className="flex justify-between text-xs font-mono text-slate-300">
+                            <span>Uploading {uploadProgress.current} of {uploadProgress.total} file(s)...</span>
+                            <span>{Math.round((uploadProgress.current / uploadProgress.total) * 100)}%</span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-700">
+                            <div
+                              className="h-full bg-gradient-to-r from-indigo-500 to-emerald-400 transition-all duration-200"
+                              style={{ width: `${(uploadProgress.current / uploadProgress.total) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <label
+                        htmlFor="media-file-input"
+                        className="mt-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/20 transition-all"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Select Multiple Files to Upload</span>
+                      </label>
+                    </div>
+
+                    {/* Search & Bulk Selection Toolbar */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 p-4 rounded-2xl bg-[#1e293b] border border-slate-700/60">
+                      {/* Search */}
+                      <div className="relative flex-1 max-w-md">
+                        <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="text"
+                          placeholder="Search media files by name..."
+                          value={mediaSearch}
+                          onChange={(e) => setMediaSearch(e.target.value)}
+                          className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                        />
+                      </div>
+
+                      {/* Select All & Batch Action Controls */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <button
+                          type="button"
+                          onClick={handleSelectAllMedia}
+                          className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer border ${
+                            isAllSelected
+                              ? 'bg-indigo-600 border-indigo-400 text-white shadow-md'
+                              : 'bg-slate-900 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-800'
+                          }`}
+                        >
+                          {isAllSelected ? (
+                            <CheckSquare className="w-3.5 h-3.5 text-white" />
+                          ) : (
+                            <Square className="w-3.5 h-3.5 text-slate-400" />
+                          )}
+                          <span>{isAllSelected ? 'Deselect All' : `Select All (${visibleFiles.length})`}</span>
+                        </button>
+
+                        {selectedMedia.length > 0 && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={handleBatchCopyUrls}
+                              className="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-slate-200 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                              title="Copy URLs of all selected images"
+                            >
+                              <Copy className="w-3.5 h-3.5 text-indigo-400" />
+                              <span>Copy URLs ({selectedMedia.length})</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={handleBatchDeleteMedia}
+                              className="px-3 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 border border-rose-500 text-white text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-md shadow-rose-600/20"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                              <span>Delete Selected ({selectedMedia.length})</span>
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => setSelectedMedia([])}
+                              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white text-xs"
+                              title="Clear selection"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Visual Gallery Grid */}
+                    {visibleFiles.length === 0 ? (
+                      <div className="p-12 rounded-2xl bg-[#1e293b] border border-slate-700/60 text-center space-y-3">
+                        <ImageIcon className="w-12 h-12 text-slate-600 mx-auto" />
+                        <p className="text-sm font-semibold text-slate-300">
+                          {mediaSearch ? 'No images match your search' : 'No media assets uploaded yet'}
+                        </p>
+                        <p className="text-xs text-slate-500">
+                          Upload thumbnails, logos, or client photos above to use them anywhere on the website.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {visibleFiles.map((file) => {
+                          const sizeKb = Math.round(file.size / 1024);
+                          const isCopied = copiedUrl === file.url;
+                          const isSelected = selectedMedia.includes(file.id);
+
+                          return (
+                            <div
+                              key={file.id}
+                              className={`group p-3 rounded-2xl border flex flex-col justify-between gap-2.5 transition-all shadow-md hover:shadow-xl relative ${
+                                isSelected
+                                  ? 'bg-indigo-950/40 border-indigo-500 ring-2 ring-indigo-500/50'
+                                  : 'bg-[#1e293b] border-slate-700/60 hover:border-indigo-500/50'
+                              }`}
+                            >
+                              {/* Selection Checkbox */}
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleToggleSelectMedia(file.id);
+                                }}
+                                className={`absolute top-4 left-4 z-20 w-6 h-6 rounded-lg flex items-center justify-center transition-all cursor-pointer ${
+                                  isSelected
+                                    ? 'bg-indigo-600 text-white shadow-lg'
+                                    : 'bg-black/60 text-white/70 hover:bg-black/90 opacity-0 group-hover:opacity-100'
+                                }`}
+                                title={isSelected ? 'Deselect image' : 'Select image'}
+                              >
+                                {isSelected ? (
+                                  <Check className="w-3.5 h-3.5 text-white" />
+                                ) : (
+                                  <Square className="w-3.5 h-3.5 text-slate-300" />
+                                )}
+                              </button>
+
+                              {/* Thumbnail preview */}
+                              <div
+                                onClick={() => setPreviewMedia(file)}
+                                className="w-full aspect-video rounded-xl bg-black/50 border border-slate-700/80 overflow-hidden relative cursor-pointer flex items-center justify-center group/thumb"
+                              >
+                                <img
+                                  src={file.url}
+                                  alt={file.name}
+                                  className="w-full h-full object-cover group-hover/thumb:scale-105 transition-transform"
+                                  onError={(e) => {
+                                    (e.target as HTMLElement).style.display = 'none';
+                                  }}
+                                />
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/thumb:opacity-100 flex items-center justify-center transition-opacity">
+                                  <Eye className="w-5 h-5 text-white drop-shadow" />
+                                </div>
+                              </div>
+
+                              {/* File details */}
+                              <div className="space-y-1">
+                                <div className="text-[11px] font-bold text-white truncate" title={file.name}>
+                                  {file.name}
+                                </div>
+                                <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono">
+                                  <span className="uppercase px-1.5 py-0.5 rounded bg-slate-900 text-slate-300 font-semibold">
+                                    {file.type}
+                                  </span>
+                                  <span>
+                                    {sizeKb > 1024 ? `${(sizeKb / 1024).toFixed(1)} MB` : `${sizeKb} KB`}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Action buttons */}
+                              <div className="flex items-center gap-1.5 pt-1.5 border-t border-slate-800">
+                                <button
+                                  onClick={() => handleCopyUrl(file.url)}
+                                  className={`flex-1 py-1.5 px-2 rounded-lg text-[10px] font-semibold flex items-center justify-center gap-1 transition-all cursor-pointer ${
+                                    isCopied
+                                      ? 'bg-emerald-600 text-white'
+                                      : 'bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white'
+                                  }`}
+                                  title="Copy URL to clipboard"
+                                >
+                                  {isCopied ? (
+                                    <>
+                                      <Check className="w-3 h-3 text-white" />
+                                      <span>Copied</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3 h-3 text-slate-400" />
+                                      <span>Copy URL</span>
+                                    </>
+                                  )}
+                                </button>
+
+                                <button
+                                  onClick={() => handleDeleteMedia(file.id)}
+                                  className="p-1.5 rounded-lg bg-slate-900 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
+                                  title="Delete Image"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* 8. SITE SETTINGS & SEO */}
               {activeNav === 'settings' && allData && (
                 <form onSubmit={handleSaveSettings} className="space-y-6 max-w-5xl">
@@ -1438,33 +2065,18 @@ export const AdminDashboard: React.FC = () => {
                         />
                       </div>
                       <div className="sm:col-span-2">
-                        <label className="block text-xs text-slate-400 mb-1">Navbar Brand Logo Image URL</label>
-                        <div className="flex gap-3 items-center">
-                          <input
-                            type="text"
-                            placeholder="https://images.unsplash.com/... or /logo.png"
-                            value={allData.settings.brandLogoImage || ''}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, brandLogoImage: e.target.value },
-                              })
-                            }
-                            className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-rose-500"
-                          />
-                          {allData.settings.brandLogoImage && (
-                            <div className="w-9 h-9 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
-                              <img
-                                src={allData.settings.brandLogoImage}
-                                alt="Logo Preview"
-                                className="w-full h-full object-cover"
-                                onError={(e) => {
-                                  (e.target as HTMLElement).style.display = 'none';
-                                }}
-                              />
-                            </div>
-                          )}
-                        </div>
+                        <ImageFieldInput
+                          label="Navbar Brand Logo Image"
+                          value={allData.settings.brandLogoImage || ''}
+                          onChange={(val) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, brandLogoImage: val },
+                            })
+                          }
+                          placeholder="Upload logo or paste image URL..."
+                          aspect="square"
+                        />
                         <p className="text-[10px] text-slate-500 mt-1">
                           Appears in top navbar next to brand name and in the footer.
                         </p>
@@ -1600,35 +2212,18 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
-                      <label className="block text-xs text-slate-400 mb-1">Portrait Image URL</label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="text"
-                          value={allData.settings.aboutPortraitImage || ''}
-                          onChange={(e) =>
-                            setAllData({
-                              ...allData,
-                              settings: { ...allData.settings, aboutPortraitImage: e.target.value },
-                            })
-                          }
-                          placeholder="https://images.unsplash.com/... or image URL"
-                          className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white"
-                        />
-                        {allData.settings.aboutPortraitImage && (
-                          <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-700 bg-slate-900 shrink-0">
-                            <img
-                              src={allData.settings.aboutPortraitImage}
-                              alt="Portrait Preview"
-                              className="w-full h-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLElement).style.display = 'none';
-                              }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    </div>
+                    <ImageFieldInput
+                      label="Portrait Image"
+                      value={allData.settings.aboutPortraitImage || ''}
+                      onChange={(val) =>
+                        setAllData({
+                          ...allData,
+                          settings: { ...allData.settings, aboutPortraitImage: val },
+                        })
+                      }
+                      placeholder="Upload portrait or paste image URL..."
+                      aspect="portrait"
+                    />
 
                     <div>
                       <label className="block text-xs text-slate-400 mb-1">Bio Paragraph 1</label>
@@ -1946,23 +2541,13 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">Thumbnail Cover Image URL</label>
-                <div className="flex items-center gap-3">
-                  <div className="w-20 aspect-video rounded-lg bg-black border border-slate-700 overflow-hidden shrink-0">
-                    {editingProject.cover_image && (
-                      <img src={editingProject.cover_image} alt="" className="w-full h-full object-cover" />
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={editingProject.cover_image || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, cover_image: e.target.value })}
-                    placeholder="/assets/images/... or https://..."
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono"
-                  />
-                </div>
-              </div>
+              <ImageFieldInput
+                label="Thumbnail Cover Image"
+                value={editingProject.cover_image || ''}
+                onChange={(val) => setEditingProject({ ...editingProject, cover_image: val })}
+                placeholder="Upload thumbnail or paste image URL..."
+                aspect="video"
+              />
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Packaging Psychology Hook</label>
@@ -2021,25 +2606,13 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">Channel Icon / Logo URL</label>
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center shrink-0">
-                    {editingClient.logo ? (
-                      <img src={editingClient.logo} alt="" className="w-full h-full object-cover" />
-                    ) : (
-                      <span className="text-xs text-slate-500 font-bold">Logo</span>
-                    )}
-                  </div>
-                  <input
-                    type="text"
-                    value={editingClient.logo || ''}
-                    onChange={(e) => setEditingClient({ ...editingClient, logo: e.target.value })}
-                    placeholder="https://... or /assets/images/..."
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono"
-                  />
-                </div>
-              </div>
+              <ImageFieldInput
+                label="Channel Icon / Brand Logo"
+                value={editingClient.logo || ''}
+                onChange={(val) => setEditingClient({ ...editingClient, logo: val })}
+                placeholder="Upload logo or paste image URL..."
+                aspect="square"
+              />
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -2142,15 +2715,13 @@ export const AdminDashboard: React.FC = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">Avatar Image URL</label>
-                <input
-                  type="text"
-                  value={editingTestimonial.avatar || ''}
-                  onChange={(e) => setEditingTestimonial({ ...editingTestimonial, avatar: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono"
-                />
-              </div>
+              <ImageFieldInput
+                label="Avatar Image"
+                value={editingTestimonial.avatar || ''}
+                onChange={(val) => setEditingTestimonial({ ...editingTestimonial, avatar: val })}
+                placeholder="Upload avatar or paste image URL..."
+                aspect="square"
+              />
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Back Dossier Biography</label>
@@ -2242,15 +2813,13 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs text-slate-400 mb-1">Portrait Image URL</label>
-                <input
-                  type="text"
-                  value={editingLeader.image || ''}
-                  onChange={(e) => setEditingLeader({ ...editingLeader, image: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-mono"
-                />
-              </div>
+              <ImageFieldInput
+                label="Portrait Image"
+                value={editingLeader.image || ''}
+                onChange={(val) => setEditingLeader({ ...editingLeader, image: val })}
+                placeholder="Upload portrait or paste image URL..."
+                aspect="portrait"
+              />
 
               <div>
                 <label className="block text-xs text-slate-400 mb-1">Quote</label>
@@ -2432,6 +3001,157 @@ export const AdminDashboard: React.FC = () => {
                 className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold"
               >
                 Delete from DB
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: MEDIA PICKER */}
+      {/* ------------------------------------------------------------- */}
+      {mediaPickerCallback && (
+        <div className="fixed inset-0 z-[1400] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="w-full max-w-3xl max-h-[85vh] bg-[#1e293b] border border-slate-700 rounded-3xl p-6 shadow-2xl flex flex-col space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-700">
+              <div className="flex items-center gap-2">
+                <Images className="w-5 h-5 text-indigo-400" />
+                <h3 className="font-bold text-sm text-white">Select Image from Media Library</h3>
+              </div>
+              <button
+                onClick={() => setMediaPickerCallback(null)}
+                className="text-slate-400 hover:text-white"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Quick Upload inside picker */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+              <div className="relative flex-1 w-full">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  placeholder="Filter images by name..."
+                  value={mediaSearch}
+                  onChange={(e) => setMediaSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+
+              <label className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer shrink-0">
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload New File</span>
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,image/avif"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const url = await handleUploadSingleFile(file);
+                      if (url) {
+                        mediaPickerCallback(url);
+                        setMediaPickerCallback(null);
+                      }
+                    }
+                  }}
+                  className="hidden"
+                />
+              </label>
+            </div>
+
+            {/* Image Grid */}
+            <div className="flex-1 overflow-y-auto pr-1 min-h-[260px] max-h-[50vh]">
+              {mediaFiles.length === 0 ? (
+                <div className="p-12 text-center text-slate-500 text-xs">
+                  No images in library yet. Upload a file above!
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                  {mediaFiles
+                    .filter((f) => !mediaSearch || f.name.toLowerCase().includes(mediaSearch.toLowerCase()))
+                    .map((file) => (
+                      <div
+                        key={file.id}
+                        onClick={() => {
+                          mediaPickerCallback(file.url);
+                          setMediaPickerCallback(null);
+                        }}
+                        className="group p-2 rounded-xl bg-slate-900 border border-slate-700/80 hover:border-indigo-500 cursor-pointer flex flex-col gap-2 transition-all hover:scale-[1.02]"
+                      >
+                        <div className="w-full aspect-video rounded-lg bg-black/40 overflow-hidden relative">
+                          <img
+                            src={file.url}
+                            alt={file.name}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLElement).style.display = 'none';
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-indigo-600/30 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <span className="px-2 py-1 rounded bg-indigo-600 text-white text-[10px] font-bold shadow">
+                              Select Image
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-[10px] text-slate-300 font-medium truncate" title={file.name}>
+                          {file.name}
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-slate-700">
+              <button
+                type="button"
+                onClick={() => setMediaPickerCallback(null)}
+                className="px-4 py-2 rounded-xl bg-slate-800 text-slate-300 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: IMAGE FULL PREVIEW */}
+      {/* ------------------------------------------------------------- */}
+      {previewMedia && (
+        <div
+          onClick={() => setPreviewMedia(null)}
+          className="fixed inset-0 z-[1500] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md cursor-zoom-out"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-w-4xl max-h-[90vh] bg-[#1e293b] border border-slate-700 rounded-3xl p-5 shadow-2xl flex flex-col space-y-3 cursor-default"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="font-bold text-sm text-white truncate max-w-md">{previewMedia.name}</h4>
+                <span className="text-xs text-slate-400 font-mono">{previewMedia.url}</span>
+              </div>
+              <button onClick={() => setPreviewMedia(null)} className="text-slate-400 hover:text-white">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="max-h-[65vh] overflow-hidden rounded-2xl bg-black flex items-center justify-center border border-slate-800">
+              <img src={previewMedia.url} alt={previewMedia.name} className="max-h-[65vh] w-auto object-contain" />
+            </div>
+
+            <div className="flex items-center justify-between pt-2">
+              <div className="text-xs text-slate-400 font-mono">
+                Size: {(previewMedia.size / 1024).toFixed(1)} KB • Type: {previewMedia.type.toUpperCase()}
+              </div>
+              <button
+                onClick={() => handleCopyUrl(previewMedia.url)}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy Image URL</span>
               </button>
             </div>
           </div>

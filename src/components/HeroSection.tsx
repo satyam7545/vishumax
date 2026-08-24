@@ -119,20 +119,19 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           </div>
         </motion.div>
 
-        {/* Quote and Right-Aligned Attribution Container */}
-        <div className="w-full max-w-2xl flex flex-col items-center">
+        {/* Headline & Attribution Container */}
+        <div className="w-full max-w-5xl flex flex-col items-center">
           {/* Main Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-sans font-semibold text-xl sm:text-2xl md:text-3xl lg:text-[2.25rem] text-white tracking-tight leading-[1.25] sm:leading-[1.22] text-center drop-shadow-[0_4px_24px_rgba(0,0,0,0.9)] w-full"
+            className="font-sans font-normal text-3xl sm:text-4xl md:text-[3.35rem] lg:text-[3.75rem] xl:text-[4.15rem] text-white tracking-tight leading-[1.14] sm:leading-[1.08] text-center drop-shadow-[0_6px_32px_rgba(0,0,0,0.95)] w-full"
           >
-            {(siteData.hero.headlinePrefix || "“If people don't click, so you want to give them")
-              .replace(/they don't watch,\s*/gi, '')}{' '}
+            {(siteData.hero.headlinePrefix || 'We make you believe in')}{' '}
             <br className="hidden sm:inline" />
             <span className="font-serif italic font-normal text-zinc-100">
-              {siteData.hero.headlineAccent || 'something to click.”'}
+              {siteData.hero.headlineAccent || 'Power of packaging.'}
             </span>
           </motion.h1>
 
@@ -141,7 +140,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.18 }}
-            className="w-full flex justify-end mt-2 sm:mt-2.5 pr-2 sm:pr-4"
+            className="w-full flex justify-end mt-2.5 sm:mt-3 pr-3 sm:pr-8"
           >
             <span className="text-xs sm:text-sm font-sans font-medium text-zinc-400">
               — <span className="text-white font-bold tracking-wide">Mr Beast*</span>
@@ -167,27 +166,35 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           )}
         </motion.p>
 
-        {/* CTA Button with shimmer effect */}
+        {/* CTA Button with Animated Glowing Border Effect & Subtle Dark Gradient */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="mt-5 sm:mt-7"
         >
-          <button
-            onClick={onOpenBooking}
-            onMouseEnter={() => onHoverStart?.('BOOK')}
-            onMouseLeave={onHoverEnd}
-            style={{
-              background: theme.ctaButtonGradient,
-              boxShadow: theme.ctaShadow,
-            }}
-            className={`relative overflow-hidden px-7 sm:px-9 py-3 sm:py-3.5 rounded-full font-sans font-bold text-xs sm:text-sm tracking-normal transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer border border-white/20 group ${theme.ctaTextColor}`}
-          >
-            {/* Shimmer sweep */}
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/25 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-            <span className="relative">{siteData.hero.ctaText}</span>
-          </button>
+          <div className="relative p-[1.5px] rounded-full overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_10px_35px_rgba(0,0,0,0.7)] inline-flex items-center justify-center">
+            {/* Spinning Conic Border Beam */}
+            <span
+              className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] pointer-events-none"
+              style={{
+                background: `conic-gradient(from 0deg, transparent 0 240deg, ${theme.secondary} 300deg, #ffffff 360deg)`,
+              }}
+            />
+
+            {/* Inner Subtle Gradient CTA Button */}
+            <button
+              type="button"
+              onClick={onOpenBooking}
+              onMouseEnter={() => onHoverStart?.('BOOK')}
+              onMouseLeave={onHoverEnd}
+              className="relative z-10 overflow-hidden px-8 sm:px-10 py-3 sm:py-3.5 rounded-full font-sans font-semibold text-xs sm:text-sm tracking-normal flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
+            >
+              {/* Shimmer sweep on hover */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              <span className="relative z-10 text-white font-medium">{siteData.hero.ctaText || 'Book a free discovery call'}</span>
+            </button>
+          </div>
         </motion.div>
 
         {/* Scroll down indicator */}

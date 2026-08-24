@@ -107,15 +107,15 @@ function AppContent() {
 
       {/* UNIFIED HERO & THUMBNAILS TOP BANNER */}
       <div className="relative w-full overflow-hidden bg-black">
-        {/* 1. Primary Glowing Aura (Dynamically adapts to theme) */}
+        {/* 1. Primary Glowing Aura Arch (Reaches right down across "We make you believe in" text) */}
         <div
-          className="absolute top-[35%] sm:top-[38%] left-1/2 -translate-x-1/2 w-[160%] max-w-[2200px] h-[950px] pointer-events-none opacity-95 blur-[60px] transition-all duration-700"
+          className="absolute -top-24 sm:-top-32 left-1/2 -translate-x-1/2 w-[130%] max-w-[1550px] h-[720px] sm:h-[820px] pointer-events-none opacity-75 blur-[60px] transition-all duration-700"
           style={{ background: theme.heroAuraGradient }}
         />
 
-        {/* 2. Soft horizontal ambient diffusion */}
+        {/* 2. Soft horizontal ambient diffusion from top */}
         <div
-          className="absolute top-[40%] left-0 right-0 h-[600px] blur-3xl pointer-events-none transition-all duration-700"
+          className="absolute top-0 left-0 right-0 h-[460px] blur-3xl pointer-events-none transition-all duration-700 opacity-45"
           style={{ background: theme.heroDiffusionGradient }}
         />
 

@@ -33,8 +33,8 @@ export const DEFAULT_SITE_DATA: SiteDataState = {
     brandLogoImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&h=120&fit=crop',
   },
   hero: {
-    headlinePrefix: "“If people don't click, so you want to give them",
-    headlineAccent: 'something to click.”',
+    headlinePrefix: 'We make you believe in',
+    headlineAccent: 'Power of packaging.',
     attributionPrefix: '—',
     attributionAuthor: 'Mr Beast*',
     viewsStat: 'We generated 80M+ views',

@@ -80,7 +80,7 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({
           <span className="text-zinc-300 font-medium"> No commitments.</span>
         </motion.p>
 
-        {/* CTA button */}
+        {/* CTA button with Animated Glowing Border Effect */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -88,21 +88,28 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({
           transition={{ duration: 0.45, delay: 0.24 }}
           className="mt-8"
         >
-          <button
-            onClick={onOpenBooking}
-            onMouseEnter={() => onHoverStart?.('BOOK')}
-            onMouseLeave={onHoverEnd}
-            style={{
-              background: theme.ctaButtonGradient,
-              boxShadow: theme.ctaShadow,
-            }}
-            className={`relative overflow-hidden inline-flex items-center gap-3 px-8 sm:px-10 py-4 sm:py-4.5 rounded-full font-sans font-bold text-sm sm:text-base tracking-tight transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer group ${theme.ctaTextColor}`}
-          >
-            {/* Shimmer */}
-            <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-            <span className="relative">Start the Conversation</span>
-            <ArrowRight className="relative w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
-          </button>
+          <div className="relative p-[1.5px] rounded-full overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl inline-flex items-center justify-center">
+            {/* Spinning Conic Border Beam */}
+            <span
+              className="absolute inset-[-1000%] animate-[spin_3s_linear_infinite] pointer-events-none"
+              style={{
+                background: `conic-gradient(from 0deg, transparent 0 240deg, ${theme.secondary} 300deg, #ffffff 360deg)`,
+              }}
+            />
+
+            {/* Inner Subtle Gradient Button Surface */}
+            <button
+              type="button"
+              onClick={onOpenBooking}
+              onMouseEnter={() => onHoverStart?.('BOOK')}
+              onMouseLeave={onHoverEnd}
+              className="relative z-10 overflow-hidden inline-flex items-center gap-3 px-8 sm:px-11 py-4 sm:py-4.5 rounded-full font-sans font-semibold text-sm sm:text-base tracking-tight cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
+            >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
+              <span className="relative z-10 text-white font-medium">Start the Conversation</span>
+              <ArrowRight className="relative z-10 w-4 h-4 text-white group-hover:translate-x-1 transition-transform duration-200" />
+            </button>
+          </div>
         </motion.div>
 
         {/* Trust micro-copy */}
