@@ -26,7 +26,10 @@ export const Navbar: React.FC<NavbarProps> = ({
     setMobileMenuOpen(false);
     const el = document.getElementById(id);
     if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      el.scrollIntoView({
+        behavior: 'smooth',
+        block: id === 'work' || id === 'about' ? 'center' : 'start',
+      });
     }
   };
 
@@ -81,14 +84,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Center: Navigation Links (Desktop) */}
         <div className="hidden md:flex items-center gap-6 lg:gap-8 text-[14px] lg:text-[15px] font-medium tracking-normal text-white">
           <a
-            href="#about"
+            href="#work"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('about');
+              scrollTo('work');
             }}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
-            How we work
+            Works
           </a>
           <a
             href="#faq"
@@ -101,14 +104,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             FAQ?
           </a>
           <a
-            href="#work"
+            href="#about"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('work');
+              scrollTo('about');
             }}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
-            Services
+            Bio
           </a>
         </div>
 
@@ -174,14 +177,14 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <div className="pointer-events-auto mt-2.5 w-full max-w-sm p-5 rounded-3xl bg-black/75 backdrop-blur-3xl border border-white/20 shadow-2xl flex flex-col gap-3.5 text-center md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
           <a
-            href="#about"
+            href="#work"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('about');
+              scrollTo('work');
             }}
             className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 border-b border-white/10 transition-colors"
           >
-            How we work
+            Works
           </a>
           <a
             href="#faq"
@@ -194,14 +197,14 @@ export const Navbar: React.FC<NavbarProps> = ({
             FAQ?
           </a>
           <a
-            href="#work"
+            href="#about"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('work');
+              scrollTo('about');
             }}
             className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 transition-colors"
           >
-            Services
+            Bio
           </a>
 
           {/* Contact Now CTA in mobile drawer */}

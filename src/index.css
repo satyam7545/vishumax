@@ -113,12 +113,12 @@ html, body {
 
 .animate-marquee-slow {
   will-change: transform;
-  animation: marqueeLeft 34s linear infinite;
+  animation: marqueeLeft 50s linear infinite;
 }
 
 .animate-marquee-reverse {
   will-change: transform;
-  animation: marqueeRight 34s linear infinite;
+  animation: marqueeRight 50s linear infinite;
 }
 
 @keyframes spinSlow {
