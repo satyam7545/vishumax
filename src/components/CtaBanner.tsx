@@ -5,14 +5,10 @@ import { useSiteData } from '../context/SiteDataContext';
 
 interface CtaBannerProps {
   onOpenBooking: () => void;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
 }
 
 export const CtaBanner: React.FC<CtaBannerProps> = ({
   onOpenBooking,
-  onHoverStart,
-  onHoverEnd,
 }) => {
   const { theme } = useSiteData();
 
@@ -60,7 +56,7 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.08 }}
-          className="font-sans font-black text-3xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.1] max-w-2xl"
+          className="font-sans font-black text-2xl sm:text-4xl md:text-5xl text-white tracking-tight leading-[1.1] max-w-2xl"
         >
           Ready to 10×{' '}
           <span className="font-serif italic font-normal text-zinc-300">
@@ -74,7 +70,7 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.45, delay: 0.16 }}
-          className="mt-4 text-sm sm:text-base text-zinc-400 font-sans max-w-md"
+          className="mt-4 text-xs sm:text-base text-zinc-400 font-sans max-w-md"
         >
           Book a free 20-min discovery call. We'll review your channel, spot the gaps, and show you exactly how to scale.
           <span className="text-zinc-300 font-medium"> No commitments.</span>
@@ -86,7 +82,7 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.45, delay: 0.24 }}
-          className="mt-8"
+          className="mt-7 sm:mt-8"
         >
           <div className="relative p-[1.5px] rounded-full overflow-hidden group cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-2xl inline-flex items-center justify-center">
             {/* Spinning Conic Border Beam */}
@@ -101,13 +97,11 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({
             <button
               type="button"
               onClick={onOpenBooking}
-              onMouseEnter={() => onHoverStart?.('BOOK')}
-              onMouseLeave={onHoverEnd}
-              className="relative z-10 overflow-hidden inline-flex items-center gap-3 px-8 sm:px-11 py-4 sm:py-4.5 rounded-full font-sans font-semibold text-sm sm:text-base tracking-tight cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
+              className="relative z-10 overflow-hidden inline-flex items-center gap-2.5 sm:gap-3 px-6 sm:px-11 py-3.5 sm:py-4.5 rounded-full font-sans font-semibold text-xs sm:text-base tracking-tight cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
               <span className="relative z-10 text-white font-medium">Start the Conversation</span>
-              <ArrowRight className="relative z-10 w-4 h-4 text-white group-hover:translate-x-1 transition-transform duration-200" />
+              <ArrowRight className="relative z-10 w-3.5 sm:w-4 h-3.5 sm:h-4 text-white group-hover:translate-x-1 transition-transform duration-200" />
             </button>
           </div>
         </motion.div>

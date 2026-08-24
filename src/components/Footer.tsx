@@ -3,15 +3,10 @@ import { ArrowUp } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface FooterProps {
-  onOpenBooking: () => void;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
+  onOpenBooking?: () => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({
-  onHoverStart,
-  onHoverEnd,
-}) => {
+export const Footer: React.FC<FooterProps> = () => {
   const { siteData } = useSiteData();
 
   const scrollToTop = () => {
@@ -23,11 +18,7 @@ export const Footer: React.FC<FooterProps> = ({
       <div className="max-w-7xl mx-auto px-6 sm:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
           {/* Brand Info */}
-          <div
-            className="flex items-center gap-3 select-none"
-            onMouseEnter={() => onHoverStart?.('TOP')}
-            onMouseLeave={onHoverEnd}
-          >
+          <div className="flex items-center gap-3 select-none">
             {siteData.navbar.brandLogoImage ? (
               <img
                 src={siteData.navbar.brandLogoImage}
@@ -45,43 +36,33 @@ export const Footer: React.FC<FooterProps> = ({
           </div>
 
           {/* Quick Links */}
-          <div className="flex items-center gap-6 text-xs text-zinc-400 font-medium">
+          <div className="flex flex-wrap justify-center sm:justify-start items-center gap-4 sm:gap-6 text-xs text-zinc-400 font-medium">
             <a
               href="#work"
-              onMouseEnter={() => onHoverStart?.('WORK')}
-              onMouseLeave={onHoverEnd}
               className="hover:text-white transition-colors"
             >
               Work
             </a>
             <a
               href="#testimonials"
-              onMouseEnter={() => onHoverStart?.('REVIEWS')}
-              onMouseLeave={onHoverEnd}
               className="hover:text-white transition-colors"
             >
               Reviews
             </a>
             <a
               href="#about"
-              onMouseEnter={() => onHoverStart?.('ABOUT')}
-              onMouseLeave={onHoverEnd}
               className="hover:text-white transition-colors"
             >
               About
             </a>
             <a
               href="#leaders"
-              onMouseEnter={() => onHoverStart?.('LEADERS')}
-              onMouseLeave={onHoverEnd}
               className="hover:text-white transition-colors"
             >
               Leaders
             </a>
             <a
               href="#faq"
-              onMouseEnter={() => onHoverStart?.('FAQS')}
-              onMouseLeave={onHoverEnd}
               className="hover:text-white transition-colors"
             >
               FAQ
@@ -92,8 +73,6 @@ export const Footer: React.FC<FooterProps> = ({
           <div className="flex items-center gap-4 text-xs">
             <button
               onClick={scrollToTop}
-              onMouseEnter={() => onHoverStart?.('TOP')}
-              onMouseLeave={onHoverEnd}
               className="flex items-center gap-1.5 text-zinc-400 hover:text-white transition-colors cursor-pointer font-medium focus:outline-none focus-visible:ring-1 focus-visible:ring-emerald-400 rounded-md p-1"
             >
               <span>Back to Top</span>

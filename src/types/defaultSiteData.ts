@@ -58,5 +58,11 @@ export const DEFAULT_SITE_DATA: SiteDataState = {
   },
   leaders: LEADERS_DATA,
   faqs: DEFAULT_FAQS,
+  contact: {
+    telegramUrl: 'https://t.me/vishumax',
+    whatsappNumber: '+91 98765 43210',
+    discordUsername: 'vishumax',
+    email: 'contact@vishumax.in',
+  },
   theme: 'design-hub',
 };

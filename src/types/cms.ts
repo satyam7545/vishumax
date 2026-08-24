@@ -146,9 +146,12 @@ export interface CMSSiteSettings {
   availabilityNote: string;
   slotsRemaining: number;
 
-  // Contact Details & Social Links
+  // Contact Details & Messaging Channels
   contactEmail: string;
   calendarBookingUrl: string;
+  socialTelegram?: string;
+  socialWhatsapp?: string;
+  socialDiscord?: string;
   socialTwitter: string;
   socialYoutube: string;
   socialLinkedin: string;

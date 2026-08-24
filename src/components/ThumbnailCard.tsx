@@ -1,22 +1,13 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 import { type ThumbnailItemData } from '../types/siteData';
-import { useSiteData } from '../context/SiteDataContext';
 
 interface ThumbnailCardProps {
   item: ThumbnailItemData;
-  onSelect: (item: ThumbnailItemData) => void;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
 }
 
 export const ThumbnailCard: React.FC<ThumbnailCardProps> = ({
   item,
-  onSelect,
-  onHoverStart,
-  onHoverEnd,
 }) => {
-  const { theme } = useSiteData();
   const renderCustomGraphic = () => {
     switch (item.graphicType) {
       case 'constipation':
@@ -76,14 +67,7 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = ({
   };
 
   return (
-    <motion.div
-      onClick={() => onSelect(item)}
-      onMouseEnter={() => onHoverStart?.('INSPECT')}
-      onMouseLeave={onHoverEnd}
-      whileHover={{ y: -6, scale: 1.02 }}
-      transition={{ duration: 0.25 }}
-      className="group relative cursor-pointer rounded-2xl overflow-hidden bg-black border border-white/10 hover:border-white/30 transition-all duration-300 aspect-video flex flex-col shadow-2xl"
-    >
+    <div className="relative rounded-2xl overflow-hidden bg-black aspect-video flex flex-col shadow-[0_14px_40px_rgba(0,0,0,0.8),0_4px_12px_rgba(0,0,0,0.6)] select-none">
       {/* Pure Thumbnail Media Container */}
       <div className="relative w-full h-full overflow-hidden bg-black flex items-center justify-center">
         {item.image ? (
@@ -91,31 +75,12 @@ export const ThumbnailCard: React.FC<ThumbnailCardProps> = ({
             src={item.image}
             alt={item.title}
             loading="lazy"
-            className="w-full h-full object-cover group-hover:scale-104 transition-transform duration-500 ease-out"
+            className="w-full h-full object-cover"
           />
         ) : (
           renderCustomGraphic()
         )}
       </div>
-
-      {/* Hover Overlay — slides up on hover */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 sm:p-5">
-        <div className="translate-y-3 group-hover:translate-y-0 transition-transform duration-300">
-          <p
-            className="text-[10px] font-mono uppercase tracking-widest mb-1 font-semibold"
-            style={{ color: theme.primary }}
-          >
-            Thumbnail Design
-          </p>
-          <h4 className="font-sans font-bold text-white text-sm sm:text-base leading-snug line-clamp-2 mb-2.5">
-            {item.title}
-          </h4>
-          <div className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-zinc-200 bg-white/10 border border-white/20 backdrop-blur-sm px-3 py-1.5 rounded-full">
-            <span>View Case</span>
-            <span style={{ color: theme.primary }}>→</span>
-          </div>
-        </div>
-      </div>
-    </motion.div>
+    </div>
   );
 };

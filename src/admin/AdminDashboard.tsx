@@ -2302,6 +2302,84 @@ export const AdminDashboard: React.FC = () => {
                     </div>
                   </div>
 
+                  {/* Messaging & Direct Connect Channels */}
+                  <div className="p-6 rounded-2xl bg-[#1e293b] border border-slate-700/60 space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-bold text-sm text-white">Direct Connect & Messaging Channels</h3>
+                      <span className="text-[10px] text-emerald-400 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full font-medium">
+                        Instant Contact Modal
+                      </span>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Telegram Profile URL / Username</label>
+                      <input
+                        type="text"
+                        value={allData.settings.socialTelegram || ''}
+                        onChange={(e) =>
+                          setAllData({
+                            ...allData,
+                            settings: { ...allData.settings, socialTelegram: e.target.value },
+                          })
+                        }
+                        placeholder="https://t.me/vishumax"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-sans"
+                      />
+                      <p className="text-[10px] text-slate-500 mt-1">
+                        Opens directly when visitors click Telegram in the contact modal.
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">WhatsApp Number</label>
+                        <input
+                          type="text"
+                          value={allData.settings.socialWhatsapp || ''}
+                          onChange={(e) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, socialWhatsapp: e.target.value },
+                            })
+                          }
+                          placeholder="+91 98765 43210"
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-sans"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">Discord Username / Tag</label>
+                        <input
+                          type="text"
+                          value={allData.settings.socialDiscord || ''}
+                          onChange={(e) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, socialDiscord: e.target.value },
+                            })
+                          }
+                          placeholder="vishumax"
+                          className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-sans"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs text-slate-400 mb-1">Contact Email</label>
+                      <input
+                        type="email"
+                        value={allData.settings.contactEmail || ''}
+                        onChange={(e) =>
+                          setAllData({
+                            ...allData,
+                            settings: { ...allData.settings, contactEmail: e.target.value },
+                          })
+                        }
+                        placeholder="contact@vishumax.in"
+                        className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white font-sans"
+                      />
+                    </div>
+                  </div>
+
                   {/* SEO Metadata */}
                   <div className="p-6 rounded-2xl bg-[#1e293b] border border-slate-700/60 space-y-4">
                     <h3 className="font-bold text-sm text-white">SEO & Social Meta Tags</h3>

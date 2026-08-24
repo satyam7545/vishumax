@@ -4,14 +4,10 @@ import { useSiteData } from '../context/SiteDataContext';
 
 interface NavbarProps {
   onOpenBooking?: (prefill?: string) => void;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenBooking,
-  onHoverStart,
-  onHoverEnd,
 }) => {
   const { siteData } = useSiteData();
   const [scrolled, setScrolled] = useState(false);
@@ -34,14 +30,14 @@ export const Navbar: React.FC<NavbarProps> = ({
   };
 
   return (
-    <header className="fixed top-4 sm:top-7 inset-x-0 z-50 flex flex-col items-center px-4 pointer-events-none select-none">
+    <header className="fixed top-4 sm:top-7 inset-x-0 z-50 flex flex-col items-center px-4 sm:px-6 pointer-events-none select-none">
       {/* Ambient Backlight Glow (Subtle & Soft) */}
       <div className="absolute -top-6 w-64 h-12 bg-amber-500/5 blur-2xl pointer-events-none rounded-full" />
 
       {/* Floating Glassmorphic Pill Header */}
       <nav
-        className={`pointer-events-auto flex items-center justify-between gap-5 sm:gap-8 md:gap-10 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-black/30 hover:bg-black/35 backdrop-blur-xl border border-white/15 hover:border-white/25 shadow-[0_4px_20px_rgba(0,0,0,0.25),inset_0_1px_1px_rgba(255,255,255,0.18)] transition-all duration-300 ${
-          scrolled ? 'scale-[0.98] bg-black/50 border-white/20 shadow-md' : ''
+        className={`pointer-events-auto w-full max-w-[92vw] md:w-auto md:max-w-fit flex items-center justify-between gap-4 sm:gap-8 md:gap-10 px-5 sm:px-8 py-2.5 sm:py-3.5 rounded-full bg-black/40 hover:bg-black/45 backdrop-blur-2xl border border-white/15 hover:border-white/25 shadow-[0_4px_24px_rgba(0,0,0,0.35),inset_0_1px_1px_rgba(255,255,255,0.18)] transition-all duration-300 ${
+          scrolled ? 'scale-[0.98] bg-black/60 border-white/20 shadow-md' : ''
         }`}
       >
         {/* Left: Golden Clover 4-Petal Logo Icon */}
@@ -51,9 +47,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          onMouseEnter={() => onHoverStart?.('HOME')}
-          onMouseLeave={onHoverEnd}
-          className="flex items-center gap-2.5 group cursor-pointer shrink-0 py-1"
+          className="flex items-center gap-2 group cursor-pointer shrink-0 py-1"
           title={siteData.navbar.brandLine1 || 'VishuMax'}
         >
           {siteData.navbar.brandLogoImage ? (
@@ -89,8 +83,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               e.preventDefault();
               scrollTo('work');
             }}
-            onMouseEnter={() => onHoverStart?.('WORKS')}
-            onMouseLeave={onHoverEnd}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
             Works
@@ -98,8 +90,6 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => onOpenBooking?.('Custom Thumbnail Packaging')}
-            onMouseEnter={() => onHoverStart?.('PRICING')}
-            onMouseLeave={onHoverEnd}
             className="text-white/90 hover:text-white transition-all cursor-pointer whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
             Pricing
@@ -110,8 +100,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               e.preventDefault();
               scrollTo('about');
             }}
-            onMouseEnter={() => onHoverStart?.('PROCESS')}
-            onMouseLeave={onHoverEnd}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
             How we work
@@ -122,8 +110,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               e.preventDefault();
               scrollTo('faq');
             }}
-            onMouseEnter={() => onHoverStart?.('FAQ')}
-            onMouseLeave={onHoverEnd}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
             FAQ?
@@ -134,22 +120,18 @@ export const Navbar: React.FC<NavbarProps> = ({
               e.preventDefault();
               scrollTo('work');
             }}
-            onMouseEnter={() => onHoverStart?.('SERVICES')}
-            onMouseLeave={onHoverEnd}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
             Services
           </a>
         </div>
 
-        {/* Right: 2 Spots Remaining Action Capsule with Shining Effect & Green Dot */}
+        {/* Right: 2 Spots Remaining (Desktop) & Hamburger Menu (Mobile) */}
         <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => onOpenBooking?.('Discovery Session')}
-            onMouseEnter={() => onHoverStart?.('BOOK')}
-            onMouseLeave={onHoverEnd}
-            className="relative overflow-hidden px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/25 hover:border-emerald-400/60 bg-white/[0.06] hover:bg-white/[0.12] text-white font-medium text-xs sm:text-[13.5px] whitespace-nowrap flex items-center gap-2.5 cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_0_16px_rgba(16,185,129,0.15),inset_0_1px_1px_rgba(255,255,255,0.25)] group/shine"
+            className="hidden md:flex relative overflow-hidden px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/25 hover:border-emerald-400/60 bg-white/[0.06] hover:bg-white/[0.12] text-white font-medium text-xs sm:text-[13.5px] whitespace-nowrap items-center gap-2.5 cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_0_16px_rgba(16,185,129,0.15),inset_0_1px_1px_rgba(255,255,255,0.25)] group/shine"
           >
             {/* Shining Light Sweep Effect */}
             <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/35 to-transparent animate-nav-shine pointer-events-none" />
@@ -169,10 +151,10 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             type="button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden p-2 rounded-full text-slate-200 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+            className="md:hidden p-1.5 rounded-full text-zinc-300 hover:text-white hover:bg-white/10 transition-colors cursor-pointer shrink-0 flex items-center justify-center"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+            {mobileMenuOpen ? <X className="w-5 h-5 text-zinc-200" /> : <Menu className="w-5 h-5 text-zinc-300" />}
           </button>
         </div>
       </nav>

@@ -5,14 +5,10 @@ import { useSiteData } from '../context/SiteDataContext';
 import { DEFAULT_FAQS } from '../types/defaultSiteData';
 
 interface FaqSectionProps {
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
   onOpenBooking?: () => void;
 }
 
 export const FaqSection: React.FC<FaqSectionProps> = ({
-  onHoverStart,
-  onHoverEnd,
   onOpenBooking,
 }) => {
   const { siteData, theme } = useSiteData();
@@ -27,20 +23,17 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
   return (
     <section id="faq" className="w-full py-6 sm:py-10">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
-        {/* Section Heading — consistent with rest of site */}
-        <div className="mb-8 sm:mb-12">
-          <div className="flex items-center gap-2.5 mb-2">
-            <span className="w-2.5 h-2.5 rounded-full" style={{ background: theme.dotColor }} />
-            <h2 className="font-sans font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
-              Frequently Asked <span className="font-serif italic font-normal text-zinc-300">Questions</span>
-            </h2>
-          </div>
-          <p className="text-sm text-zinc-400 ml-5 font-sans">
+        {/* Section Heading — Centered */}
+        <div className="flex flex-col items-center text-center mb-10 sm:mb-14">
+          <h2 className="font-sans font-bold text-3xl sm:text-4xl text-white tracking-tight">
+            Frequently Asked <span className="font-serif italic font-normal text-zinc-300">Questions</span>
+          </h2>
+          <p className="text-sm text-zinc-400 font-sans mt-2">
             Real questions, honest answers.
           </p>
           {/* Gradient divider */}
           <div
-            className="mt-5 h-px w-full"
+            className="mt-6 h-px w-24 mx-auto"
             style={{
               background: theme.gradientDivider,
             }}
@@ -63,8 +56,6 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 {/* Question Header Button */}
                 <button
                   onClick={() => toggleFaq(faq.id)}
-                  onMouseEnter={() => onHoverStart?.('FAQ')}
-                  onMouseLeave={onHoverEnd}
                   className="w-full py-5 sm:py-6 flex items-center gap-4 text-left cursor-pointer select-none group"
                 >
                   {/* Icon toggles between + and × with theme fill when open */}
@@ -137,8 +128,6 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
             </div>
             <button
               onClick={onOpenBooking}
-              onMouseEnter={() => onHoverStart?.('TALK')}
-              onMouseLeave={onHoverEnd}
               style={{
                 background: theme.ctaButtonGradient,
                 boxShadow: `0 4px 18px ${theme.glowColor}`,

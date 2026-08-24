@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Quote, Star, RotateCw } from 'lucide-react';
 import { type TestimonialItemData } from '../types/siteData';
@@ -6,24 +6,13 @@ import { useSiteData } from '../context/SiteDataContext';
 
 interface TestimonialCardProps {
   item: TestimonialItemData;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
 }
 
 export const TestimonialCard: React.FC<TestimonialCardProps> = ({
   item,
-  onHoverStart,
-  onHoverEnd,
 }) => {
   const { theme } = useSiteData();
   const [isFlipped, setIsFlipped] = useState(false);
-  const [hasGlowed, setHasGlowed] = useState(false);
-
-  useEffect(() => {
-    // One-time border glow pulse fades out after 1.8s to hint at interactivity
-    const timer = setTimeout(() => setHasGlowed(true), 1800);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleFlip = () => {
     setIsFlipped(!isFlipped);
@@ -33,14 +22,8 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
     <div
       role="button"
       tabIndex={0}
-      aria-label={`Testimonial from ${item.name}. Press Enter or Space to flip card.`}
-      style={{
-        boxShadow: !hasGlowed ? `0 0 20px ${theme.glowColor}` : undefined,
-        borderColor: !hasGlowed ? theme.primary : undefined,
-      }}
-      className={`perspective-1500 w-full min-h-[250px] sm:min-h-[270px] select-none cursor-pointer flex flex-col focus:outline-none rounded-3xl transition-all duration-700 group ${
-        !hasGlowed ? 'ring-2 ring-emerald-500/40' : ''
-      }`}
+      aria-label={`Testimonial from ${item.name}. Hover to flip card.`}
+      className="perspective-1500 w-full min-h-[250px] sm:min-h-[270px] select-none cursor-pointer flex flex-col focus:outline-none rounded-3xl transition-all duration-700 group"
       onClick={handleFlip}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -48,8 +31,8 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
           handleFlip();
         }
       }}
-      onMouseEnter={() => onHoverStart?.('FLIP')}
-      onMouseLeave={onHoverEnd}
+      onMouseEnter={() => setIsFlipped(true)}
+      onMouseLeave={() => setIsFlipped(false)}
     >
       <motion.div
         animate={{ rotateY: isFlipped ? 180 : 0 }}
@@ -92,12 +75,6 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({
                 {item.role} • {item.company}
               </p>
             </div>
-          </div>
-
-          {/* Persistent flip hint badge */}
-          <div className="absolute bottom-4 right-5 flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-900/90 border border-zinc-800 text-[10px] text-zinc-400 font-sans font-medium opacity-80 group-hover:opacity-100 group-hover:text-zinc-200 transition-all pointer-events-none shadow-2xs">
-            <RotateCw className="w-2.5 h-2.5" style={{ color: theme.primary }} />
-            <span>Tap to flip</span>
           </div>
         </div>
 

@@ -1,19 +1,8 @@
 import React from 'react';
-import { type ThumbnailItemData } from '../types/siteData';
 import { ThumbnailCard } from './ThumbnailCard';
 import { useSiteData } from '../context/SiteDataContext';
 
-interface ThumbnailShowcaseProps {
-  onSelectThumbnail: (item: ThumbnailItemData) => void;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
-}
-
-export const ThumbnailShowcase: React.FC<ThumbnailShowcaseProps> = ({
-  onSelectThumbnail,
-  onHoverStart,
-  onHoverEnd,
-}) => {
+export const ThumbnailShowcase: React.FC = () => {
   const { siteData } = useSiteData();
 
   const thumbs = siteData.thumbnails || [];
@@ -27,43 +16,67 @@ export const ThumbnailShowcase: React.FC<ThumbnailShowcaseProps> = ({
 
   return (
     <section id="work" className="w-full relative select-none overflow-hidden pt-2 pb-16 sm:pb-24 bg-transparent">
+      {/* Left Edge Blur & Fade-Out Mask (Thin & Subtle) */}
+      <div className="absolute top-0 bottom-0 left-0 w-8 sm:w-14 md:w-24 z-20 pointer-events-none bg-gradient-to-r from-black via-black/70 to-transparent" />
+
+      {/* Right Edge Blur & Fade-Out Mask (Thin & Subtle) */}
+      <div className="absolute top-0 bottom-0 right-0 w-8 sm:w-14 md:w-24 z-20 pointer-events-none bg-gradient-to-l from-black via-black/70 to-transparent" />
+
       {/* Main Container */}
       <div className="relative z-10 w-full space-y-4 sm:space-y-5">
-        {/* Row 1: Moving Left */}
+        {/* Row 1: Moving Left (Continuous Smooth Loop) */}
         <div className="relative w-full overflow-hidden py-1">
-          <div className="flex animate-marquee-slow whitespace-nowrap gap-5 sm:gap-6 items-center">
-            {[...row1Thumbs, ...row1Thumbs, ...row1Thumbs, ...row1Thumbs].map((thumb, idx) => (
-              <div
-                key={`r1-${thumb.id}-${idx}`}
-                className="w-[300px] sm:w-[420px] md:w-[460px] shrink-0"
-              >
-                <ThumbnailCard
-                  item={thumb}
-                  onSelect={onSelectThumbnail}
-                  onHoverStart={onHoverStart}
-                  onHoverEnd={onHoverEnd}
-                />
-              </div>
-            ))}
+          <div className="flex w-max animate-marquee-slow">
+            {/* Track 1 */}
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 pr-2.5 sm:pr-3.5">
+              {[...row1Thumbs, ...row1Thumbs].map((thumb, idx) => (
+                <div
+                  key={`r1-a-${thumb.id}-${idx}`}
+                  className="w-[280px] sm:w-[380px] md:w-[460px] shrink-0"
+                >
+                  <ThumbnailCard item={thumb} />
+                </div>
+              ))}
+            </div>
+            {/* Track 2 (Exact Duplicate for Seamless Infinite Loop) */}
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 pr-2.5 sm:pr-3.5" aria-hidden="true">
+              {[...row1Thumbs, ...row1Thumbs].map((thumb, idx) => (
+                <div
+                  key={`r1-b-${thumb.id}-${idx}`}
+                  className="w-[280px] sm:w-[380px] md:w-[460px] shrink-0"
+                >
+                  <ThumbnailCard item={thumb} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Row 2: Moving Right (Opposite Direction) */}
+        {/* Row 2: Moving Right (Opposite Direction Continuous Smooth Loop) */}
         <div className="relative w-full overflow-hidden py-1">
-          <div className="flex animate-marquee-reverse whitespace-nowrap gap-5 sm:gap-6 items-center">
-            {[...row2Thumbs, ...row2Thumbs, ...row2Thumbs, ...row2Thumbs].map((thumb, idx) => (
-              <div
-                key={`r2-${thumb.id}-${idx}`}
-                className="w-[300px] sm:w-[420px] md:w-[460px] shrink-0"
-              >
-                <ThumbnailCard
-                  item={thumb}
-                  onSelect={onSelectThumbnail}
-                  onHoverStart={onHoverStart}
-                  onHoverEnd={onHoverEnd}
-                />
-              </div>
-            ))}
+          <div className="flex w-max animate-marquee-reverse">
+            {/* Track 1 */}
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 pr-2.5 sm:pr-3.5">
+              {[...row2Thumbs, ...row2Thumbs].map((thumb, idx) => (
+                <div
+                  key={`r2-a-${thumb.id}-${idx}`}
+                  className="w-[280px] sm:w-[380px] md:w-[460px] shrink-0"
+                >
+                  <ThumbnailCard item={thumb} />
+                </div>
+              ))}
+            </div>
+            {/* Track 2 (Exact Duplicate for Seamless Infinite Loop) */}
+            <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 pr-2.5 sm:pr-3.5" aria-hidden="true">
+              {[...row2Thumbs, ...row2Thumbs].map((thumb, idx) => (
+                <div
+                  key={`r2-b-${thumb.id}-${idx}`}
+                  className="w-[280px] sm:w-[380px] md:w-[460px] shrink-0"
+                >
+                  <ThumbnailCard item={thumb} />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

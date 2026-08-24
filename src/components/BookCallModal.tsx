@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle2, Send, Clock, Shield } from 'lucide-react';
-import confetti from 'canvas-confetti';
+import { X, Send, Copy, Check, MessageSquare, Shield, ExternalLink } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface BookCallModalProps {
@@ -15,80 +14,40 @@ export const BookCallModal: React.FC<BookCallModalProps> = ({
   onClose,
   prefillThumbnail,
 }) => {
-  const { theme } = useSiteData();
-  const [channelName, setChannelName] = useState('');
-  const [channelUrl, setChannelUrl] = useState('');
-  const [email, setEmail] = useState('');
-  const [currentCtr, setCurrentCtr] = useState('4-6%');
-  const [monthlyDrops, setMonthlyDrops] = useState('4-8 videos');
-  const [packageTier, setPackageTier] = useState('Monthly Retainer (8 Drops)');
-  const [notes, setNotes] = useState(
-    prefillThumbnail ? `Interested in strategy similar to: "${prefillThumbnail}"` : ''
-  );
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const { siteData, theme } = useSiteData();
+  const [copiedType, setCopiedType] = useState<'whatsapp' | 'discord' | 'email' | null>(null);
 
-  const handleClose = React.useCallback(() => {
-    setIsSubmitted(false);
-    setErrorMessage(null);
-    onClose();
-  }, [onClose]);
+  const telegramUrl = siteData.contact?.telegramUrl || 'https://t.me/vishumax';
+  const whatsappNumber = siteData.contact?.whatsappNumber || '+91 98765 43210';
+  const discordUsername = siteData.contact?.discordUsername || 'vishumax';
+  const contactEmail = siteData.contact?.email || 'contact@vishumax.in';
+
+  // Format WhatsApp Link
+  const cleanWhatsappDigits = whatsappNumber.replace(/[^0-9]/g, '');
+  const whatsappUrl = `https://wa.me/${cleanWhatsappDigits}?text=${encodeURIComponent(
+    prefillThumbnail
+      ? `Hi Vishal! I'm interested in thumbnail packaging similar to "${prefillThumbnail}".`
+      : "Hi Vishal! I'd like to discuss thumbnail packaging for my YouTube channel."
+  )}`;
+
+  const handleCopy = (text: string, type: 'whatsapp' | 'discord' | 'email') => {
+    navigator.clipboard.writeText(text);
+    setCopiedType(type);
+    setTimeout(() => setCopiedType(null), 2000);
+  };
 
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        handleClose();
+        onClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, handleClose]);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
-
-  const triggerCelebration = () => {
-    confetti({
-      particleCount: 80,
-      spread: 70,
-      origin: { y: 0.6 },
-      colors: ['#ea3829', '#f2552c', '#ffffff', '#fbbf24'],
-    });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setErrorMessage(null);
-
-    try {
-      const res = await fetch('/api/inquiries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: channelName,
-          email,
-          channel_url: channelUrl,
-          project_type: packageTier,
-          current_ctr: currentCtr,
-          monthly_drops: monthlyDrops,
-          message: notes,
-        }),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to submit discovery inquiry. Please check your connection and try again.');
-      }
-
-      setIsSubmitted(true);
-      triggerCelebration();
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Something went wrong. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   return (
     <AnimatePresence>
@@ -98,7 +57,7 @@ export const BookCallModal: React.FC<BookCallModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onClick={handleClose}
+          onClick={onClose}
           className="fixed inset-0 bg-black/85 backdrop-blur-md"
         />
 
@@ -108,204 +67,156 @@ export const BookCallModal: React.FC<BookCallModalProps> = ({
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-2xl bg-[#111116] border border-white/15 rounded-3xl shadow-2xl overflow-hidden z-10 my-auto p-6 sm:p-8"
+          className="relative w-full max-w-xl bg-[#0e0e13] border border-white/20 rounded-3xl shadow-[0_20px_60px_rgba(0,0,0,0.9)] overflow-hidden z-10 my-auto p-6 sm:p-8"
         >
+          {/* Ambient Top Glow */}
+          <div
+            className="absolute -top-16 left-1/2 -translate-x-1/2 w-80 h-28 blur-3xl pointer-events-none rounded-full"
+            style={{ background: theme.heroAuraGradient }}
+          />
+
           {/* Close Button */}
           <button
             type="button"
-            onClick={handleClose}
+            onClick={onClose}
             aria-label="Close modal"
-            className="absolute top-5 right-5 z-30 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-md"
+            className="absolute top-5 right-5 z-30 p-2 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-md"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4" />
           </button>
 
-          {!isSubmitted ? (
-            <div>
-              {/* Header */}
-              <div className="mb-6">
-                <div
-                  style={{
-                    background: theme.badgeBg,
-                    borderColor: theme.badgeBorder,
-                    color: theme.primary,
-                  }}
-                  className="inline-flex items-center gap-2 px-3 py-1 rounded-full border text-xs font-mono mb-2 font-semibold"
-                >
-                  <Clock className="w-3.5 h-3.5" />
-                  <span>Free 20-Min YouTube CTR Audit</span>
-                </div>
-                <h3 className="font-display font-extrabold text-2xl sm:text-3xl text-white tracking-tight">
-                  Book a Discovery Strategy Session
-                </h3>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                  We'll review your recent videos, analyze your packaging gaps, and show you how to scale views.
-                </p>
-              </div>
-
-              {errorMessage && (
-                <div className="mb-4 p-3 rounded-xl bg-red-950/50 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
-                  <span>{errorMessage}</span>
-                </div>
-              )}
-
-              {/* Booking Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                      Channel Name *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={channelName}
-                      onChange={(e) => setChannelName(e.target.value)}
-                      placeholder="e.g. Ali Abdaal / TechLead"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs placeholder:text-zinc-600 focus:outline-none transition-colors font-sans"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                      Channel URL or Handle *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={channelUrl}
-                      onChange={(e) => setChannelUrl(e.target.value)}
-                      placeholder="youtube.com/@yourchannel"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs placeholder:text-zinc-600 focus:outline-none transition-colors font-sans"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                      Your Email *
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="creator@gmail.com"
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs placeholder:text-zinc-600 focus:outline-none transition-colors font-sans"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                      Monthly Video Output
-                    </label>
-                    <select
-                      value={monthlyDrops}
-                      onChange={(e) => setMonthlyDrops(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs focus:outline-none transition-colors font-sans cursor-pointer"
-                    >
-                      <option className="bg-[#18181b] text-white" value="1-3 videos">1 - 3 videos / month</option>
-                      <option className="bg-[#18181b] text-white" value="4-8 videos">4 - 8 videos / month</option>
-                      <option className="bg-[#18181b] text-white" value="8-15 videos">8 - 15 videos / month</option>
-                      <option className="bg-[#18181b] text-white" value="Daily drops">Daily / High-Frequency</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                      Estimated Current CTR
-                    </label>
-                    <select
-                      value={currentCtr}
-                      onChange={(e) => setCurrentCtr(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs focus:outline-none transition-colors font-sans cursor-pointer"
-                    >
-                      <option className="bg-[#18181b] text-white" value="Under 3%">Under 3% (Needs overhaul)</option>
-                      <option className="bg-[#18181b] text-white" value="4-6%">4% - 6% (Average)</option>
-                      <option className="bg-[#18181b] text-white" value="7-10%">7% - 10% (Good)</option>
-                      <option className="bg-[#18181b] text-white" value="10%+">10%+ (Scaling aggressively)</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                      Desired Partnership
-                    </label>
-                    <select
-                      value={packageTier}
-                      onChange={(e) => setPackageTier(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs focus:outline-none transition-colors font-sans cursor-pointer"
-                    >
-                      <option className="bg-[#18181b] text-white" value="Monthly Retainer (8 Drops)">Monthly Retainer (8 Drops)</option>
-                      <option className="bg-[#18181b] text-white" value="Monthly Retainer (15 Drops)">Monthly Retainer (15 Drops)</option>
-                      <option className="bg-[#18181b] text-white" value="Full Channel Packaging Overhaul">Full Channel Packaging Overhaul</option>
-                      <option className="bg-[#18181b] text-white" value="Test Pilot Drop (3 Thumbnails)">Test Pilot Drop (3 Thumbnails)</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-mono text-zinc-300 mb-1.5 uppercase">
-                    Channel Goal / Specific Requests
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={notes}
-                    onChange={(e) => setNotes(e.target.value)}
-                    placeholder="Tell us what you want to achieve or any inspiration links..."
-                    className="w-full px-3.5 py-2.5 rounded-xl bg-black/60 border border-white/10 focus:border-[#ea3829] text-white text-xs placeholder:text-zinc-600 focus:outline-none transition-colors font-sans"
-                  />
-                </div>
-
-                <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div className="flex items-center gap-2 text-[11px] text-zinc-400">
-                    <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                    <span>Direct review by Ravi Franklin • No generic agency handoff</span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    style={{
-                      background: theme.ctaButtonGradient,
-                      boxShadow: theme.ctaShadow,
-                    }}
-                    className={`w-full sm:w-auto px-6 py-3 rounded-xl font-bold text-xs tracking-wider uppercase flex items-center justify-center gap-2 transition-all cursor-pointer shrink-0 disabled:opacity-50 hover:scale-105 active:scale-95 ${theme.ctaTextColor}`}
-                  >
-                    <Send className="w-3.5 h-3.5" />
-                    <span>{isSubmitting ? 'Submitting...' : 'Schedule Session'}</span>
-                  </button>
-                </div>
-              </form>
+          {/* Header */}
+          <div className="text-center mb-6 relative z-10">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[11px] font-sans font-semibold mb-2.5">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_8px_#34d399]" />
+              <span>Direct Creator Access</span>
             </div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className="text-center py-8 space-y-4"
+            <h3 className="font-sans font-bold text-2xl sm:text-3xl text-white tracking-tight">
+              Connect with <span className="font-serif italic font-normal text-zinc-200">Vishal Gupta</span>
+            </h3>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1 max-w-sm mx-auto font-sans">
+              Choose your preferred channel below for fast, direct communication regarding packaging & strategy.
+            </p>
+          </div>
+
+          {/* Channel Cards */}
+          <div className="space-y-3.5 relative z-10">
+            {/* 1. Telegram (Primary Direct Chat) */}
+            <a
+              href={telegramUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group flex items-center justify-between p-4 sm:p-4.5 rounded-2xl bg-[#0088cc]/15 hover:bg-[#0088cc]/25 border border-[#0088cc]/35 hover:border-[#0088cc]/60 shadow-[0_4px_20px_rgba(0,136,204,0.15)] transition-all duration-200 cursor-pointer"
             >
-              <div className="w-16 h-16 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center mx-auto text-emerald-400 shadow-xl">
-                <CheckCircle2 className="w-8 h-8" />
+              <div className="flex items-center gap-3.5">
+                <div className="w-11 h-11 rounded-xl bg-[#0088cc] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform shrink-0">
+                  <Send className="w-5 h-5 -translate-x-0.5 translate-y-0.5 rotate-[-20deg]" />
+                </div>
+                <div className="text-left">
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans font-bold text-sm sm:text-base text-white">Chat on Telegram</span>
+                    <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#0088cc]/30 text-cyan-200 border border-[#0088cc]/40">
+                      Fastest
+                    </span>
+                  </div>
+                  <p className="text-xs text-zinc-300 font-sans mt-0.5">
+                    Instant reply • Review channel & discuss drops directly
+                  </p>
+                </div>
               </div>
-              <h3 className="font-display font-extrabold text-2xl text-white">
-                Discovery Session Requested!
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-300 max-w-md mx-auto leading-relaxed">
-                Thank you, <strong className="text-white">{channelName}</strong>. Your inquiry has been saved to our studio system. Ravi Franklin will review your channel analytics and email you at <strong className="text-white">{email}</strong> within 12 hours with available time slots and an initial audit teardown.
-              </p>
-              <div className="pt-4">
+              <ExternalLink className="w-4 h-4 text-cyan-300 group-hover:translate-x-0.5 transition-transform shrink-0 ml-2" />
+            </a>
+
+            {/* 2. WhatsApp */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-2xl bg-[#25D366]/10 hover:bg-[#25D366]/15 border border-[#25D366]/30 transition-all gap-3">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-[#25D366] flex items-center justify-center text-black shadow-md shrink-0">
+                  <MessageSquare className="w-5 h-5 fill-current" />
+                </div>
+                <div className="text-left">
+                  <span className="font-sans font-bold text-sm text-white">WhatsApp</span>
+                  <p className="text-xs text-emerald-300 font-mono font-medium mt-0.5">
+                    {whatsappNumber}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button
-                  onClick={handleClose}
-                  className="px-6 py-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-xs transition-colors cursor-pointer"
+                  type="button"
+                  onClick={() => handleCopy(whatsappNumber, 'whatsapp')}
+                  className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-200 text-xs font-sans font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  Return to Portfolio
+                  {copiedType === 'whatsapp' ? (
+                    <>
+                      <Check className="w-3.5 h-3.5 text-emerald-400" />
+                      <span className="text-emerald-300">Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-3.5 h-3.5" />
+                      <span>Copy</span>
+                    </>
+                  )}
                 </button>
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] text-black font-sans font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <span>Open</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
               </div>
-            </motion.div>
-          )}
+            </div>
+
+            {/* 3. Discord */}
+            <div className="flex items-center justify-between p-4 rounded-2xl bg-[#5865F2]/10 hover:bg-[#5865F2]/15 border border-[#5865F2]/30 transition-all">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-[#5865F2] flex items-center justify-center text-white shadow-md shrink-0 font-bold text-sm">
+                  D
+                </div>
+                <div className="text-left">
+                  <span className="font-sans font-bold text-sm text-white">Discord</span>
+                  <p className="text-xs text-indigo-300 font-mono font-medium mt-0.5">
+                    {discordUsername}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleCopy(discordUsername, 'discord')}
+                className="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-zinc-200 text-xs font-sans font-medium flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                {copiedType === 'discord' ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 text-indigo-400" />
+                    <span className="text-indigo-300">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Copy Tag</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Direct Guarantee Footer */}
+          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-[11px] text-zinc-400 font-sans">
+            <div className="flex items-center gap-1.5">
+              <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span>Direct strategy review • No agency middlemen</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleCopy(contactEmail, 'email')}
+              className="text-zinc-400 hover:text-white transition-colors cursor-pointer"
+            >
+              {copiedType === 'email' ? 'Email Copied!' : contactEmail}
+            </button>
+          </div>
         </motion.div>
       </div>
     </AnimatePresence>

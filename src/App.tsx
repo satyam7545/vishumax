@@ -1,5 +1,4 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { CustomCursor, type CursorMode } from './components/CustomCursor';
 import { Navbar } from './components/Navbar';
 import { HeroSection } from './components/HeroSection';
 import { ThumbnailShowcase } from './components/ThumbnailShowcase';
@@ -7,12 +6,10 @@ import { StatsBar } from './components/StatsBar';
 import { TestimonialsSection } from './components/TestimonialsSection';
 import { IndustryLeadersSection } from './components/IndustryLeadersSection';
 import { FaqSection } from './components/FaqSection';
-import { ThumbnailModal } from './components/ThumbnailModal';
 import { BookCallModal } from './components/BookCallModal';
 import { CtaBanner } from './components/CtaBanner';
 import { Footer } from './components/Footer';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
-import type { ThumbnailItemData } from './types/siteData';
 
 // Code-split heavy admin suite
 const AdminDashboard = lazy(() =>
@@ -24,10 +21,7 @@ const AdminLoginModal = lazy(() =>
 
 function AppContent() {
   const { theme, isAuthenticated, setIsAdminOpen, setIsLoginModalOpen } = useSiteData();
-  const [cursorMode, setCursorMode] = useState<CursorMode>('default');
-  const [cursorText, setCursorText] = useState<string | undefined>(undefined);
 
-  const [selectedThumbnail, setSelectedThumbnail] = useState<ThumbnailItemData | null>(null);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingPrefill, setBookingPrefill] = useState<string | undefined>(undefined);
 
@@ -68,26 +62,6 @@ function AppContent() {
     };
   }, [isAuthenticated, setIsAdminOpen, setIsLoginModalOpen]);
 
-  const handleHoverStart = (text?: string) => {
-    if (text) {
-      setCursorText(text);
-      if (text.includes('FLIP')) {
-        setCursorMode('flip');
-      } else if (text.includes('VIEW') || text.includes('INSPECT')) {
-        setCursorMode('view');
-      } else {
-        setCursorMode('link');
-      }
-    } else {
-      setCursorMode('link');
-    }
-  };
-
-  const handleHoverEnd = () => {
-    setCursorMode('default');
-    setCursorText(undefined);
-  };
-
   const handleOpenBooking = (prefillTitle?: string) => {
     setBookingPrefill(prefillTitle);
     setIsBookingOpen(true);
@@ -95,15 +69,8 @@ function AppContent() {
 
   return (
     <div className="min-h-screen bg-black text-zinc-100 relative overflow-x-hidden font-sans w-full selection:bg-emerald-500 selection:text-black">
-      {/* Follower Custom Cursor */}
-      <CustomCursor cursorMode={cursorMode} cursorText={cursorText} />
-
       {/* Navigation Header */}
-      <Navbar
-        onOpenBooking={() => handleOpenBooking()}
-        onHoverStart={() => handleHoverStart('MENU')}
-        onHoverEnd={handleHoverEnd}
-      />
+      <Navbar onOpenBooking={() => handleOpenBooking()} />
 
       {/* UNIFIED HERO & THUMBNAILS TOP BANNER */}
       <div className="relative w-full overflow-hidden bg-black">
@@ -129,18 +96,10 @@ function AppContent() {
         />
 
         {/* Edge-to-Edge Hero */}
-        <HeroSection
-          onOpenBooking={() => handleOpenBooking()}
-          onHoverStart={handleHoverStart}
-          onHoverEnd={handleHoverEnd}
-        />
+        <HeroSection onOpenBooking={() => handleOpenBooking()} />
 
         {/* Full-Width Moving Thumbnail Showcase (Dual Opposite Rows) */}
-        <ThumbnailShowcase
-          onSelectThumbnail={(thumb) => setSelectedThumbnail(thumb)}
-          onHoverStart={handleHoverStart}
-          onHoverEnd={handleHoverEnd}
-        />
+        <ThumbnailShowcase />
       </div>
 
       {/* Social Proof Stats Strip */}
@@ -173,52 +132,25 @@ function AppContent() {
 
         {/* Testimonials 3D Flip System + About Vishal Gupta */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TestimonialsSection
-            onOpenBooking={() => handleOpenBooking()}
-            onHoverStart={handleHoverStart}
-            onHoverEnd={handleHoverEnd}
-          />
+          <TestimonialsSection onOpenBooking={() => handleOpenBooking()} />
         </div>
 
         {/* Trusted by Industry Leaders Section */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <IndustryLeadersSection
-            onOpenBooking={() => handleOpenBooking()}
-            onHoverStart={handleHoverStart}
-            onHoverEnd={handleHoverEnd}
-          />
+          <IndustryLeadersSection onOpenBooking={() => handleOpenBooking()} />
         </div>
 
         {/* FAQs Accordion Section */}
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FaqSection
-            onOpenBooking={() => handleOpenBooking()}
-            onHoverStart={handleHoverStart}
-            onHoverEnd={handleHoverEnd}
-          />
+          <FaqSection onOpenBooking={() => handleOpenBooking()} />
         </div>
       </div>
 
       {/* Full-width CTA Banner */}
-      <CtaBanner
-        onOpenBooking={() => handleOpenBooking()}
-        onHoverStart={handleHoverStart}
-        onHoverEnd={handleHoverEnd}
-      />
+      <CtaBanner onOpenBooking={() => handleOpenBooking()} />
 
       {/* Footer */}
-      <Footer
-        onOpenBooking={() => handleOpenBooking()}
-        onHoverStart={handleHoverStart}
-        onHoverEnd={handleHoverEnd}
-      />
-
-      {/* Interactive Lightbox Modal */}
-      <ThumbnailModal
-        item={selectedThumbnail}
-        onClose={() => setSelectedThumbnail(null)}
-        onBookCall={(title) => handleOpenBooking(title)}
-      />
+      <Footer onOpenBooking={() => handleOpenBooking()} />
 
       {/* Interactive Booking Strategy Modal */}
       <BookCallModal

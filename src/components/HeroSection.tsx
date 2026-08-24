@@ -5,8 +5,6 @@ import { useSiteData } from '../context/SiteDataContext';
 
 interface HeroSectionProps {
   onOpenBooking: () => void;
-  onHoverStart?: (text?: string) => void;
-  onHoverEnd?: () => void;
 }
 
 /** Parses the leading number from a string like "100M+" or "250+" */
@@ -51,8 +49,6 @@ function useCounter(target: number, duration = 1800) {
 
 export const HeroSection: React.FC<HeroSectionProps> = ({
   onOpenBooking,
-  onHoverStart,
-  onHoverEnd,
 }) => {
   const { siteData, theme } = useSiteData();
 
@@ -61,9 +57,9 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
   const count = useCounter(num);
 
   return (
-    <section className="relative w-full pt-24 sm:pt-28 pb-4 sm:pb-6 flex flex-col items-center justify-center text-center bg-transparent">
+    <section className="relative w-full pt-28 sm:pt-32 pb-4 sm:pb-6 flex flex-col items-center justify-center text-center bg-transparent">
       {/* Main Content Container */}
-      <div className="relative z-10 max-w-5xl mx-auto px-6 sm:px-8 flex flex-col items-center w-full">
+      <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 flex flex-col items-center w-full">
         {/* Proof Lives in Our Work Marquee */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -82,51 +78,90 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
               WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
             }}
           >
-            <div className="flex animate-marquee whitespace-nowrap gap-2.5 items-center">
-              {[...siteData.proofLogos, ...siteData.proofLogos, ...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
-                <div
-                  key={`${brand.id}-${idx}`}
-                  className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
-                >
-                  {brand.logo ? (
-                    <img
-                      src={brand.logo}
-                      alt={brand.name}
-                      className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
-                    />
-                  ) : (
-                    <span
-                      className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
-                      style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
-                    >
-                      {brand.name.charAt(0)}
+            <div className="flex w-max animate-marquee">
+              {/* Track A */}
+              <div className="flex shrink-0 items-center gap-2.5 pr-2.5">
+                {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
+                  <div
+                    key={`p-a-${brand.id}-${idx}`}
+                    className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
+                  >
+                    {brand.logo ? (
+                      <img
+                        src={brand.logo}
+                        alt={brand.name}
+                        className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
+                      />
+                    ) : (
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
+                        style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
+                      >
+                        {brand.name.charAt(0)}
+                      </span>
+                    )}
+                    <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
+                      {brand.name}
                     </span>
-                  )}
-                  <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
-                    {brand.name}
-                  </span>
-                  {brand.badge && (
-                    <span
-                      className="text-[9px] font-mono font-semibold"
-                      style={{ color: theme.primary }}
-                    >
-                      {brand.badge}
+                    {brand.badge && (
+                      <span
+                        className="text-[9px] font-mono font-semibold"
+                        style={{ color: theme.primary }}
+                      >
+                        {brand.badge}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Track B (Exact Duplicate for Seamless Loop) */}
+              <div className="flex shrink-0 items-center gap-2.5 pr-2.5" aria-hidden="true">
+                {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
+                  <div
+                    key={`p-b-${brand.id}-${idx}`}
+                    className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
+                  >
+                    {brand.logo ? (
+                      <img
+                        src={brand.logo}
+                        alt={brand.name}
+                        className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
+                      />
+                    ) : (
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
+                        style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
+                      >
+                        {brand.name.charAt(0)}
+                      </span>
+                    )}
+                    <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
+                      {brand.name}
                     </span>
-                  )}
-                </div>
-              ))}
+                    {brand.badge && (
+                      <span
+                        className="text-[9px] font-mono font-semibold"
+                        style={{ color: theme.primary }}
+                      >
+                        {brand.badge}
+                      </span>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </motion.div>
 
         {/* Headline & Attribution Container */}
         <div className="w-full max-w-5xl flex flex-col items-center">
-          {/* Main Headline */}
+          {/* Main Top Headline */}
           <motion.h1
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-sans font-normal text-3xl sm:text-4xl md:text-[3.35rem] lg:text-[3.75rem] xl:text-[4.15rem] text-white tracking-tight leading-[1.14] sm:leading-[1.08] text-center drop-shadow-[0_6px_32px_rgba(0,0,0,0.95)] w-full"
+            className="font-sans font-normal text-[1.85rem] sm:text-4xl md:text-[3.35rem] lg:text-[3.75rem] xl:text-[4.15rem] text-white tracking-tight leading-[1.15] sm:leading-[1.08] text-center drop-shadow-[0_6px_32px_rgba(0,0,0,0.95)] w-full"
           >
             {(siteData.hero.headlinePrefix || 'We make you believe in')}{' '}
             <br className="hidden sm:inline" />
@@ -135,15 +170,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             </span>
           </motion.h1>
 
-          {/* Said by Attribution (right and below of quote) */}
+          {/* Duplicated Quote & Mr Beast Attribution on the Same Line */}
           <motion.div
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.18 }}
-            className="w-full flex justify-end mt-2.5 sm:mt-3 pr-3 sm:pr-8"
+            className="w-full flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 mt-4 sm:mt-5 text-center px-4"
           >
-            <span className="text-xs sm:text-sm font-sans font-medium text-zinc-400">
-              — <span className="text-white font-bold tracking-wide">Mr Beast*</span>
+            <span className="text-xs sm:text-sm font-sans font-normal text-zinc-400">
+              “If people don't click, so you want to give them something to click.”
+            </span>
+            <span className="text-xs sm:text-sm font-sans font-bold text-white tracking-wide whitespace-nowrap">
+              — Mr Beast*
             </span>
           </motion.div>
         </div>
@@ -186,8 +224,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <button
               type="button"
               onClick={onOpenBooking}
-              onMouseEnter={() => onHoverStart?.('BOOK')}
-              onMouseLeave={onHoverEnd}
               className="relative z-10 overflow-hidden px-8 sm:px-10 py-3 sm:py-3.5 rounded-full font-sans font-semibold text-xs sm:text-sm tracking-normal flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
             >
               {/* Shimmer sweep on hover */}

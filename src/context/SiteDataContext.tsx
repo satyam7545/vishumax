@@ -149,6 +149,12 @@ export const SiteDataProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       testimonials: testimonials.length > 0 ? testimonials : (cms.testimonials ? [] : DEFAULT_SITE_DATA.testimonials),
       leaders: leaders.length > 0 ? leaders : (cms.leaders ? [] : DEFAULT_SITE_DATA.leaders),
       faqs: DEFAULT_SITE_DATA.faqs,
+      contact: {
+        telegramUrl: s?.socialTelegram || 'https://t.me/vishumax',
+        whatsappNumber: s?.socialWhatsapp || '+91 98765 43210',
+        discordUsername: s?.socialDiscord || 'vishumax',
+        email: s?.contactEmail || 'contact@vishumax.in',
+      },
       theme: (s?.theme as ThemeId) || DEFAULT_SITE_DATA.theme || DEFAULT_THEME_ID,
     };
   };

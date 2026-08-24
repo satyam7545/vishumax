@@ -91,6 +91,13 @@ export interface FaqItemData {
   answer: string;
 }
 
+export interface ContactConfig {
+  telegramUrl: string;
+  whatsappNumber: string;
+  discordUsername: string;
+  email: string;
+}
+
 import type { ThemeId } from './theme';
 
 export interface SiteDataState {
@@ -102,5 +109,6 @@ export interface SiteDataState {
   about: AboutConfig;
   leaders: LeaderItemData[];
   faqs?: FaqItemData[];
+  contact?: ContactConfig;
   theme?: ThemeId;
 }
