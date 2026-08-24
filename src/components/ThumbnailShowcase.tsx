@@ -16,11 +16,11 @@ export const ThumbnailShowcase: React.FC = () => {
 
   return (
     <section id="work" className="w-full relative select-none overflow-hidden pt-2 pb-16 sm:pb-24 bg-transparent">
-      {/* Left Edge Blur & Fade-Out Mask (Thin & Subtle) */}
-      <div className="absolute top-0 bottom-0 left-0 w-8 sm:w-14 md:w-24 z-20 pointer-events-none bg-gradient-to-r from-black via-black/70 to-transparent" />
+      {/* Left Edge Fade (Subtle) */}
+      <div className="absolute top-0 bottom-0 left-0 w-6 sm:w-10 md:w-16 z-20 pointer-events-none bg-gradient-to-r from-black via-black/40 to-transparent" />
 
-      {/* Right Edge Blur & Fade-Out Mask (Thin & Subtle) */}
-      <div className="absolute top-0 bottom-0 right-0 w-8 sm:w-14 md:w-24 z-20 pointer-events-none bg-gradient-to-l from-black via-black/70 to-transparent" />
+      {/* Right Edge Fade (Subtle) */}
+      <div className="absolute top-0 bottom-0 right-0 w-6 sm:w-10 md:w-16 z-20 pointer-events-none bg-gradient-to-l from-black via-black/40 to-transparent" />
 
       {/* Main Container */}
       <div className="relative z-10 w-full space-y-4 sm:space-y-5">
@@ -54,7 +54,7 @@ export const ThumbnailShowcase: React.FC = () => {
 
         {/* Row 2: Moving Right (Opposite Direction Continuous Smooth Loop) */}
         <div className="relative w-full overflow-hidden py-1">
-          <div className="flex w-max animate-marquee-reverse">
+          <div className="flex w-max animate-marquee-slow" style={{ animationDirection: 'reverse' }}>
             {/* Track 1 */}
             <div className="flex shrink-0 items-center gap-2.5 sm:gap-3.5 pr-2.5 sm:pr-3.5">
               {[...row2Thumbs, ...row2Thumbs].map((thumb, idx) => (

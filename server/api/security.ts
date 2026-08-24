@@ -59,6 +59,35 @@ export function sanitizeString(val: unknown, maxLength = 1000): string {
     .slice(0, maxLength);
 }
 
+export function checkAuthRateLimit(ip: string): { allowed: boolean; remaining: number; retryAfterSec?: number } {
+  // Max 5 attempts per 15 minutes per IP
+  return checkRateLimit(`auth_attempt:${ip}`, 5, 15 * 60 * 1000);
+}
+
+export function resetAuthRateLimit(ip: string): void {
+  rateLimitStore.delete(`auth_attempt:${ip}`);
+}
+
+/**
+ * Recursively sanitize strings in objects and arrays
+ */
+export function sanitizeObject<T>(obj: T): T {
+  if (typeof obj === 'string') {
+    return sanitizeString(obj, 10000) as unknown as T;
+  }
+  if (Array.isArray(obj)) {
+    return obj.map((item) => sanitizeObject(item)) as unknown as T;
+  }
+  if (obj !== null && typeof obj === 'object') {
+    const result: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      result[key] = sanitizeObject(value);
+    }
+    return result as T;
+  }
+  return obj;
+}
+
 export function isValidEmail(email: unknown): boolean {
   if (typeof email !== 'string') return false;
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;

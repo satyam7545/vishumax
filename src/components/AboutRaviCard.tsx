@@ -12,7 +12,7 @@ export const AboutRaviCard: React.FC = () => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5 }}
-      className="w-full bg-gradient-to-br from-[#111116] via-[#0c0c10] to-[#111116] border border-zinc-800/90 rounded-2xl sm:rounded-3xl p-5 sm:p-8 md:p-10 shadow-[0_12px_40px_rgba(0,0,0,0.6)] relative overflow-hidden"
+      className="w-full relative overflow-hidden py-4 sm:py-6"
     >
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-center">
         {/* Left: Bio & Description */}
@@ -35,7 +35,7 @@ export const AboutRaviCard: React.FC = () => {
 
         {/* Right: Studio Portrait Photo */}
         <div className="md:col-span-5 lg:col-span-4 flex justify-center md:justify-end">
-          <div className="relative w-full max-w-[240px] sm:max-w-[280px] aspect-[4/4.5] rounded-2xl overflow-hidden border border-zinc-800/90 shadow-2xl group">
+          <div className="relative w-full max-w-[240px] sm:max-w-[280px] aspect-[4/4.5] rounded-2xl overflow-hidden shadow-2xl group">
             <img
               src={siteData.about.portraitImage}
               alt={siteData.about.name}

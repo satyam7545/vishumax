@@ -130,6 +130,31 @@ html, body {
   animation: spinSlow 8s linear infinite;
 }
 
+@keyframes scrollUp {
+  0%   { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(0, -50%, 0); }
+}
+
+@keyframes scrollDown {
+  0%   { transform: translate3d(0, -50%, 0); }
+  100% { transform: translate3d(0, 0, 0); }
+}
+
+.animate-scroll-up {
+  will-change: transform;
+  animation: scrollUp 28s linear infinite;
+}
+
+.animate-scroll-down {
+  will-change: transform;
+  animation: scrollDown 28s linear infinite;
+}
+
+.pause-on-hover:hover .animate-scroll-up,
+.pause-on-hover:hover .animate-scroll-down {
+  animation-play-state: paused;
+}
+
 @keyframes navShine {
   0% {
     transform: translateX(-150%) skewX(-20deg);
@@ -151,7 +176,9 @@ html, body {
   .animate-marquee,
   .animate-marquee-slow,
   .animate-marquee-reverse,
-  .animate-spin-slow {
+  .animate-spin-slow,
+  .animate-scroll-up,
+  .animate-scroll-down {
     animation: none !important;
   }
 

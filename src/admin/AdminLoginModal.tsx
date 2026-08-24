@@ -15,7 +15,7 @@ export const AdminLoginModal: React.FC = () => {
 
     const success = await login(email, password);
     if (!success) {
-      setErrorMessage('Invalid administrator credentials. Please verify your email and password.');
+      setErrorMessage('Invalid administrator credentials. Please check your email and password.');
     }
   };
 
@@ -49,37 +49,41 @@ export const AdminLoginModal: React.FC = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={handleClose}
-          className="fixed inset-0 bg-black/85 backdrop-blur-lg"
+          className="fixed inset-0 bg-black/85 backdrop-blur-xl"
         />
 
         {/* Modal Window */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          initial={{ opacity: 0, scale: 0.95, y: 15 }}
           animate={{ opacity: 1, scale: 1, y: 0 }}
-          exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className="relative w-full max-w-md bg-[#101014] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl z-10 my-auto overflow-hidden"
+          exit={{ opacity: 0, scale: 0.95, y: 15 }}
+          transition={{ type: 'spring', damping: 26, stiffness: 320 }}
+          className="relative w-full max-w-md bg-[#0a0a0e]/95 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 sm:p-8 shadow-[0_25px_70px_rgba(0,0,0,0.85)] z-10 my-auto overflow-hidden text-zinc-100"
         >
           {/* Top ambient glow */}
-          <div className="absolute top-0 right-0 w-48 h-48 bg-[#ea3829]/15 blur-3xl pointer-events-none rounded-full" />
+          <div className="absolute -top-12 -right-12 w-48 h-48 bg-emerald-500/15 blur-3xl pointer-events-none rounded-full" />
+          <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-amber-500/10 blur-3xl pointer-events-none rounded-full" />
 
           {/* Close button */}
           <button
             type="button"
             onClick={handleClose}
             aria-label="Close admin login"
-            className="absolute top-5 right-5 z-30 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-zinc-300 hover:text-white transition-all cursor-pointer shadow-md"
+            className="absolute top-5 right-5 z-30 p-2 rounded-full bg-white/5 hover:bg-white/15 border border-white/10 text-zinc-400 hover:text-white transition-all cursor-pointer shadow-md"
           >
             <X className="w-4 h-4" />
           </button>
 
           {/* Header */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#ea3829] to-[#ff503e] flex items-center justify-center text-white shadow-glow-red mb-3">
-              <Lock className="w-6 h-6" />
+            <div className="w-13 h-13 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-950 border border-white/15 flex items-center justify-center text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.2)] mb-3 relative group">
+              <span className="absolute inset-0 rounded-2xl bg-emerald-500/10 blur-sm pointer-events-none" />
+              <Lock className="w-6 h-6 relative z-10" />
             </div>
-            <h3 className="font-bold text-xl text-white tracking-tight">Admin Authentication</h3>
-            <div className="flex items-center gap-1.5 mt-1 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2.5 py-0.5 rounded-full border border-emerald-800/30">
+            <h3 className="font-sans font-bold text-xl text-white tracking-tight">Admin Authentication</h3>
+            <p className="text-xs text-zinc-400 mt-1">Access the VishuMax Management Studio</p>
+
+            <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-3 py-0.5 rounded-full border border-emerald-800/40 shadow-xs">
               <Database className="w-3 h-3" />
               <span>SQLite Database Auth</span>
             </div>
@@ -90,7 +94,7 @@ export const AdminLoginModal: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: -5 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-4 p-3 rounded-xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-start gap-2"
+              className="mb-4 p-3 rounded-2xl bg-red-950/40 border border-red-500/30 text-red-300 text-xs flex items-start gap-2.5"
             >
               <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
               <span>{errorMessage}</span>
@@ -109,7 +113,7 @@ export const AdminLoginModal: React.FC = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@vishumax.in"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black border border-white/15 focus:border-[#ea3829] text-white text-xs font-sans placeholder:text-zinc-600 focus:outline-none transition-colors"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-zinc-950/80 border border-white/10 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 text-white text-xs font-sans placeholder:text-zinc-600 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -124,7 +128,7 @@ export const AdminLoginModal: React.FC = () => {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••••••"
-                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-black border border-white/15 focus:border-[#ea3829] text-white text-xs font-sans placeholder:text-zinc-600 focus:outline-none transition-colors"
+                  className="w-full pl-10 pr-3.5 py-2.5 rounded-xl bg-zinc-950/80 border border-white/10 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 text-white text-xs font-sans placeholder:text-zinc-600 focus:outline-none transition-all"
                 />
               </div>
             </div>
@@ -132,7 +136,7 @@ export const AdminLoginModal: React.FC = () => {
             <button
               type="submit"
               disabled={isAuthLoading}
-              className="w-full py-3 rounded-xl bg-gradient-to-r from-[#ea3829] to-[#ff503e] hover:from-[#ff4233] hover:to-[#ff614f] text-white font-bold text-xs tracking-wider uppercase shadow-glow-red flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+              className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-black font-sans font-bold text-xs tracking-wider uppercase shadow-[0_0_25px_rgba(16,185,129,0.3)] flex items-center justify-center gap-2 transition-all duration-200 cursor-pointer disabled:opacity-50 hover:scale-[1.01] active:scale-95 mt-2"
             >
               {isAuthLoading ? (
                 <span>Authenticating...</span>

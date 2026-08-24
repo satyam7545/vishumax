@@ -21,22 +21,17 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
   };
 
   return (
-    <section id="faq" className="w-full py-6 sm:py-10">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6">
+    <section id="faq" className="w-full py-10 sm:py-16">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6">
         {/* Section Heading — Centered */}
-        <div className="flex flex-col items-center text-center mb-10 sm:mb-14">
-          <h2 className="font-sans font-bold text-3xl sm:text-4xl text-white tracking-tight">
+        <div className="flex flex-col items-center text-center mb-12 sm:mb-16">
+          <h2 className="font-sans font-bold text-4xl sm:text-5xl text-white tracking-tight">
             Frequently Asked <span className="font-serif italic font-normal text-zinc-300">Questions</span>
           </h2>
-          <p className="text-sm text-zinc-400 font-sans mt-2">
-            Real questions, honest answers.
-          </p>
           {/* Gradient divider */}
           <div
             className="mt-6 h-px w-24 mx-auto"
-            style={{
-              background: theme.gradientDivider,
-            }}
+            style={{ background: theme.gradientDivider }}
           />
         </div>
 
@@ -58,29 +53,29 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                   onClick={() => toggleFaq(faq.id)}
                   className="w-full py-5 sm:py-6 flex items-center gap-4 text-left cursor-pointer select-none group"
                 >
-                  {/* Icon toggles between + and × with theme fill when open */}
+                  {/* Icon toggles: theme-colored when open, subtle when closed */}
                   <div
                     style={
                       isOpen
                         ? { background: theme.primary, color: theme.ctaTextColor === 'text-black' ? '#000000' : '#ffffff' }
-                        : {}
+                        : { borderColor: theme.primary, color: theme.primary }
                     }
-                    className={`shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 ${
+                    className={`shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200 border ${
                       isOpen
-                        ? 'shadow-xs'
-                        : 'bg-zinc-900 border border-zinc-800 text-zinc-400 group-hover:bg-zinc-800 group-hover:text-zinc-200'
+                        ? 'shadow-sm'
+                        : 'bg-transparent group-hover:opacity-80'
                     }`}
                   >
                     <motion.div
                       animate={{ rotate: isOpen ? 45 : 0 }}
                       transition={{ duration: 0.2, ease: 'easeInOut' }}
                     >
-                      <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                      <Plus className="w-4 h-4 stroke-[2.5]" />
                     </motion.div>
                   </div>
 
                   <span
-                    className={`font-sans font-semibold text-sm sm:text-base transition-colors duration-200 ${
+                    className={`font-sans font-semibold text-base sm:text-lg transition-colors duration-200 ${
                       isOpen ? 'text-white' : 'text-zinc-300 group-hover:text-white'
                     }`}
                   >
@@ -98,7 +93,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                       transition={{ duration: 0.28, ease: 'easeInOut' }}
                       className="overflow-hidden"
                     >
-                      <div className="pb-6 pl-10 pr-4 text-sm text-zinc-400 font-sans leading-relaxed">
+                      <div className="pb-7 pl-11 pr-4 text-sm sm:text-[15px] text-zinc-400 font-sans leading-relaxed">
                         {faq.answer}
                       </div>
                     </motion.div>

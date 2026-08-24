@@ -4,6 +4,8 @@ import { loginAdmin, verifyAdminToken, changeAdminPassword, updateAdminProfile }
 import {
   applySecurityHeaders,
   checkRateLimit,
+  checkAuthRateLimit,
+  resetAuthRateLimit,
   getClientIp,
   validateInquiryInput,
 } from './api/security.ts';
@@ -155,15 +157,15 @@ export function sqliteApiPlugin(): Plugin {
             return;
           }
 
-          // 3. AUTH: POST /api/auth/login (Rate limited)
+          // 3. AUTH: POST /api/auth/login (Strict brute-force rate limit)
           if (pathname === '/api/auth/login' && method === 'POST') {
-            const loginLimit = checkRateLimit(`login:${ip}`, 5, 15 * 60 * 1000);
-            if (!loginLimit.allowed) {
+            const authLimit = checkAuthRateLimit(ip);
+            if (!authLimit.allowed) {
               res.statusCode = 429;
               res.end(
                 JSON.stringify({
                   success: false,
-                  error: `Too many login attempts. Please wait ${loginLimit.retryAfterSec}s before retrying.`,
+                  error: `Too many login attempts. Please wait ${authLimit.retryAfterSec}s before retrying.`,
                 })
               );
               return;
@@ -183,6 +185,7 @@ export function sqliteApiPlugin(): Plugin {
               return;
             }
 
+            resetAuthRateLimit(ip);
             res.statusCode = 200;
             res.end(JSON.stringify({ success: true, user: result.user, token: result.token }));
             return;
@@ -358,16 +361,16 @@ export function sqliteApiPlugin(): Plugin {
           // 21. ADMIN: POST /api/auth/change-password
           if (pathname === '/api/auth/change-password' && method === 'POST') {
             const { oldPassword, newPassword } = await getBody();
-            if (!oldPassword || !newPassword || newPassword.length < 6) {
+            if (!oldPassword || !newPassword) {
               res.statusCode = 400;
-              res.end(JSON.stringify({ success: false, error: 'New password must be at least 6 characters' }));
+              res.end(JSON.stringify({ success: false, error: 'Current and new password are required' }));
               return;
             }
 
-            const changed = changeAdminPassword(user.id, oldPassword, newPassword);
-            if (!changed) {
+            const result = changeAdminPassword(user.id, oldPassword, newPassword);
+            if (!result.success) {
               res.statusCode = 400;
-              res.end(JSON.stringify({ success: false, error: 'Incorrect current password' }));
+              res.end(JSON.stringify({ success: false, error: result.error || 'Failed to change password' }));
               return;
             }
 
@@ -385,10 +388,10 @@ export function sqliteApiPlugin(): Plugin {
               return;
             }
 
-            const updated = updateAdminProfile(user.id, email, name);
-            if (!updated) {
+            const result = updateAdminProfile(user.id, email, name);
+            if (!result.success) {
               res.statusCode = 400;
-              res.end(JSON.stringify({ success: false, error: 'Failed to update admin profile (email may be in use)' }));
+              res.end(JSON.stringify({ success: false, error: result.error || 'Failed to update admin profile' }));
               return;
             }
 

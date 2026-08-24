@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Quote, Star, RotateCw } from 'lucide-react';
+import { Star } from 'lucide-react';
 import { type TestimonialItemData } from '../types/siteData';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -8,118 +8,100 @@ interface TestimonialCardProps {
   item: TestimonialItemData;
 }
 
-export const TestimonialCard: React.FC<TestimonialCardProps> = ({
-  item,
-}) => {
+export const TestimonialCard: React.FC<TestimonialCardProps> = ({ item }) => {
   const { theme } = useSiteData();
   const [isFlipped, setIsFlipped] = useState(false);
-
-  const handleFlip = () => {
-    setIsFlipped(!isFlipped);
-  };
 
   return (
     <div
       role="button"
       tabIndex={0}
-      aria-label={`Testimonial from ${item.name}. Hover to flip card.`}
-      className="perspective-1500 w-full min-h-[250px] sm:min-h-[270px] select-none cursor-pointer flex flex-col focus:outline-none rounded-3xl transition-all duration-700 group"
-      onClick={handleFlip}
+      aria-label={`Testimonial from ${item.name}. Click to flip.`}
+      className="perspective-1500 w-full min-h-[300px] sm:min-h-[320px] select-none cursor-pointer flex flex-col focus:outline-none"
+      onClick={() => setIsFlipped(!isFlipped)}
       onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          handleFlip();
-        }
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setIsFlipped(!isFlipped); }
       }}
       onMouseEnter={() => setIsFlipped(true)}
       onMouseLeave={() => setIsFlipped(false)}
     >
       <motion.div
         animate={{ rotateY: isFlipped ? 180 : 0 }}
-        transition={{
-          duration: 0.55,
-          ease: [0.23, 1, 0.32, 1],
-        }}
-        className="w-full h-full relative transform-style-3d rounded-3xl flex-1"
+        transition={{ duration: 0.6, ease: [0.23, 1, 0.32, 1] }}
+        className="w-full h-full relative transform-style-3d rounded-2xl flex-1"
       >
-        {/* FRONT FACE (Sleek Modern Dark Card) */}
-        <div className="w-full h-full rounded-3xl bg-[#0d0d12] text-zinc-100 p-6 sm:p-7 flex flex-col justify-between border border-zinc-800/80 shadow-[0_4px_25px_rgba(0,0,0,0.5)] hover:border-zinc-700 hover:shadow-[0_8px_30px_rgba(0,0,0,0.7)] transition-all duration-300 overflow-hidden">
-          {/* Top: Stars & Quote */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 text-amber-400">
-                {[...Array(item.rating || 5)].map((_, i) => (
-                  <Star key={i} className="w-3.5 h-3.5 fill-amber-400" />
-                ))}
-              </div>
-              <Quote className="w-5 h-5 text-zinc-700 -scale-x-100" />
-            </div>
-
-            <p className="font-sans text-xs sm:text-sm leading-relaxed text-zinc-200 font-medium">
-              "{item.quote}"
-            </p>
+        {/* ── FRONT FACE ── */}
+        <div className="w-full h-full rounded-2xl bg-[#0c0c10] text-zinc-100 p-7 sm:p-8 flex flex-col justify-between border border-white/[0.06] hover:border-white/[0.12] transition-colors duration-300 overflow-hidden">
+          {/* Stars */}
+          <div className="flex items-center gap-0.5 mb-5">
+            {[...Array(item.rating || 5)].map((_, i) => (
+              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+            ))}
           </div>
 
-          {/* Bottom: Creator Profile */}
-          <div className="pt-4 mt-4 border-t border-zinc-800/80 flex items-center gap-3">
+          {/* Quote */}
+          <p className="font-sans text-sm sm:text-[15px] leading-[1.75] text-zinc-200 font-normal flex-1">
+            "{item.quote}"
+          </p>
+
+          {/* Divider */}
+          <div className="my-6 h-px bg-white/[0.06]" />
+
+          {/* Creator row */}
+          <div className="flex items-center gap-3.5">
             <img
               src={item.avatar}
               alt={item.name}
-              className="w-10 h-10 rounded-full object-cover border border-zinc-700 shadow-sm shrink-0"
+              className="w-11 h-11 rounded-full object-cover shrink-0"
             />
             <div className="flex-1 min-w-0">
-              <h4 className="font-sans font-bold text-xs sm:text-sm text-white tracking-tight uppercase truncate">
+              <h4 className="font-sans font-semibold text-sm text-white leading-tight truncate">
                 {item.name}
               </h4>
-              <p className="text-[11px] text-zinc-400 font-sans truncate font-medium">
-                {item.role} • {item.company}
+              <p className="text-[12px] text-zinc-500 font-sans truncate mt-0.5">
+                {item.role}{item.company ? ` · ${item.company}` : ''}
               </p>
             </div>
           </div>
         </div>
 
-        {/* BACK FACE (Deep-Dive Dark Dossier) */}
-        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-3xl bg-[#09090d] text-zinc-100 p-6 sm:p-7 flex flex-col justify-between border border-zinc-800 overflow-hidden shadow-2xl">
-          <div>
-            <div className="flex items-center justify-between gap-3 mb-3">
-              <div className="flex items-center gap-3">
-                <img
-                  src={item.avatar}
-                  alt={item.name}
-                  className="w-8 h-8 rounded-full object-cover border border-white/20 shrink-0"
-                />
-                <div>
-                  <h4 className="font-sans font-bold text-xs sm:text-sm text-white uppercase">
-                    {item.name}
-                  </h4>
-                  <p className="text-[10px] text-zinc-400 font-mono">
-                    {item.channel}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/10 text-[9px] text-zinc-400 font-mono">
-                <RotateCw className="w-2.5 h-2.5" />
-                <span>back</span>
-              </div>
+        {/* ── BACK FACE ── */}
+        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl bg-[#0a0a0e] text-zinc-100 p-7 sm:p-8 flex flex-col gap-4 border border-white/[0.08] overflow-hidden">
+          {/* Header */}
+          <div className="flex items-center gap-3">
+            <img
+              src={item.avatar}
+              alt={item.name}
+              className="w-9 h-9 rounded-full object-cover shrink-0"
+            />
+            <div>
+              <h4 className="font-sans font-semibold text-sm text-white leading-tight">{item.name}</h4>
+              <p className="text-[11px] text-zinc-500 font-sans mt-0.5">{item.channel}</p>
             </div>
-
-            <p className="text-[11px] text-zinc-300 leading-relaxed font-sans mb-3 line-clamp-4">
-              {item.detailedBio}
-            </p>
           </div>
 
-          {/* Metrics */}
+          {/* Divider */}
+          <div className="h-px bg-white/[0.06]" />
+
+          {/* Bio */}
+          <p className="text-[13px] text-zinc-300 leading-[1.7] font-sans flex-1 line-clamp-5">
+            {item.detailedBio}
+          </p>
+
+          {/* Stats */}
           {item.stats && (
-            <div className="pt-3 border-t border-white/10 grid grid-cols-3 gap-2 text-center">
+            <div className="pt-4 border-t border-white/[0.06] grid grid-cols-3 gap-2 text-center">
               {item.stats.map((st, i) => (
-                <div key={i}>
-                  <div className="text-[9px] font-mono text-zinc-400 uppercase">{st.label}</div>
-                  <div
-                    className="text-xs sm:text-sm font-bold font-mono"
+                <div key={i} className="flex flex-col gap-1">
+                  <span
+                    className="text-sm font-bold font-sans"
                     style={{ color: theme.primary }}
                   >
                     {st.value}
-                  </div>
+                  </span>
+                  <span className="text-[10px] font-sans text-zinc-500 uppercase tracking-wide">
+                    {st.label}
+                  </span>
                 </div>
               ))}
             </div>

@@ -54,8 +54,8 @@ export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
             />
 
-            {/* Gradient Scrim (Reveals on Hover) */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out" />
+            {/* Gradient Scrim — only covers bottom where text lives */}
+            <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/95 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out" />
 
             {/* Bottom Card Content (Name & Details Reveal Exclusively on Hover) */}
             <div className="relative p-5 z-10 flex flex-col justify-end translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out pointer-events-none">

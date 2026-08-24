@@ -67,9 +67,6 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           transition={{ duration: 0.4 }}
           className="mb-5 sm:mb-6 flex flex-col items-center gap-2.5 w-full"
         >
-          <span className="text-[10px] sm:text-[11px] font-sans font-semibold uppercase tracking-widest text-zinc-400">
-            Proof lives in our work
-          </span>
 
           <div
             className="relative w-full max-w-3xl overflow-hidden py-0.5"
