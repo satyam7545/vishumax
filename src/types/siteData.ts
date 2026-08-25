@@ -3,6 +3,7 @@ export interface HeroConfig {
   headlineAccent: string;
   attributionPrefix: string;
   attributionAuthor: string;
+  attributionQuote?: string;
   viewsStat: string;
   ctaText: string;
   ctaSubtext: string;
@@ -25,6 +26,7 @@ export interface AboutConfig {
   portraitImage: string;
   name: string;
   roleTitle: string;
+  slotsRemaining?: number;
 }
 
 export interface ThumbnailItemData {
@@ -41,6 +43,8 @@ export interface ThumbnailItemData {
   afterCtr: string;
   strategyBreakdown: string[];
   image?: string;
+  avatar?: string;
+  link?: string;
   graphicType?: 'constipation' | 'educator' | 'indianoil' | 'finance' | 'custom';
   isCustomGraphic?: boolean;
 }

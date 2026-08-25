@@ -1,5 +1,4 @@
 import React from 'react';
-import { Star } from 'lucide-react';
 import { AboutRaviCard } from './AboutRaviCard';
 import { useSiteData } from '../context/SiteDataContext';
 import { type TestimonialItemData } from '../types/siteData';
@@ -9,52 +8,49 @@ interface TestimonialsSectionProps {
 }
 
 // ── Minimal static card used inside the scrolling columns ──────────────────
-function ScrollTestimonialCard({ item, theme }: { item: TestimonialItemData; theme: { primary: string; gradientDivider: string } }) {
+function ScrollTestimonialCard({ item }: { item: TestimonialItemData; theme: { primary: string; glowColor?: string; gradientDivider: string } }) {
+  const cleanQuote = item.quote ? item.quote.replace(/^["'“]|["'”]$/g, '').trim() : '';
+  const channelHandle = item.channel
+    ? (item.channel.startsWith('@') ? item.channel : `@${item.channel.replace(/\s+/g, '')}`)
+    : `@${item.name.replace(/\s+/g, '')}`;
+
   return (
-    <div className="rounded-2xl bg-[#0c0c10] border border-white/[0.06] p-6 flex flex-col gap-4 shrink-0">
-      {/* Stars */}
-      <div className="flex items-center gap-0.5">
-        {[...Array(item.rating || 5)].map((_, i) => (
-          <Star key={i} className="w-3 h-3 fill-amber-400 text-amber-400" />
-        ))}
-      </div>
+    <div
+      className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 flex flex-col shrink-0 transition-all duration-300 group hover:scale-[1.01] border border-white/40 text-left select-none"
+      style={{
+        background: 'linear-gradient(135deg, #a7f3d0 0%, #86efac 40%, #4ade80 85%, #22c55e 100%)',
+        boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 0 35px rgba(74,222,128,0.25)',
+      }}
+    >
+      {/* Subtle diagonal ambient light ray matching the screenshot */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'linear-gradient(125deg, transparent 32%, rgba(255,255,255,0.28) 48%, rgba(255,255,255,0.12) 56%, transparent 68%)',
+        }}
+      />
 
-      {/* Quote */}
-      <p className="font-sans text-[13px] sm:text-sm leading-relaxed text-zinc-300">
-        "{item.quote}"
-      </p>
-
-      {/* Divider */}
-      <div className="h-px bg-white/[0.05]" />
-
-      {/* Author */}
-      <div className="flex items-center gap-3">
+      {/* TOP: Author Profile with Avatar, Name, and @Handle */}
+      <div className="flex items-center gap-4 sm:gap-4.5 mb-5 sm:mb-6 relative z-10">
         <img
           src={item.avatar}
           alt={item.name}
-          className="w-9 h-9 rounded-full object-cover shrink-0"
+          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 shadow-md border border-black/10"
         />
         <div className="min-w-0">
-          <p className="font-sans font-semibold text-[13px] text-white leading-tight truncate">
+          <h4 className="font-['Inter',sans-serif] font-semibold text-[21px] sm:text-[23.5px] text-zinc-950 tracking-tight leading-tight truncate">
             {item.name}
-          </p>
-          <p className="font-sans text-[11px] text-zinc-500 mt-0.5 truncate">
-            {item.role}{item.company ? ` · ${item.company}` : ''}
+          </h4>
+          <p className="font-['Inter',sans-serif] text-[13.5px] sm:text-[14.5px] text-emerald-950 font-normal mt-0.5 leading-none truncate">
+            {channelHandle}
           </p>
         </div>
       </div>
 
-      {/* Stats row if available */}
-      {item.stats && item.stats.length > 0 && (
-        <div className="flex items-center gap-4 pt-1">
-          {item.stats.slice(0, 2).map((st, i) => (
-            <div key={i} className="flex flex-col">
-              <span className="text-xs font-bold" style={{ color: theme.primary }}>{st.value}</span>
-              <span className="text-[10px] text-zinc-600 uppercase tracking-wide">{st.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Testimonial Quote Text */}
+      <p className="font-['Inter',sans-serif] text-[14px] sm:text-[15.5px] leading-[1.65] text-zinc-950 font-normal relative z-10 text-left">
+        {cleanQuote}
+      </p>
     </div>
   );
 }

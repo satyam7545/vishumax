@@ -197,12 +197,12 @@ export function upsertProject(project: Partial<CMSProject>): boolean {
     const slug = project.slug || project.title?.toLowerCase().replace(/[^a-z0-9]+/g, '-') || `proj-${Date.now()}`;
     const stmt = db.prepare(`
       INSERT INTO projects (
-        id, title, slug, description, client_id, category, cover_image, video_duration, views_count,
+        id, title, slug, description, client_id, category, cover_image, avatar, link, video_duration, views_count,
         ctr_before, ctr_after, ctr_gain, channel, niche, hook, strategy_breakdown, graphic_type,
         featured, published, sort_order, updated_at
       )
       VALUES (
-        @id, @title, @slug, @description, @client_id, @category, @cover_image, @video_duration, @views_count,
+        @id, @title, @slug, @description, @client_id, @category, @cover_image, @avatar, @link, @video_duration, @views_count,
         @ctr_before, @ctr_after, @ctr_gain, @channel, @niche, @hook, @strategy_breakdown, @graphic_type,
         @featured, @published, @sort_order, CURRENT_TIMESTAMP
       )
@@ -213,6 +213,8 @@ export function upsertProject(project: Partial<CMSProject>): boolean {
         client_id = excluded.client_id,
         category = excluded.category,
         cover_image = excluded.cover_image,
+        avatar = excluded.avatar,
+        link = excluded.link,
         video_duration = excluded.video_duration,
         views_count = excluded.views_count,
         ctr_before = excluded.ctr_before,
@@ -235,10 +237,12 @@ export function upsertProject(project: Partial<CMSProject>): boolean {
       slug,
       description: project.description || '',
       client_id: project.client_id || null,
-      category: project.category || 'Education & Strategy',
+      category: project.category || 'Documentary',
       cover_image: project.cover_image || '',
+      avatar: project.avatar || '',
+      link: project.link || '',
       video_duration: project.video_duration || '12:00',
-      views_count: project.views_count || '1M views',
+      views_count: project.views_count || '1.2M Views',
       ctr_before: project.ctr_before || '4.0%',
       ctr_after: project.ctr_after || '14.0%',
       ctr_gain: project.ctr_gain || '+18.0%',

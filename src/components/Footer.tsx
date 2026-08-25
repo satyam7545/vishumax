@@ -47,15 +47,32 @@ export const Footer: React.FC<FooterProps> = () => {
 
   return (
     <footer className="w-full bg-black border-t border-zinc-800/80 py-12 sm:py-16 text-zinc-400 font-sans relative z-10 overflow-hidden">
-      {/* Inverted arch gradient — drops from top center downward */}
+      {/* 1. Large Top Gradient Glow — rich radiant theme illumination */}
       <div
-        className="absolute inset-x-0 top-0 h-[60%] pointer-events-none transition-all duration-700"
+        className="absolute inset-x-0 top-0 h-full pointer-events-none transition-all duration-700"
         style={{
-          background: `radial-gradient(ellipse 80% 100% at 50% 0%, ${theme.glowColor} 0%, transparent 70%)`,
-          opacity: 0.15,
+          background: `radial-gradient(ellipse 95% 100% at 50% 0%, ${theme.glowColor} 0%, rgba(0,0,0,0.5) 65%, transparent 100%)`,
+          opacity: 0.52,
         }}
       />
-      <div className="max-w-7xl mx-auto px-6 sm:px-8">
+      {/* 2. Secondary concentrated top core beam */}
+      <div
+        className="absolute inset-x-0 top-0 h-[220px] pointer-events-none transition-all duration-700"
+        style={{
+          background: `radial-gradient(ellipse 70% 80% at 50% -20%, ${theme.secondary || '#38bdf8'} 0%, transparent 75%)`,
+          opacity: 0.35,
+        }}
+      />
+      {/* 3. Luminous Top Border Beam Highlight */}
+      <div
+        className="absolute inset-x-0 top-0 h-px pointer-events-none"
+        style={{
+          background: `linear-gradient(90deg, transparent 0%, ${theme.primary} 50%, transparent 100%)`,
+          opacity: 0.6,
+        }}
+      />
+
+      <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
 
           {/* Brand + Email */}

@@ -15,7 +15,7 @@ export const ThumbnailShowcase: React.FC = () => {
       : thumbs;
 
   return (
-    <section id="work" className="w-full relative select-none overflow-hidden pt-2 pb-16 sm:pb-24 bg-transparent">
+    <section className="w-full relative select-none overflow-hidden pt-2 pb-16 sm:pb-24 bg-transparent">
       {/* Left Edge Fade (Subtle) */}
       <div className="absolute top-0 bottom-0 left-0 w-6 sm:w-10 md:w-16 z-20 pointer-events-none bg-gradient-to-r from-black via-black/40 to-transparent" />
 

@@ -1,15 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Star } from 'lucide-react';
 import { type TestimonialItemData } from '../types/siteData';
-import { useSiteData } from '../context/SiteDataContext';
 
 interface TestimonialCardProps {
   item: TestimonialItemData;
 }
 
 export const TestimonialCard: React.FC<TestimonialCardProps> = ({ item }) => {
-  const { theme } = useSiteData();
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
@@ -31,81 +28,73 @@ export const TestimonialCard: React.FC<TestimonialCardProps> = ({ item }) => {
         className="w-full h-full relative transform-style-3d rounded-2xl flex-1"
       >
         {/* ── FRONT FACE ── */}
-        <div className="w-full h-full rounded-2xl bg-[#0c0c10] text-zinc-100 p-7 sm:p-8 flex flex-col justify-between border border-white/[0.06] hover:border-white/[0.12] transition-colors duration-300 overflow-hidden">
-          {/* Stars */}
-          <div className="flex items-center gap-0.5 mb-5">
-            {[...Array(item.rating || 5)].map((_, i) => (
-              <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-            ))}
-          </div>
+        <div
+          className="w-full h-full rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 flex flex-col transition-all duration-300 overflow-hidden relative group hover:scale-[1.01] border border-white/40 text-left select-none"
+          style={{
+            background: 'linear-gradient(135deg, #a7f3d0 0%, #86efac 40%, #4ade80 85%, #22c55e 100%)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 0 35px rgba(74,222,128,0.25)',
+          }}
+        >
+          {/* Subtle diagonal ambient light ray matching the screenshot */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background: 'linear-gradient(125deg, transparent 32%, rgba(255,255,255,0.28) 48%, rgba(255,255,255,0.12) 56%, transparent 68%)',
+            }}
+          />
 
-          {/* Quote */}
-          <p className="font-sans text-sm sm:text-[15px] leading-[1.75] text-zinc-200 font-normal flex-1">
-            "{item.quote}"
-          </p>
-
-          {/* Divider */}
-          <div className="my-6 h-px bg-white/[0.06]" />
-
-          {/* Creator row */}
-          <div className="flex items-center gap-3.5">
+          {/* TOP: Author Profile with Avatar, Name, and @Handle */}
+          <div className="flex items-center gap-4 sm:gap-4.5 mb-5 sm:mb-6 relative z-10">
             <img
               src={item.avatar}
               alt={item.name}
-              className="w-11 h-11 rounded-full object-cover shrink-0"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 shadow-md border border-black/10"
             />
-            <div className="flex-1 min-w-0">
-              <h4 className="font-sans font-semibold text-sm text-white leading-tight truncate">
+            <div className="min-w-0">
+              <h4 className="font-['Inter',sans-serif] font-semibold text-[21px] sm:text-[23.5px] text-zinc-950 tracking-tight leading-tight truncate">
                 {item.name}
               </h4>
-              <p className="text-[12px] text-zinc-500 font-sans truncate mt-0.5">
-                {item.role}{item.company ? ` · ${item.company}` : ''}
+              <p className="font-['Inter',sans-serif] text-[13.5px] sm:text-[14.5px] text-emerald-950 font-normal mt-0.5 leading-none truncate">
+                {item.channel?.startsWith('@') ? item.channel : `@${(item.channel || item.name).replace(/\s+/g, '')}`}
               </p>
             </div>
           </div>
+
+          {/* Quote */}
+          <p className="font-['Inter',sans-serif] text-[14px] sm:text-[15.5px] leading-[1.65] text-zinc-950 font-normal relative z-10 text-left flex-1">
+            {item.quote ? item.quote.replace(/^["'“]|["'”]$/g, '').trim() : ''}
+          </p>
         </div>
 
         {/* ── BACK FACE ── */}
-        <div className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-2xl bg-[#0a0a0e] text-zinc-100 p-7 sm:p-8 flex flex-col gap-4 border border-white/[0.08] overflow-hidden">
-          {/* Header */}
-          <div className="flex items-center gap-3">
+        <div
+          className="absolute inset-0 w-full h-full backface-hidden rotate-y-180 rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 flex flex-col overflow-hidden relative border border-white/40 text-left"
+          style={{
+            background: 'linear-gradient(135deg, #a7f3d0 0%, #86efac 40%, #4ade80 85%, #22c55e 100%)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 0 35px rgba(74,222,128,0.25)',
+          }}
+        >
+          {/* TOP: Header */}
+          <div className="flex items-center gap-4 sm:gap-4.5 mb-5 sm:mb-6 relative z-10">
             <img
               src={item.avatar}
               alt={item.name}
-              className="w-9 h-9 rounded-full object-cover shrink-0"
+              className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 shadow-md border border-black/10"
             />
-            <div>
-              <h4 className="font-sans font-semibold text-sm text-white leading-tight">{item.name}</h4>
-              <p className="text-[11px] text-zinc-500 font-sans mt-0.5">{item.channel}</p>
+            <div className="min-w-0">
+              <h4 className="font-['Inter',sans-serif] font-semibold text-[21px] sm:text-[23.5px] text-zinc-950 tracking-tight leading-tight truncate">
+                {item.name}
+              </h4>
+              <p className="font-['Inter',sans-serif] text-[13.5px] sm:text-[14.5px] text-emerald-950 font-normal mt-0.5 leading-none truncate">
+                {item.channel?.startsWith('@') ? item.channel : `@${(item.channel || item.name).replace(/\s+/g, '')}`}
+              </p>
             </div>
           </div>
 
-          {/* Divider */}
-          <div className="h-px bg-white/[0.06]" />
-
           {/* Bio */}
-          <p className="text-[13px] text-zinc-300 leading-[1.7] font-sans flex-1 line-clamp-5">
-            {item.detailedBio}
+          <p className="font-['Inter',sans-serif] text-[14px] sm:text-[15.5px] text-zinc-950 leading-[1.65] font-normal flex-1 relative z-10 overflow-y-auto">
+            {item.detailedBio || item.quote}
           </p>
-
-          {/* Stats */}
-          {item.stats && (
-            <div className="pt-4 border-t border-white/[0.06] grid grid-cols-3 gap-2 text-center">
-              {item.stats.map((st, i) => (
-                <div key={i} className="flex flex-col gap-1">
-                  <span
-                    className="text-sm font-bold font-sans"
-                    style={{ color: theme.primary }}
-                  >
-                    {st.value}
-                  </span>
-                  <span className="text-[10px] font-sans text-zinc-500 uppercase tracking-wide">
-                    {st.label}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
       </motion.div>
     </div>

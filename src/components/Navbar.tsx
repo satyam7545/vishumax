@@ -5,10 +5,12 @@ import { useSiteData } from '../context/SiteDataContext';
 
 interface NavbarProps {
   onOpenBooking?: (prefill?: string) => void;
+  onNavigateToWorks?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenBooking,
+  onNavigateToWorks,
 }) => {
   const { siteData } = useSiteData();
   const [scrolled, setScrolled] = useState(false);
@@ -84,10 +86,14 @@ export const Navbar: React.FC<NavbarProps> = ({
         {/* Center: Navigation Links (Desktop) */}
         <div className="hidden md:flex items-center gap-6 lg:gap-8 text-[14px] lg:text-[15px] font-medium tracking-normal text-white">
           <a
-            href="#work"
+            href="#works"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('work');
+              if (onNavigateToWorks) {
+                onNavigateToWorks();
+              } else {
+                window.location.hash = '#works';
+              }
             }}
             className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
           >
@@ -133,7 +139,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </span>
 
             <span className="relative z-10 text-white font-semibold tracking-tight group-hover/shine:text-emerald-100 transition-colors">
-              2 Spots Remaining
+              {siteData.about.slotsRemaining !== undefined
+                ? `${siteData.about.slotsRemaining} Spots Remaining`
+                : (siteData.about.badgeText || '2 Spots Remaining')}
             </span>
           </button>
 
@@ -177,10 +185,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       {mobileMenuOpen && (
         <div className="pointer-events-auto mt-2.5 w-full max-w-sm p-5 rounded-3xl bg-black/75 backdrop-blur-3xl border border-white/20 shadow-2xl flex flex-col gap-3.5 text-center md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
           <a
-            href="#work"
+            href="#works"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('work');
+              setMobileMenuOpen(false);
+              if (onNavigateToWorks) {
+                onNavigateToWorks();
+              } else {
+                window.location.hash = '#works';
+              }
             }}
             className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 border-b border-white/10 transition-colors"
           >

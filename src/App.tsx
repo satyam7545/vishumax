@@ -9,6 +9,7 @@ import { FaqSection } from './components/FaqSection';
 import { BookCallModal } from './components/BookCallModal';
 import { CtaBanner } from './components/CtaBanner';
 import { Footer } from './components/Footer';
+import { WorksPage } from './pages/WorksPage';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 
 // Code-split heavy admin suite
@@ -22,12 +23,13 @@ const AdminLoginModal = lazy(() =>
 function AppContent() {
   const { theme, isAuthenticated, setIsAdminOpen, setIsLoginModalOpen } = useSiteData();
 
+  const [currentView, setCurrentView] = useState<'home' | 'works'>('home');
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingPrefill, setBookingPrefill] = useState<string | undefined>(undefined);
 
-  // Hidden admin access: secret route (/admin or #admin) or keyboard shortcut (Ctrl+Shift+A)
+  // Route detection & navigation: /works, #works, /admin, #admin
   useEffect(() => {
-    const checkAdminRoute = () => {
+    const handleRouteChange = () => {
       const path = window.location.pathname.toLowerCase();
       const hash = window.location.hash.toLowerCase();
       if (path === '/admin' || path === '/admin/' || hash === '#admin') {
@@ -36,12 +38,16 @@ function AppContent() {
         } else {
           setIsLoginModalOpen(true);
         }
+      } else if (path === '/works' || path === '/works/' || hash === '#works') {
+        setCurrentView('works');
+      } else {
+        setCurrentView('home');
       }
     };
 
-    checkAdminRoute();
-    window.addEventListener('hashchange', checkAdminRoute);
-    window.addEventListener('popstate', checkAdminRoute);
+    handleRouteChange();
+    window.addEventListener('hashchange', handleRouteChange);
+    window.addEventListener('popstate', handleRouteChange);
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
@@ -56,8 +62,8 @@ function AppContent() {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => {
-      window.removeEventListener('hashchange', checkAdminRoute);
-      window.removeEventListener('popstate', checkAdminRoute);
+      window.removeEventListener('hashchange', handleRouteChange);
+      window.removeEventListener('popstate', handleRouteChange);
       window.removeEventListener('keydown', handleKeyDown);
     };
   }, [isAuthenticated, setIsAdminOpen, setIsLoginModalOpen]);
@@ -67,90 +73,117 @@ function AppContent() {
     setIsBookingOpen(true);
   };
 
+  const navigateToWorks = () => {
+    window.location.hash = '#works';
+    setCurrentView('works');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const navigateToHome = () => {
+    window.location.hash = '';
+    if (window.location.pathname !== '/') {
+      window.history.pushState({}, '', '/');
+    }
+    setCurrentView('home');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <div className="min-h-screen bg-black text-zinc-100 relative overflow-x-hidden font-sans w-full selection:bg-emerald-500 selection:text-black">
-      {/* Navigation Header */}
-      <Navbar onOpenBooking={() => handleOpenBooking()} />
-
-      {/* UNIFIED HERO & THUMBNAILS TOP BANNER */}
-      <div className="relative w-full overflow-hidden bg-black">
-        {/* 1. Primary Glowing Aura Arch (Reaches right down across "We make you believe in" text) */}
-        <div
-          className="absolute -top-24 sm:-top-32 left-1/2 -translate-x-1/2 w-[130%] max-w-[1550px] h-[720px] sm:h-[820px] pointer-events-none opacity-75 blur-[60px] transition-all duration-700"
-          style={{ background: theme.heroAuraGradient }}
+      {currentView === 'works' ? (
+        <WorksPage
+          onNavigateHome={navigateToHome}
+          onOpenBooking={handleOpenBooking}
         />
+      ) : (
+        <>
+          {/* Navigation Header */}
+          <Navbar
+            onOpenBooking={() => handleOpenBooking()}
+            onNavigateToWorks={navigateToWorks}
+          />
 
-        {/* 2. Soft horizontal ambient diffusion from top */}
-        <div
-          className="absolute top-0 left-0 right-0 h-[460px] blur-3xl pointer-events-none transition-all duration-700 opacity-45"
-          style={{ background: theme.heroDiffusionGradient }}
-        />
+          {/* UNIFIED HERO & THUMBNAILS TOP BANNER */}
+          <div className="relative w-full overflow-hidden bg-black">
+            {/* 1. Primary Glowing Aura Arch (Reaches right down across "We make you believe in" text) */}
+            <div
+              className="absolute -top-24 sm:-top-32 left-1/2 -translate-x-1/2 w-[130%] max-w-[1550px] h-[720px] sm:h-[820px] pointer-events-none opacity-75 blur-[60px] transition-all duration-700"
+              style={{ background: theme.heroAuraGradient }}
+            />
 
-        {/* 3. Smooth bottom linear fade into pure deep dark */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-40 sm:h-56 pointer-events-none z-10"
-          style={{
-            background:
-              'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 50%, #000000 100%)',
-          }}
-        />
+            {/* 2. Soft horizontal ambient diffusion from top */}
+            <div
+              className="absolute top-0 left-0 right-0 h-[460px] blur-3xl pointer-events-none transition-all duration-700 opacity-45"
+              style={{ background: theme.heroDiffusionGradient }}
+            />
 
-        {/* Edge-to-Edge Hero */}
-        <HeroSection onOpenBooking={() => handleOpenBooking()} />
+            {/* 3. Smooth bottom linear fade into pure deep dark */}
+            <div
+              className="absolute bottom-0 left-0 right-0 h-40 sm:h-56 pointer-events-none z-10"
+              style={{
+                background:
+                  'linear-gradient(to bottom, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.4) 50%, #000000 100%)',
+              }}
+            />
 
-        {/* Full-Width Moving Thumbnail Showcase (Dual Opposite Rows) */}
-        <ThumbnailShowcase />
-      </div>
+            {/* Edge-to-Edge Hero */}
+            <HeroSection onOpenBooking={() => handleOpenBooking()} />
 
-      {/* Social Proof Stats Strip */}
-      <StatsBar />
+            {/* Full-Width Moving Thumbnail Showcase (Dual Opposite Rows) */}
+            <ThumbnailShowcase />
+          </div>
 
-      {/* Deep Dark Canvas for Lower Sections with Pattern & Ambient Glows */}
-      <div className="relative z-10 bg-black text-zinc-100 pb-20 w-full space-y-20 sm:space-y-28 pt-8 sm:pt-14 overflow-hidden">
-        {/* 1. Subtle Dark Grid Pattern */}
-        <div className="absolute inset-0 bg-dark-grid opacity-40 pointer-events-none" />
+          {/* Social Proof Stats Strip */}
+          <StatsBar />
 
-        {/* 2. Delicate Radial Dots Texture */}
-        <div className="absolute inset-0 bg-dark-dots opacity-30 pointer-events-none" />
+          {/* Deep Dark Canvas for Lower Sections with Pattern & Ambient Glows */}
+          <div className="relative z-10 bg-black text-zinc-100 pb-20 w-full space-y-20 sm:space-y-28 pt-8 sm:pt-14 overflow-hidden">
+            {/* 1. Subtle Dark Grid Pattern */}
+            <div className="absolute inset-0 bg-dark-grid opacity-40 pointer-events-none" />
 
-        {/* 3. Ambient Theme Glow Blobs for Visual Depth */}
-        <div
-          className="absolute top-[8%] left-[-15%] w-[650px] h-[650px] rounded-full blur-[140px] pointer-events-none opacity-20 transition-all duration-700"
-          style={{ background: theme.glowColor }}
-        />
-        <div
-          className="absolute top-[42%] right-[-15%] w-[700px] h-[700px] rounded-full blur-[150px] pointer-events-none opacity-15 transition-all duration-700"
-          style={{ background: theme.glowColor }}
-        />
-        <div
-          className="absolute bottom-[10%] left-[20%] w-[600px] h-[600px] rounded-full blur-[150px] pointer-events-none opacity-15 transition-all duration-700"
-          style={{ background: theme.glowColor }}
-        />
+            {/* 2. Delicate Radial Dots Texture */}
+            <div className="absolute inset-0 bg-dark-dots opacity-30 pointer-events-none" />
 
-        {/* 4. Soft Vignette Mask */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none opacity-60" />
+            {/* 3. Ambient Theme Glow Blobs for Visual Depth */}
+            <div
+              className="absolute top-[8%] left-[-15%] w-[650px] h-[650px] rounded-full blur-[140px] pointer-events-none opacity-20 transition-all duration-700"
+              style={{ background: theme.glowColor }}
+            />
+            <div
+              className="absolute top-[42%] right-[-15%] w-[700px] h-[700px] rounded-full blur-[150px] pointer-events-none opacity-15 transition-all duration-700"
+              style={{ background: theme.glowColor }}
+            />
+            <div
+              className="absolute bottom-[10%] left-[20%] w-[600px] h-[600px] rounded-full blur-[150px] pointer-events-none opacity-15 transition-all duration-700"
+              style={{ background: theme.glowColor }}
+            />
 
-        {/* Testimonials 3D Flip System + About Vishal Gupta */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <TestimonialsSection onOpenBooking={() => handleOpenBooking()} />
-        </div>
+            {/* 4. Soft Vignette Mask */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none opacity-60" />
 
-        {/* Trusted by Industry Leaders Section */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <IndustryLeadersSection onOpenBooking={() => handleOpenBooking()} />
-        </div>
+            {/* Testimonials 3D Flip System + About Vishal Gupta */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <TestimonialsSection onOpenBooking={() => handleOpenBooking()} />
+            </div>
 
-        {/* FAQs Accordion Section */}
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <FaqSection onOpenBooking={() => handleOpenBooking()} />
-        </div>
-      </div>
+            {/* Trusted by Industry Leaders Section */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <IndustryLeadersSection onOpenBooking={() => handleOpenBooking()} />
+            </div>
 
-      {/* Full-width CTA Banner */}
-      <CtaBanner onOpenBooking={() => handleOpenBooking()} />
+            {/* FAQs Accordion Section */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <FaqSection onOpenBooking={() => handleOpenBooking()} />
+            </div>
+          </div>
 
-      {/* Footer */}
-      <Footer onOpenBooking={() => handleOpenBooking()} />
+          {/* Full-width CTA Banner */}
+          <CtaBanner onOpenBooking={() => handleOpenBooking()} />
+
+          {/* Footer */}
+          <Footer onOpenBooking={() => handleOpenBooking()} />
+        </>
+      )}
 
       {/* Interactive Booking Strategy Modal */}
       <BookCallModal

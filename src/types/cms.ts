@@ -34,6 +34,8 @@ export interface CMSProject {
   client_id?: string;
   category: string;
   cover_image: string;
+  avatar?: string;
+  link?: string;
   video_duration: string;
   views_count: string;
   ctr_before: string;
@@ -125,9 +127,15 @@ export interface CMSSiteSettings {
   heroHeadlineAccent: string;
   heroAttributionPrefix: string;
   heroAttributionAuthor: string;
+  heroAttributionQuote?: string;
   heroViewsStat: string;
   heroCtaText: string;
   heroCtaSubtext: string;
+  
+  // CTA Banner
+  ctaBannerHeadline?: string;
+  ctaBannerSubtext?: string;
+  ctaBannerButtonText?: string;
   
   // About / Profile
   aboutBadgeText: string;

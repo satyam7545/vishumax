@@ -158,12 +158,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="font-sans font-normal text-[1.85rem] sm:text-4xl md:text-[3.35rem] lg:text-[3.75rem] xl:text-[4.15rem] text-white tracking-tight leading-[1.15] sm:leading-[1.08] text-center drop-shadow-[0_6px_32px_rgba(0,0,0,0.95)] w-full"
+            className="font-sans font-normal text-[2.55rem] xs:text-[2.85rem] sm:text-4xl md:text-[3.35rem] lg:text-[3.75rem] xl:text-[4.15rem] text-white tracking-tight leading-[1.08] sm:leading-[1.08] text-center drop-shadow-[0_6px_32px_rgba(0,0,0,0.95)] w-full max-w-5xl px-2"
           >
-            {(siteData.hero.headlinePrefix || 'We make you believe in')}{' '}
-            <br className="hidden sm:inline" />
-            <span className="font-serif italic font-normal text-zinc-100">
-              {siteData.hero.headlineAccent || 'Power of packaging.'}
+            {/* Phone View (< sm): Split "We make you believe" & "in Power of packaging." */}
+            <span className="sm:hidden">
+              <span className="block">
+                {(siteData.hero.headlinePrefix || 'We make you believe in').trim().toLowerCase().endsWith(' in')
+                  ? (siteData.hero.headlinePrefix || 'We make you believe in').trim().slice(0, -3).trim()
+                  : (siteData.hero.headlinePrefix || 'We make you believe')}
+              </span>
+              <span className="block mt-1">
+                {(siteData.hero.headlinePrefix || 'We make you believe in').trim().toLowerCase().endsWith(' in') && (
+                  <span className="font-sans font-normal">in </span>
+                )}
+                <span className="font-serif italic font-normal text-zinc-100">
+                  {siteData.hero.headlineAccent || 'Power of packaging.'}
+                </span>
+              </span>
+            </span>
+
+            {/* Desktop View (>= sm): Original layout & typography */}
+            <span className="hidden sm:inline">
+              {(siteData.hero.headlinePrefix || 'We make you believe in')}{' '}
+              <br />
+              <span className="font-serif italic font-normal text-zinc-100">
+                {siteData.hero.headlineAccent || 'Power of packaging.'}
+              </span>
             </span>
           </motion.h1>
 
@@ -172,13 +192,13 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             initial={{ opacity: 0, y: 6 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.18 }}
-            className="w-full flex flex-wrap justify-center items-center gap-1.5 sm:gap-2 mt-4 sm:mt-5 text-center px-4"
+            className="w-full flex flex-wrap justify-center items-center gap-1 sm:gap-2 mt-2.5 sm:mt-4 text-center px-4"
           >
-            <span className="text-xs sm:text-sm font-sans font-normal text-zinc-400">
-              “If people don't click, so you want to give them something to click.”
+            <span className="text-[9.5px] xs:text-[10px] sm:text-xs font-sans font-normal text-zinc-400/80 sm:text-zinc-400 leading-normal">
+              {siteData.hero.attributionQuote || "“If people don't click, so you want to give them something to click.”"}
             </span>
-            <span className="text-xs sm:text-sm font-sans font-bold text-white tracking-wide whitespace-nowrap">
-              — Mr Beast*
+            <span className="text-[9.5px] xs:text-[10px] sm:text-xs font-sans font-normal sm:font-bold text-zinc-400 sm:text-white tracking-wide whitespace-nowrap">
+              {siteData.hero.attributionPrefix || '—'} {siteData.hero.attributionAuthor || 'Mr Beast*'}
             </span>
           </motion.div>
         </div>

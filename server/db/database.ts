@@ -77,6 +77,8 @@ export function initDatabase() {
       client_id TEXT,
       category TEXT NOT NULL,
       cover_image TEXT NOT NULL,
+      avatar TEXT,
+      link TEXT,
       video_duration TEXT DEFAULT '10:00',
       views_count TEXT DEFAULT '1M views',
       ctr_before TEXT DEFAULT '4.0%',
@@ -96,6 +98,14 @@ export function initDatabase() {
     );
     CREATE INDEX IF NOT EXISTS idx_projects_published ON projects(published, sort_order);
   `);
+
+  // Ensure avatar and link columns exist if table already existed
+  try {
+    db.exec(`ALTER TABLE projects ADD COLUMN avatar TEXT;`);
+  } catch {}
+  try {
+    db.exec(`ALTER TABLE projects ADD COLUMN link TEXT;`);
+  } catch {}
 
   // 4. Testimonials table
   db.exec(`
@@ -204,10 +214,11 @@ export function initDatabase() {
       brandLine1: 'Vishu',
       brandLine2: 'Max',
       brandLogoImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&h=120&fit=crop',
-      heroHeadlinePrefix: "“If people don't click, so you want to give them",
-      heroHeadlineAccent: 'something to click.”',
+      heroHeadlinePrefix: 'We make you believe in',
+      heroHeadlineAccent: 'Power of packaging.',
       heroAttributionPrefix: '—',
       heroAttributionAuthor: 'Mr Beast*',
+      heroAttributionQuote: "“If people don't click, so you want to give them something to click.”",
       heroViewsStat: 'We generated 80M+ views',
       heroCtaText: 'Book a free discovery call',
       heroCtaSubtext: 'Direct review by Vishal Gupta • No generic agency handoff',
@@ -490,6 +501,22 @@ export function initDatabase() {
     for (const proj of initialProjects) {
       insertProject.run(proj);
     }
+  }
+
+  // Backfill avatars for existing project records if missing
+  const placeholderAvatars: Record<string, string> = {
+    'thumb-1': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
+    'thumb-2': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
+    'thumb-3': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
+    'thumb-4': 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
+    'thumb-5': 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop',
+    'thumb-6': 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=100&h=100&fit=crop',
+    'thumb-7': 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=100&h=100&fit=crop',
+    'thumb-8': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&fit=crop',
+  };
+  const updateProjectAvatar = db.prepare("UPDATE projects SET avatar = ? WHERE id = ? AND (avatar IS NULL OR avatar = '')");
+  for (const [id, url] of Object.entries(placeholderAvatars)) {
+    updateProjectAvatar.run(url, id);
   }
 
   // E. Seed Testimonials

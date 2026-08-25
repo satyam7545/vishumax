@@ -6,7 +6,6 @@ import {
   Image as ImageIcon,
   MessageSquare,
   Users,
-  Briefcase,
   Inbox,
   Settings,
   ShieldCheck,
@@ -38,11 +37,13 @@ import {
   Square,
   Send,
   MessageCircle,
+  Mail,
   Lock,
   UserCheck,
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { THEMES, DEFAULT_THEME_ID, type ThemeDefinition } from '../types/theme';
+import { MediaPickerModal } from './MediaPickerModal';
 import type {
   CMSClient,
   CMSProject,
@@ -74,7 +75,7 @@ export const AdminDashboard: React.FC = () => {
   } = useSiteData();
 
   const [activeNav, setActiveNav] = useState<
-    'overview' | 'projects' | 'clients' | 'testimonials' | 'leaders' | 'services' | 'media' | 'inquiries' | 'settings' | 'security'
+    'overview' | 'projects' | 'clients' | 'testimonials' | 'leaders' | 'media' | 'inquiries' | 'settings' | 'security'
   >('overview');
 
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
@@ -104,6 +105,7 @@ export const AdminDashboard: React.FC = () => {
 
   // Search & Filter States
   const [searchQuery, setSearchQuery] = useState('');
+  const [projectCategoryFilter, setProjectCategoryFilter] = useState('All');
   const [inquiryStatusFilter, setInquiryStatusFilter] = useState<'all' | 'new' | 'reviewed' | 'contacted' | 'archived'>('all');
 
   // Modal Editing States
@@ -111,7 +113,6 @@ export const AdminDashboard: React.FC = () => {
   const [editingClient, setEditingClient] = useState<Partial<CMSClient> | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Partial<CMSTestimonial> | null>(null);
   const [editingLeader, setEditingLeader] = useState<Partial<CMSLeader> | null>(null);
-  const [editingService, setEditingService] = useState<Partial<CMSService> | null>(null);
   const [viewingInquiry, setViewingInquiry] = useState<CMSContactInquiry | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: string; id: string | number; name: string } | null>(null);
 
@@ -429,31 +430,6 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleSaveService = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingService) return;
-    try {
-      const res = await fetch('/api/cms/services', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-        body: JSON.stringify(editingService),
-      });
-      if (res.ok) {
-        notify('Service package saved successfully!');
-        setEditingService(null);
-        await fetchAllCMSData();
-        await refreshCMSData();
-      } else {
-        notify('Failed to save service', 'error');
-      }
-    } catch {
-      notify('Network error', 'error');
-    }
-  };
-
   const handleUpdateInquiryStatus = async (id: number, status: string) => {
     try {
       const res = await fetch(`/api/inquiries/${id}/status`, {
@@ -494,7 +470,7 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const handleReorder = async (table: 'clients' | 'projects' | 'testimonials' | 'leaders' | 'services', items: any[], index: number, direction: 'up' | 'down') => {
+  const handleReorder = async (table: 'clients' | 'projects' | 'testimonials' | 'leaders', items: any[], index: number, direction: 'up' | 'down') => {
     const newItems = [...items];
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= newItems.length) return;
@@ -553,6 +529,7 @@ export const AdminDashboard: React.FC = () => {
     aspect?: 'video' | 'square' | 'portrait';
   }) => {
     const [uploading, setUploading] = useState(false);
+    const [isPickerOpen, setIsPickerOpen] = useState(false);
     const fileRef = useRef<HTMLInputElement>(null);
 
     const onFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -576,7 +553,18 @@ export const AdminDashboard: React.FC = () => {
 
     return (
       <div>
-        <label className="block text-xs text-zinc-400 mb-1 font-medium">{label}</label>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-xs text-zinc-400 font-medium">{label}</label>
+          <button
+            type="button"
+            onClick={() => setIsPickerOpen(true)}
+            className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer transition-colors"
+          >
+            <Images className="w-3 h-3" />
+            <span>Select from Media Library</span>
+          </button>
+        </div>
+
         <div className="flex items-center gap-2">
           <div className={`${aspectClass} bg-zinc-950 border border-white/10 overflow-hidden flex items-center justify-center shrink-0 shadow-inner`}>
             {value ? (
@@ -597,7 +585,7 @@ export const AdminDashboard: React.FC = () => {
             type="text"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder || 'Paste URL or Upload ->'}
+            placeholder={placeholder || 'Paste URL or Select / Upload ->'}
             className="flex-1 px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white font-mono placeholder:text-zinc-600 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 focus:outline-none transition-all"
           />
 
@@ -608,6 +596,16 @@ export const AdminDashboard: React.FC = () => {
             accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif,image/avif"
             className="hidden"
           />
+
+          <button
+            type="button"
+            onClick={() => setIsPickerOpen(true)}
+            title="Browse Media Library"
+            className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer border border-white/10"
+          >
+            <Images className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Library</span>
+          </button>
 
           <button
             type="button"
@@ -628,6 +626,14 @@ export const AdminDashboard: React.FC = () => {
             )}
           </button>
         </div>
+
+        <MediaPickerModal
+          isOpen={isPickerOpen}
+          onClose={() => setIsPickerOpen(false)}
+          onSelect={(url) => onChange(url)}
+          currentUrl={value}
+          title={`Select ${label}`}
+        />
       </div>
     );
   };
@@ -790,26 +796,6 @@ export const AdminDashboard: React.FC = () => {
 
             <button
               onClick={() => {
-                setActiveNav('services');
-                setIsMobileSidebarOpen(false);
-              }}
-              className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-medium transition-all cursor-pointer ${
-                activeNav === 'services'
-                  ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/25 shadow-[0_0_15px_rgba(16,185,129,0.15)] font-semibold'
-                  : 'text-zinc-400 hover:text-white hover:bg-white/5'
-              }`}
-            >
-              <div className="flex items-center gap-3">
-                <Briefcase className="w-4 h-4" />
-                <span>Services & Offerings</span>
-              </div>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-zinc-900 border border-white/5 text-zinc-300">
-                {allData?.services.length || 0}
-              </span>
-            </button>
-
-            <button
-              onClick={() => {
                 setActiveNav('media');
                 fetchMediaFiles();
                 setIsMobileSidebarOpen(false);
@@ -936,7 +922,6 @@ export const AdminDashboard: React.FC = () => {
               {activeNav === 'clients' && 'Client Roster & Proof Logos'}
               {activeNav === 'testimonials' && 'What Creators Say (Flip Cards)'}
               {activeNav === 'leaders' && 'Industry Leaders Portfolio'}
-              {activeNav === 'services' && 'Services & Offerings'}
               {activeNav === 'media' && 'Media Library & Uploads'}
               {activeNav === 'inquiries' && 'Contact Inquiries & Discovery Leads'}
               {activeNav === 'settings' && 'Site Settings, Themes & Messaging Channels'}
@@ -1100,7 +1085,7 @@ export const AdminDashboard: React.FC = () => {
                           type="text"
                           value={searchQuery}
                           onChange={(e) => setSearchQuery(e.target.value)}
-                          placeholder="Search thumbnails..."
+                          placeholder="Search showcase thumbnails..."
                           className="pl-9 pr-4 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-emerald-500/60 w-48 sm:w-64"
                         />
                       </div>
@@ -1111,19 +1096,20 @@ export const AdminDashboard: React.FC = () => {
                         setEditingProject({
                           title: '',
                           slug: '',
-                          category: 'Growth & Strategy',
+                          category: 'Documentary',
                           cover_image: '',
+                          avatar: '',
                           video_duration: '12:00',
-                          views_count: '1.5M views',
+                          views_count: '2.4M Views',
                           ctr_before: '4.5%',
                           ctr_after: '14.8%',
                           ctr_gain: '+19.2% CTR',
-                          channel: 'Channel Name',
+                          channel: '@Creator',
                           niche: 'Education',
-                          hook: 'Contrarian psychological angle attracting high-intent clicks.',
+                          hook: 'High-contrast psychological packaging hook triggering instant curiosity.',
                           strategy_breakdown: [
-                            'Focused visual hierarchy with clear contrast',
-                            'Optimized for mobile YouTube feed dark mode',
+                            'Focused visual hierarchy with high contrast',
+                            'Optimized for mobile YouTube dark mode feed',
                           ],
                           graphic_type: 'custom',
                           featured: true,
@@ -1134,8 +1120,26 @@ export const AdminDashboard: React.FC = () => {
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Add Thumbnail</span>
+                      <span>Add Thumbnail Case Study</span>
                     </button>
+                  </div>
+
+                  {/* Category Filter Pills */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {['All', 'Documentary', 'Tech', 'Travel', 'Podcast/Interviews', 'Health'].map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setProjectCategoryFilter(cat)}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
+                          projectCategoryFilter === cat
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shadow-xs'
+                            : 'bg-white/5 hover:bg-white/10 text-zinc-400 hover:text-zinc-200 border border-white/5'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
                   </div>
 
                   {/* Projects Table */}
@@ -1146,7 +1150,9 @@ export const AdminDashboard: React.FC = () => {
                           <tr className="bg-zinc-950/60 border-b border-white/10 text-zinc-400">
                             <th className="p-4 font-semibold">Order</th>
                             <th className="p-4 font-semibold">Thumbnail</th>
-                            <th className="p-4 font-semibold">Title & Channel</th>
+                            <th className="p-4 font-semibold">Channel & Title</th>
+                            <th className="p-4 font-semibold">Category</th>
+                            <th className="p-4 font-semibold">Views Metric</th>
                             <th className="p-4 font-semibold">CTR Gain</th>
                             <th className="p-4 font-semibold">Status</th>
                             <th className="p-4 text-right font-semibold">Actions</th>
@@ -1154,7 +1160,15 @@ export const AdminDashboard: React.FC = () => {
                         </thead>
                         <tbody className="divide-y divide-zinc-800/80">
                           {allData.projects
-                            .filter((p) => p.title.toLowerCase().includes(searchQuery.toLowerCase()))
+                            .filter((p) => {
+                              const matchesSearch =
+                                p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                                (p.channel || '').toLowerCase().includes(searchQuery.toLowerCase());
+                              const matchesCat =
+                                projectCategoryFilter === 'All' ||
+                                (p.category || '').toLowerCase().includes(projectCategoryFilter.toLowerCase());
+                              return matchesSearch && matchesCat;
+                            })
                             .map((proj, idx) => (
                               <tr key={proj.id} className="hover:bg-white/[0.02] transition-colors">
                                 <td className="p-4 font-mono text-zinc-500">
@@ -1194,10 +1208,27 @@ export const AdminDashboard: React.FC = () => {
                                 </td>
 
                                 <td className="p-4">
-                                  <div className="font-semibold text-white">{proj.title}</div>
-                                  <div className="text-[11px] text-zinc-400">
-                                    {proj.channel} · <span className="font-mono">{proj.views_count}</span>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    {proj.avatar ? (
+                                      <img src={proj.avatar} alt="" className="w-5 h-5 rounded-full object-cover border border-white/10" />
+                                    ) : (
+                                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">
+                                        {(proj.channel || 'C')[0]}
+                                      </div>
+                                    )}
+                                    <span className="text-[11px] font-semibold text-zinc-400">{proj.channel || '@Channel'}</span>
                                   </div>
+                                  <div className="font-semibold text-white line-clamp-1">{proj.title}</div>
+                                </td>
+
+                                <td className="p-4">
+                                  <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 font-medium text-[11px]">
+                                    {proj.category || 'Documentary'}
+                                  </span>
+                                </td>
+
+                                <td className="p-4 font-mono font-bold text-white text-[11px]">
+                                  {proj.views_count || '1.2M Views'}
                                 </td>
 
                                 <td className="p-4 font-mono">
@@ -1514,83 +1545,7 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
-              {/* 6. SERVICES & OFFERINGS */}
-              {activeNav === 'services' && allData && (
-                <div className="space-y-6 max-w-6xl">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-zinc-300">Services & Packaging Packages</h2>
-                    <button
-                      onClick={() =>
-                        setEditingService({
-                          title: 'Thumbnail Retainer',
-                          description: 'Full packaging partnership for active YouTube channels.',
-                          icon: 'sparkles',
-                          deliverables: ['Custom Concept Direction', 'Unlimited Split Tests', '24h Delivery'],
-                          sort_order: allData.services.length + 1,
-                          published: true,
-                        })
-                      }
-                      className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs flex items-center gap-2 shadow-md cursor-pointer"
-                    >
-                      <Plus className="w-4 h-4" />
-                      <span>Add Service</span>
-                    </button>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {allData.services.map((s, idx) => (
-                      <div
-                        key={s.id}
-                        className="p-6 rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4 hover:border-emerald-500/30 transition-all flex flex-col justify-between"
-                      >
-                        <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-[10px] font-mono font-bold uppercase">
-                              {s.icon || 'PACKAGE'}
-                            </span>
-                          </div>
-                          <h4 className="font-bold text-white text-base">{s.title}</h4>
-                          <p className="text-xs text-zinc-400">{s.description}</p>
-                        </div>
-
-                        <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-[10px] font-mono text-zinc-500">#{idx + 1}</span>
-                          <div className="flex items-center gap-1.5">
-                            <button
-                              onClick={() => handleReorder('services', allData.services, idx, 'up')}
-                              disabled={idx === 0}
-                              className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
-                            >
-                              <ArrowUp className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => handleReorder('services', allData.services, idx, 'down')}
-                              disabled={idx === allData.services.length - 1}
-                              className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
-                            >
-                              <ArrowDown className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setEditingService(s)}
-                              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white cursor-pointer"
-                            >
-                              <Edit className="w-3.5 h-3.5" />
-                            </button>
-                            <button
-                              onClick={() => setDeleteConfirm({ type: 'services', id: s.id, name: s.title })}
-                              className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 cursor-pointer"
-                            >
-                              <Trash2 className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* 7. MEDIA LIBRARY & UPLOADS */}
+              {/* 6. MEDIA LIBRARY & UPLOADS */}
               {activeNav === 'media' && (
                 <div className="space-y-6 max-w-6xl">
                   {/* Upload Drop Zone */}
@@ -1728,7 +1683,38 @@ export const AdminDashboard: React.FC = () => {
                               </div>
 
                               {/* Hover overlay actions */}
-                              <div className="absolute inset-0 bg-black/75 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2 pointer-events-none group-hover:pointer-events-auto">
+                              <div className="absolute inset-0 bg-black/75 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2 pointer-events-none group-hover:pointer-events-auto">
+                                <button
+                                  onClick={() => {
+                                    setEditingProject({
+                                      title: file.name.replace(/\.[^/.]+$/, '').replace(/[-_]/g, ' '),
+                                      slug: '',
+                                      category: 'Documentary',
+                                      cover_image: file.url,
+                                      avatar: '',
+                                      video_duration: '12:00',
+                                      views_count: '2.4M Views',
+                                      ctr_before: '4.5%',
+                                      ctr_after: '14.8%',
+                                      ctr_gain: '+19.2% CTR',
+                                      channel: '@Creator',
+                                      niche: 'Education',
+                                      hook: 'High-contrast psychological packaging hook.',
+                                      strategy_breakdown: [
+                                        'Focused visual hierarchy with clear contrast',
+                                        'Optimized for mobile YouTube dark mode feed',
+                                      ],
+                                      graphic_type: 'custom',
+                                      featured: true,
+                                      published: true,
+                                      sort_order: (allData?.projects.length || 0) + 1,
+                                    });
+                                  }}
+                                  title="Feature this in Works Showcase"
+                                  className="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 cursor-pointer transition-colors"
+                                >
+                                  <Sparkles className="w-4 h-4" />
+                                </button>
                                 <button
                                   onClick={() => handleCopyUrl(file.url)}
                                   title="Copy Image URL"
@@ -1835,15 +1821,15 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               )}
 
-              {/* 9. SITE SETTINGS, THEMES & MESSAGING CHANNELS */}
+              {/* 8. SITE SETTINGS, THEMES & ALL FRONTEND CONTROLS */}
               {activeNav === 'settings' && allData && (
                 <div className="space-y-6 max-w-4xl">
                   <form onSubmit={handleSaveSettings} className="space-y-6">
-                    {/* Theme Selector */}
+                    {/* 1. Theme Selector */}
                     <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
                       <div className="flex items-center gap-2 text-sm font-semibold text-white">
                         <Palette className="w-4 h-4 text-emerald-400" />
-                        <span>Accent Color & Atmospheric Theme</span>
+                        <span>Accent Color & Atmospheric Glow Theme</span>
                       </div>
 
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -1879,21 +1865,294 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Direct Messaging Channels */}
+                    {/* 2. Brand & Header Identity */}
                     <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
                       <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                        <Send className="w-4 h-4 text-teal-400" />
-                        <span>Direct Messaging & Instant Connect Channels</span>
+                        <Settings className="w-4 h-4 text-emerald-400" />
+                        <span>Brand & Header Identity</span>
                       </div>
-                      <p className="text-xs text-zinc-400">
-                        Configures the direct chat links and handles displayed across the booking modal and contact channels.
-                      </p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Brand Word 1</label>
+                          <input
+                            type="text"
+                            value={allData.settings.brandLine1 || 'Vishu'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, brandLine1: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Brand Word 2 (Highlighted)</label>
+                          <input
+                            type="text"
+                            value={allData.settings.brandLine2 || 'Max'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, brandLine2: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <ImageFieldInput
+                          label="Brand Logo Icon (Optional)"
+                          value={allData.settings.brandLogoImage || ''}
+                          onChange={(val) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, brandLogoImage: val },
+                            })
+                          }
+                          placeholder="Upload or pick logo..."
+                          aspect="square"
+                        />
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Navbar Available Spots Count</label>
+                          <input
+                            type="number"
+                            value={allData.settings.slotsRemaining !== undefined ? allData.settings.slotsRemaining : 2}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, slotsRemaining: parseInt(e.target.value, 10) || 0 },
+                              })
+                            }
+                            placeholder="e.g. 2"
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                          <span className="text-[10px] text-zinc-500 mt-1 block">Renders "{allData.settings.slotsRemaining || 2} Spots Remaining" radar badge in header</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 3. Hero Section Packaging & Headlines */}
+                    <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                        <Sparkles className="w-4 h-4 text-teal-400" />
+                        <span>Hero Section Content</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Headline Main Line</label>
+                          <input
+                            type="text"
+                            value={allData.settings.heroHeadlinePrefix || 'We make you believe in'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, heroHeadlinePrefix: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Headline Accent (Italic Serif)</label>
+                          <input
+                            type="text"
+                            value={allData.settings.heroHeadlineAccent || 'Power of packaging.'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, heroHeadlineAccent: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Quote Body</label>
+                          <input
+                            type="text"
+                            value={allData.settings.heroAttributionQuote || "“If people don't click, so you want to give them something to click.”"}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, heroAttributionQuote: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Quote Attribution</label>
+                          <input
+                            type="text"
+                            value={allData.settings.heroAttributionAuthor || 'Mr Beast*'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, heroAttributionAuthor: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Views Metric Counter</label>
+                          <input
+                            type="text"
+                            value={allData.settings.heroViewsStat || 'We generated 80M+ views'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, heroViewsStat: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Hero Primary CTA Button Label</label>
+                          <input
+                            type="text"
+                            value={allData.settings.heroCtaText || 'Book a free discovery call'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, heroCtaText: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* 4. About / Bio Section */}
+                    <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                        <UserCheck className="w-4 h-4 text-emerald-400" />
+                        <span>About / Bio Section</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Creator Full Name</label>
+                          <input
+                            type="text"
+                            value={allData.settings.aboutName || 'Vishal Gupta'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, aboutName: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium">Bio Section Heading</label>
+                          <input
+                            type="text"
+                            value={allData.settings.aboutHeading || 'About Vishal Gupta'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, aboutHeading: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-zinc-400 mb-1 font-medium">Bio Paragraph 1</label>
+                        <textarea
+                          rows={2}
+                          value={allData.settings.aboutBioParagraph1 || ''}
+                          onChange={(e) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, aboutBioParagraph1: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-zinc-400 mb-1 font-medium">Bio Paragraph 2</label>
+                        <textarea
+                          rows={2}
+                          value={allData.settings.aboutBioParagraph2 || ''}
+                          onChange={(e) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, aboutBioParagraph2: e.target.value },
+                            })
+                          }
+                          className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                        />
+                      </div>
+
+                      <ImageFieldInput
+                        label="Studio Portrait Photo"
+                        value={allData.settings.aboutPortraitImage || ''}
+                        onChange={(val) =>
+                          setAllData({
+                            ...allData,
+                            settings: { ...allData.settings, aboutPortraitImage: val },
+                          })
+                        }
+                        placeholder="Upload or pick portrait image..."
+                        aspect="square"
+                      />
+                    </div>
+
+                    {/* 5. Direct Messaging & Contact Channels */}
+                    <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
+                      <div className="flex items-center gap-2 text-sm font-semibold text-white">
+                        <Send className="w-4 h-4 text-sky-400" />
+                        <span>Direct Messaging & Contact Channels</span>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
+                            <Mail className="w-3.5 h-3.5 text-amber-400" />
+                            <span>Contact Email (Footer & Inquiry)</span>
+                          </label>
+                          <input
+                            type="email"
+                            value={allData.settings.contactEmail || 'contact@vishumax.in'}
+                            onChange={(e) =>
+                              setAllData({
+                                ...allData,
+                                settings: { ...allData.settings, contactEmail: e.target.value },
+                              })
+                            }
+                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60"
+                          />
+                        </div>
+
                         <div>
                           <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
                             <Send className="w-3.5 h-3.5 text-sky-400" />
-                            <span>Telegram Username</span>
+                            <span>Telegram Username or URL</span>
                           </label>
                           <input
                             type="text"
@@ -1904,7 +2163,7 @@ export const AdminDashboard: React.FC = () => {
                                 settings: { ...allData.settings, socialTelegram: e.target.value },
                               })
                             }
-                            placeholder="@username"
+                            placeholder="username"
                             className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60"
                           />
                         </div>
@@ -1912,7 +2171,7 @@ export const AdminDashboard: React.FC = () => {
                         <div>
                           <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
                             <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>WhatsApp Number</span>
+                            <span>WhatsApp Phone Number</span>
                           </label>
                           <input
                             type="text"
@@ -1949,96 +2208,12 @@ export const AdminDashboard: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Brand & Copy Settings */}
-                    <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
-                      <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                        <Settings className="w-4 h-4 text-emerald-400" />
-                        <span>Branding & Hero Headlines</span>
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1">Brand Line 1</label>
-                          <input
-                            type="text"
-                            value={allData.settings.brandLine1 || 'VishuMax'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, brandLine1: e.target.value },
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1">Brand Line 2</label>
-                          <input
-                            type="text"
-                            value={allData.settings.brandLine2 || 'Packaging'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, brandLine2: e.target.value },
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                          />
-                        </div>
-                      </div>
-
-                      <ImageFieldInput
-                        label="Brand Logo Icon (Optional)"
-                        value={allData.settings.brandLogoImage || ''}
-                        onChange={(val) =>
-                          setAllData({
-                            ...allData,
-                            settings: { ...allData.settings, brandLogoImage: val },
-                          })
-                        }
-                        placeholder="Leave blank to use default golden clover logo..."
-                        aspect="square"
-                      />
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1">Hero Prefix</label>
-                          <input
-                            type="text"
-                            value={allData.settings.heroHeadlinePrefix || 'Stop Scroll.'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, heroHeadlinePrefix: e.target.value },
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1">Hero Accent</label>
-                          <input
-                            type="text"
-                            value={allData.settings.heroHeadlineAccent || 'Dominate Feeds.'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, heroHeadlineAccent: e.target.value },
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
                     <button
                       type="submit"
-                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all cursor-pointer"
+                      className="px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs tracking-wider uppercase shadow-[0_0_20px_rgba(16,185,129,0.25)] transition-all cursor-pointer flex items-center gap-2"
                     >
-                      Save Configuration
+                      <Check className="w-4 h-4" />
+                      <span>Save & Sync All Configurations</span>
                     </button>
                   </form>
                 </div>
@@ -2165,8 +2340,9 @@ export const AdminDashboard: React.FC = () => {
         <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl overflow-y-auto">
           <div className="w-full max-w-2xl bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto space-y-4 text-zinc-100">
             <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="font-bold text-sm text-white">
-                {editingProject.id ? 'Edit Thumbnail Case Study' : 'New Thumbnail Case Study'}
+              <h3 className="font-bold text-sm text-white flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span>{editingProject.id ? 'Edit Thumbnail Case Study' : 'New Thumbnail Case Study'}</span>
               </h3>
               <button onClick={() => setEditingProject(null)} className="text-zinc-400 hover:text-white cursor-pointer">
                 <X className="w-4 h-4" />
@@ -2181,30 +2357,92 @@ export const AdminDashboard: React.FC = () => {
                   required
                   value={editingProject.title || ''}
                   onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
+                  placeholder="e.g. Inside India's Floating Slum..."
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                />
+              </div>
+
+              {/* Category Selection with Quick Chips */}
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1 font-medium">Category *</label>
+                <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                  {['Documentary', 'Tech', 'Travel', 'Podcast/Interviews', 'Health'].map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      onClick={() => setEditingProject({ ...editingProject, category: cat })}
+                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-colors ${
+                        editingProject.category === cat
+                          ? 'bg-emerald-500 text-black font-bold'
+                          : 'bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10'
+                      }`}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={editingProject.category || ''}
+                  onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
+                  placeholder="Type or select a category above..."
                   className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Channel Name *</label>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Channel Name / Handle *</label>
                   <input
                     type="text"
                     required
                     value={editingProject.channel || ''}
                     onChange={(e) => setEditingProject({ ...editingProject, channel: e.target.value })}
+                    placeholder="e.g. @KKCreate"
                     className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Views Count</label>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Views Count Metric</label>
                   <input
                     type="text"
                     value={editingProject.views_count || ''}
                     onChange={(e) => setEditingProject({ ...editingProject, views_count: e.target.value })}
+                    placeholder="e.g. 9.5M Views"
                     className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-zinc-400 mb-1 font-medium">
+                  Attached Redirect Link / Video URL (Opens when user clicks card)
+                </label>
+                <input
+                  type="text"
+                  value={editingProject.link || ''}
+                  onChange={(e) => setEditingProject({ ...editingProject, link: e.target.value })}
+                  placeholder="https://youtube.com/watch?v=... or custom link"
+                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white placeholder:text-zinc-600 font-mono"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <ImageFieldInput
+                  label="Channel / Creator Avatar Logo"
+                  value={editingProject.avatar || ''}
+                  onChange={(val) => setEditingProject({ ...editingProject, avatar: val })}
+                  placeholder="Pick avatar or paste URL..."
+                  aspect="square"
+                />
+                <ImageFieldInput
+                  label="Thumbnail High-Res Graphic Cover"
+                  value={editingProject.cover_image || ''}
+                  onChange={(val) => setEditingProject({ ...editingProject, cover_image: val })}
+                  placeholder="Pick thumbnail or paste URL..."
+                  aspect="video"
+                />
               </div>
 
               <div className="grid grid-cols-3 gap-3">
@@ -2237,38 +2475,43 @@ export const AdminDashboard: React.FC = () => {
                 </div>
               </div>
 
-              <ImageFieldInput
-                label="Thumbnail High-Res Graphic Cover"
-                value={editingProject.cover_image || ''}
-                onChange={(val) => setEditingProject({ ...editingProject, cover_image: val })}
-                placeholder="Upload thumbnail or paste image URL..."
-                aspect="video"
-              />
-
               <div>
                 <label className="block text-xs text-zinc-400 mb-1 font-medium">Packaging Psychology Hook</label>
                 <textarea
                   rows={2}
                   value={editingProject.hook || ''}
                   onChange={(e) => setEditingProject({ ...editingProject, hook: e.target.value })}
+                  placeholder="Describe the curiosity gap, focal point, and contrast strategy..."
                   className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setEditingProject(null)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
-                >
-                  Save Thumbnail
-                </button>
+              <div className="flex items-center justify-between pt-3 border-t border-white/10">
+                <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editingProject.published !== false}
+                    onChange={(e) => setEditingProject({ ...editingProject, published: e.target.checked })}
+                    className="rounded border-white/20 bg-zinc-900 text-emerald-500 focus:ring-emerald-500"
+                  />
+                  <span>Publish to Live Works Showcase</span>
+                </label>
+
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setEditingProject(null)}
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
+                  >
+                    Save Thumbnail
+                  </button>
+                </div>
               </div>
             </form>
           </div>
@@ -2543,74 +2786,6 @@ export const AdminDashboard: React.FC = () => {
                   className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
                 >
                   Save Leader
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ------------------------------------------------------------- */}
-      {/* MODAL: EDIT/ADD SERVICE */}
-      {/* ------------------------------------------------------------- */}
-      {editingService && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div className="w-full max-w-md bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-zinc-100">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="font-bold text-sm text-white">
-                {editingService.id ? 'Edit Service Package' : 'Add Service Package'}
-              </h3>
-              <button onClick={() => setEditingService(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSaveService} className="space-y-4">
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Service Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingService.title || ''}
-                  onChange={(e) => setEditingService({ ...editingService, title: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Description</label>
-                <textarea
-                  rows={2}
-                  value={editingService.description || ''}
-                  onChange={(e) => setEditingService({ ...editingService, description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Icon / Badge Tag</label>
-                <input
-                  type="text"
-                  value={editingService.icon || ''}
-                  onChange={(e) => setEditingService({ ...editingService, icon: e.target.value })}
-                  placeholder="e.g. RETAINER, GROWTH"
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
-                <button
-                  type="button"
-                  onClick={() => setEditingService(null)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
-                >
-                  Save Service
                 </button>
               </div>
             </form>
