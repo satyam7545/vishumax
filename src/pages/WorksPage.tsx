@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, ArrowLeft, ArrowUpRight } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Eye, ArrowLeft } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { Footer } from '../components/Footer';
 
@@ -168,26 +168,26 @@ export const WorksPage: React.FC<WorksPageProps> = ({
           </div>
         </div>
 
-        {/* 3-Column Pure White Card Grid (Optimized responsive layout) */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
-          <AnimatePresence mode="popLayout">
-            {filteredThumbnails.map((item, idx) => {
-              const channelHandle = item.channel?.startsWith('@')
-                ? item.channel
-                : `@${item.channel || 'Creator'}`;
-              const channelInitial = (item.channel || item.title || 'C').replace('@', '').charAt(0).toUpperCase();
+        {/* 3-Column Pure White Card Grid (Smooth, glitch-free fade) */}
+        <motion.div
+          key={selectedCategory}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.25, ease: 'easeOut' }}
+          className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8"
+        >
+          {filteredThumbnails.map((item) => {
+            const channelHandle = item.channel?.startsWith('@')
+              ? item.channel
+              : `@${item.channel || 'Creator'}`;
+            const channelInitial = (item.channel || item.title || 'C').replace('@', '').charAt(0).toUpperCase();
 
-              return (
-                <motion.div
-                  key={item.id}
-                  layout
-                  initial={{ opacity: 0, y: 15 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.35, delay: (idx % 6) * 0.04 }}
-                  onClick={() => handleCardClick(item)}
-                  className="group relative rounded-2xl sm:rounded-3xl bg-white p-3.5 sm:p-5 shadow-[0_20px_60px_rgba(0,0,0,0.6)] border border-slate-100 hover:-translate-y-2 hover:shadow-[0_30px_80px_rgba(0,0,0,0.85)] transition-all duration-300 flex flex-col justify-between cursor-pointer overflow-hidden text-slate-900"
-                >
+            return (
+              <div
+                key={item.id}
+                onClick={() => handleCardClick(item)}
+                className="group relative rounded-2xl sm:rounded-3xl bg-white p-3.5 sm:p-5 shadow-[0_16px_50px_rgba(0,0,0,0.6)] border border-slate-100 hover:-translate-y-1.5 hover:shadow-[0_24px_70px_rgba(0,0,0,0.85)] transition-all duration-300 ease-out flex flex-col justify-between cursor-pointer overflow-hidden text-slate-900 will-change-transform"
+              >
                   {/* Top: 16:9 Thumbnail Image (Pure design preview, No CTR overlay) */}
                   <div className="relative w-full aspect-video rounded-xl sm:rounded-2xl overflow-hidden bg-slate-900 shadow-md">
                     {item.image ? (
@@ -203,10 +203,7 @@ export const WorksPage: React.FC<WorksPageProps> = ({
                       </div>
                     )}
 
-                    {/* External Link Hover Pill Badge */}
-                    <div className="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 p-1.5 rounded-full bg-black/75 backdrop-blur-md text-white opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-lg group-hover:scale-110">
-                      <ArrowUpRight className="w-3.5 h-3.5 text-white" />
-                    </div>
+
                   </div>
 
                   {/* Middle: Channel Avatar + Title & Verified Handle */}
@@ -259,11 +256,10 @@ export const WorksPage: React.FC<WorksPageProps> = ({
                       <Eye className="w-3 sm:w-3.5 h-3 sm:h-3.5 text-slate-500 shrink-0" />
                     </div>
                   </div>
-                </motion.div>
+                </div>
               );
             })}
-          </AnimatePresence>
-        </div>
+        </motion.div>
 
         {/* Empty State */}
         {filteredThumbnails.length === 0 && (

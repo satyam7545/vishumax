@@ -129,14 +129,12 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Right: Buttons + Hamburger */}
         <motion.div layout transition={{ layout: { duration: 0.35, ease: [0.4, 0, 0.2, 1] } }} className="flex items-center gap-2">
-          {/* 2 Spots Remaining (always visible on desktop) */}
-          <button
-            type="button"
-            onClick={() => onOpenBooking?.('Discovery Session')}
-            className="hidden md:flex relative overflow-hidden px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/25 hover:border-emerald-400/60 bg-white/[0.06] hover:bg-white/[0.12] text-white font-medium text-xs sm:text-[13.5px] whitespace-nowrap items-center gap-2.5 cursor-pointer transition-all duration-300 hover:scale-[1.03] active:scale-95 shadow-[0_0_16px_rgba(16,185,129,0.15),inset_0_1px_1px_rgba(255,255,255,0.25)] group/shine"
+          {/* Spots Remaining Status Badge (Non-interactive status indicator) */}
+          <div
+            className="hidden md:flex relative overflow-hidden px-5 sm:px-6 py-2 sm:py-2.5 rounded-full border border-white/20 bg-white/[0.05] text-white font-medium text-xs sm:text-[13.5px] whitespace-nowrap items-center gap-2.5 select-none pointer-events-none shadow-[0_0_16px_rgba(16,185,129,0.12),inset_0_1px_1px_rgba(255,255,255,0.2)]"
           >
             {/* Shining Light Sweep Effect */}
-            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/35 to-transparent animate-nav-shine pointer-events-none" />
+            <span className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/25 to-transparent animate-nav-shine pointer-events-none" />
 
             {/* Glowing Green Radar Dot */}
             <span className="relative flex h-2.5 w-2.5 shrink-0">
@@ -144,12 +142,12 @@ export const Navbar: React.FC<NavbarProps> = ({
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400 shadow-[0_0_8px_#34d399]" />
             </span>
 
-            <span className="relative z-10 text-white font-semibold tracking-tight group-hover/shine:text-emerald-100 transition-colors">
+            <span className="relative z-10 text-white font-semibold tracking-tight">
               {siteData.about.slotsRemaining !== undefined
                 ? `${siteData.about.slotsRemaining} Spots Remaining`
                 : (siteData.about.badgeText || '2 Spots Remaining')}
             </span>
-          </button>
+          </div>
 
 
           {/* Mobile Menu Toggle Button */}
