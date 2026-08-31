@@ -142,9 +142,9 @@ export const WorksPage: React.FC<WorksPageProps> = ({
           </p>
         </motion.div>
 
-        {/* Category Pill Tabs Bar with Glassmorphic Effect (Mobile scrollable without scrollbars) */}
-        <div className="mb-8 sm:mb-14 w-full overflow-x-auto py-2 px-3 sm:px-2 flex sm:justify-center [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-          <div className="bg-white/[0.08] backdrop-blur-2xl border border-white/[0.2] shadow-[0_20px_50px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.25)] rounded-full p-1 sm:p-1.5 inline-flex items-center gap-1 sm:gap-1.5 shrink-0 mx-auto sm:mx-0">
+        {/* Category Pill Tabs Bar: Wraps cleanly on mobile so it never goes out of screen */}
+        <div className="mb-8 sm:mb-14 w-full max-w-4xl mx-auto flex justify-center px-2 sm:px-4">
+          <div className="bg-white/[0.07] backdrop-blur-2xl border border-white/[0.18] shadow-[0_16px_45px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.2)] rounded-3xl sm:rounded-full p-1.5 flex flex-wrap sm:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 max-w-full">
             {CATEGORIES.map((category) => {
               const isSelected = selectedCategory === category;
               return (
@@ -152,10 +152,10 @@ export const WorksPage: React.FC<WorksPageProps> = ({
                   key={category}
                   type="button"
                   onClick={() => setSelectedCategory(category)}
-                  className={`relative px-3 sm:px-6 py-1.5 sm:py-2 rounded-full text-xs sm:text-[13.5px] transition-all duration-300 cursor-pointer whitespace-nowrap font-['Inter',sans-serif] ${
+                  className={`relative px-3 sm:px-5 py-1.5 sm:py-2 rounded-full text-xs sm:text-[13.5px] transition-all duration-200 cursor-pointer whitespace-nowrap font-['Inter',sans-serif] ${
                     isSelected
-                      ? 'bg-white text-zinc-950 font-bold shadow-[0_4px_20px_rgba(255,255,255,0.4)] scale-[1.02]'
-                      : 'text-zinc-300 hover:text-white hover:bg-white/[0.1] font-medium'
+                      ? 'bg-white text-zinc-950 font-bold shadow-[0_4px_18px_rgba(255,255,255,0.4)] scale-[1.02]'
+                      : 'text-zinc-300 hover:text-white hover:bg-white/[0.08] font-medium'
                   }`}
                 >
                   {category}

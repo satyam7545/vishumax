@@ -1,6 +1,8 @@
 import http from 'http';
 import path from 'path';
 import fs from 'fs';
+import zlib from 'zlib';
+import crypto from 'crypto';
 import { initDatabase } from './db/database.ts';
 import { loginAdmin, verifyAdminToken, changeAdminPassword, updateAdminProfile } from './api/auth.ts';
 import {
@@ -60,6 +62,14 @@ const MIME_TYPES: Record<string, string> = {
   '.xml': 'application/xml',
   '.txt': 'text/plain',
 };
+
+// Extensions that should be gzip-compressed
+const COMPRESSIBLE_EXTS = new Set(['.html', '.js', '.css', '.json', '.svg', '.xml', '.txt']);
+
+/** Generate a simple ETag from file mtime + size */
+function generateETag(stat: fs.Stats): string {
+  return '"' + crypto.createHash('md5').update(`${stat.mtimeMs}-${stat.size}`).digest('hex').slice(0, 16) + '"';
+}
 
 // Initialize database
 initDatabase();
@@ -137,19 +147,37 @@ const server = http.createServer(async (req, res) => {
     res.setHeader('Content-Type', 'application/json');
 
     try {
+      // Helper: send gzip-compressed JSON if client supports it
+      const sendJSON = (data: unknown, status = 200) => {
+        const json = JSON.stringify(data);
+        const acceptEncoding = req.headers['accept-encoding'] || '';
+        res.statusCode = status;
+        if (acceptEncoding.includes('gzip')) {
+          res.setHeader('Content-Encoding', 'gzip');
+          res.setHeader('Vary', 'Accept-Encoding');
+          zlib.gzip(json, (err, buf) => {
+            if (err) { res.removeHeader('Content-Encoding'); res.end(json); }
+            else { res.end(buf); }
+          });
+        } else {
+          res.end(json);
+        }
+      };
+
       // 1. PUBLIC: GET /api/cms/public-data
       if (pathname === '/api/cms/public-data' && method === 'GET') {
         const data = getPublicCMSData();
-        res.statusCode = 200;
-        res.end(JSON.stringify({ success: true, data }));
+        // Cache public site data for 30 seconds (fast refresh without hammering DB)
+        res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
+        sendJSON({ success: true, data });
         return;
       }
 
       // Legacy support: GET /api/site-data
       if (pathname === '/api/site-data' && method === 'GET') {
         const data = getPublicCMSData();
-        res.statusCode = 200;
-        res.end(JSON.stringify({ success: true, data }));
+        res.setHeader('Cache-Control', 'public, max-age=30, stale-while-revalidate=60');
+        sendJSON({ success: true, data });
         return;
       }
 
@@ -510,17 +538,42 @@ const server = http.createServer(async (req, res) => {
   if (fs.existsSync(filePath)) {
     const ext = path.extname(filePath).toLowerCase();
     const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    const stat = fs.statSync(filePath);
+
     res.setHeader('Content-Type', contentType);
+    res.setHeader('Vary', 'Accept-Encoding');
 
     // Cache control
     if (ext === '.html') {
-      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     } else {
+      // Versioned assets: cache for 1 year
       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     }
 
-    const stream = fs.createReadStream(filePath);
-    stream.pipe(res);
+    // ETag support for conditional requests (reduces bandwidth on re-visits)
+    const etag = generateETag(stat);
+    res.setHeader('ETag', etag);
+    if (req.headers['if-none-match'] === etag) {
+      res.statusCode = 304;
+      res.end();
+      return;
+    }
+
+    // Gzip compression for text assets (reduces JS/CSS transfer by ~70%)
+    const acceptEncoding = req.headers['accept-encoding'] || '';
+    const shouldCompress = COMPRESSIBLE_EXTS.has(ext) && acceptEncoding.includes('gzip');
+
+    if (shouldCompress) {
+      res.setHeader('Content-Encoding', 'gzip');
+      const stream = fs.createReadStream(filePath);
+      const gzip = zlib.createGzip({ level: 6 });
+      stream.pipe(gzip).pipe(res);
+    } else {
+      res.setHeader('Content-Length', stat.size);
+      const stream = fs.createReadStream(filePath);
+      stream.pipe(res);
+    }
   } else {
     res.statusCode = 404;
     res.end('Not Found. Please run `npm run build` before starting production server.');

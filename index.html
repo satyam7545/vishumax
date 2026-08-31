@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#000000" />
     
-    <title>VishuMax — High-CTR YouTube Packaging & Graphic Design</title>
+    <title>VishuMax — High-CTR YouTube Packaging &amp; Graphic Design</title>
     <meta name="description" content="We create high-converting YouTube packaging and thumbnail designs that drive millions of views. VishuMax by Vishal Gupta." />
     <link rel="canonical" href="https://vishumax.in" />
 
@@ -23,11 +23,19 @@
     <meta name="twitter:title" content="VishuMax — High-Converting YouTube Packaging" />
     <meta name="twitter:description" content="We create high-converting YouTube packaging and thumbnail designs that drive millions of views. VishuMax by Vishal Gupta." />
     <meta name="twitter:image" content="https://vishumax.in/assets/images/ravi_franklin_portrait_1787307325661.jpg" />
-    
-    <!-- Google Fonts: Inter + Poppins + Playfair Display + JetBrains Mono -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,600&family=Playfair+Display:ital,wght@0,600;1,400;1,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <!-- DNS prefetch + preconnect for Google Fonts CDN (reduces latency) -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!--
+      Google Fonts: load only what's needed.
+      - Removed JetBrains Mono (only used in admin panel → loaded on demand).
+      - display=swap ensures text is visible during font load.
+    -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,400;1,600&display=swap" rel="stylesheet" />
 
     <!-- Structured Data: JSON-LD -->
     <script type="application/ld+json">
