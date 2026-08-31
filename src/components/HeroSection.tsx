@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, Send } from 'lucide-react';
+import { ChevronDown, MessageCircle } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface HeroSectionProps {
@@ -246,8 +246,8 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             >
               {/* Shimmer sweep on hover */}
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-              <Send className="relative z-10 w-3.5 h-3.5 text-sky-400" />
-              <span className="relative z-10 text-white font-medium">{siteData.hero.ctaText || 'Chat on Telegram'}</span>
+              <MessageCircle className="relative z-10 w-4 h-4 text-emerald-400" />
+              <span className="relative z-10 text-white font-medium">{siteData.hero.ctaText && siteData.hero.ctaText !== 'Chat on Telegram' ? siteData.hero.ctaText : 'Live Chat'}</span>
             </button>
           </div>
         </motion.div>

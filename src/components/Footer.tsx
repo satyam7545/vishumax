@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUp, Send } from 'lucide-react';
+import { ArrowUp, MessageCircle } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface FooterProps {
@@ -45,9 +45,11 @@ export const Footer: React.FC<FooterProps> = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const rawTg = siteData.contact?.telegramUrl || 'https://t.me/vishumax';
-  const telegramUrl = rawTg.startsWith('http') ? rawTg : `https://t.me/${rawTg.replace('@', '')}`;
-  const telegramHandle = rawTg.startsWith('http') ? `@${rawTg.split('/').pop()}` : rawTg.startsWith('@') ? rawTg : `@${rawTg}`;
+  const rawWa = siteData.contact?.whatsappNumber || '9065033165';
+  const cleanWa = rawWa.replace(/\D/g, '');
+  const waPhone = cleanWa.length === 10 ? `91${cleanWa}` : (cleanWa || '919065033165');
+  const whatsappUrl = `https://wa.me/${waPhone}`;
+  const whatsappDisplay = cleanWa.length === 10 ? `+91 ${cleanWa.slice(0, 5)} ${cleanWa.slice(5)}` : rawWa;
 
   return (
     <footer className="w-full bg-black border-t border-zinc-800/80 py-12 sm:py-16 text-zinc-400 font-sans relative z-10 overflow-hidden">
@@ -98,15 +100,15 @@ export const Footer: React.FC<FooterProps> = () => {
               </span>
             </div>
             <a
-              href={telegramUrl}
+              href={whatsappUrl}
               className="text-xs text-zinc-400 hover:text-emerald-400 transition-colors ml-9 flex items-center gap-1.5 font-medium"
             >
-              <Send className="w-3 h-3 text-sky-400" />
-              <span>{telegramHandle}</span>
+              <MessageCircle className="w-3 h-3 text-emerald-400" />
+              <span>{whatsappDisplay}</span>
             </a>
           </div>
 
-          {/* Center / Action Section: Social Media Icons + Direct Telegram Chat */}
+          {/* Center / Action Section: Social Media Icons + Direct Live Chat */}
           <div className="flex flex-wrap items-center gap-3 sm:gap-4">
             {/* Social Media Links */}
             <div className="flex items-center gap-2.5">
@@ -124,13 +126,13 @@ export const Footer: React.FC<FooterProps> = () => {
               ))}
             </div>
 
-            {/* Direct Telegram Chat button (Direct redirect in same window) */}
+            {/* Direct Live Chat button (Direct redirect in same window) */}
             <a
-              href={telegramUrl}
+              href={whatsappUrl}
               className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-300 hover:text-white font-semibold text-xs transition-all shadow-sm group"
             >
-              <Send className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
-              <span>Chat on Telegram</span>
+              <MessageCircle className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>Live Chat</span>
             </a>
           </div>
 

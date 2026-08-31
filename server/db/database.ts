@@ -239,7 +239,7 @@ export function initDatabase() {
       contactEmail: 'contact@vishumax.in',
       calendarBookingUrl: 'https://cal.com/vishumax/discovery',
       socialTelegram: 'https://t.me/vishumax',
-      socialWhatsapp: '+91 98765 43210',
+      socialWhatsapp: '9065033165',
       socialDiscord: 'vishumax',
       socialTwitter: 'https://twitter.com',
       socialYoutube: 'https://youtube.com',

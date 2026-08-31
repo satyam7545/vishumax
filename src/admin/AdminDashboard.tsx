@@ -35,7 +35,7 @@ import {
   Loader2,
   CheckSquare,
   Square,
-  Send,
+  MessageCircle,
   Lock,
   UserCheck,
   Crop,
@@ -2449,38 +2449,37 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </div>
 
-                    {/* 5. Contact Channels (Telegram Only) */}
+                    {/* 5. Contact Channels (WhatsApp Live Chat) */}
                     <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
                       <div className="flex items-center gap-2 text-sm font-semibold text-white">
-                        <Send className="w-4 h-4 text-sky-400" />
-                        <span>Direct Telegram Contact</span>
+                        <MessageCircle className="w-4 h-4 text-emerald-400" />
+                        <span>Direct WhatsApp Live Chat</span>
                       </div>
                       <p className="text-xs text-zinc-400">
-                        All contact and live chat buttons across the website redirect directly to this Telegram chat in the same window.
+                        All "Live Chat" buttons across the website redirect directly to this WhatsApp chat in the same window.
                       </p>
 
                       <div className="max-w-md">
                         <label className="block text-xs text-zinc-300 mb-1.5 font-medium flex items-center gap-1.5">
-                          <Send className="w-3.5 h-3.5 text-sky-400" />
-                          <span>Telegram Username or Link *</span>
+                          <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>WhatsApp Number *</span>
                         </label>
                         <div className="relative">
-                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500">t.me/</span>
                           <input
                             type="text"
-                            value={(allData.settings.socialTelegram || 'vishumax').replace('https://t.me/', '').replace('http://t.me/', '').replace('@', '')}
+                            value={allData.settings.socialWhatsapp || '9065033165'}
                             onChange={(e) =>
                               setAllData({
                                 ...allData,
-                                settings: { ...allData.settings, socialTelegram: e.target.value.trim() },
+                                settings: { ...allData.settings, socialWhatsapp: e.target.value.trim() },
                               })
                             }
-                            placeholder="vishumax"
-                            className="w-full pl-14 pr-3 py-2.5 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60 font-mono"
+                            placeholder="9065033165"
+                            className="w-full px-3 py-2.5 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60 font-mono"
                           />
                         </div>
                         <span className="text-[11px] text-zinc-500 mt-1 block">
-                          Preview: https://t.me/{(allData.settings.socialTelegram || 'vishumax').replace('https://t.me/', '').replace('http://t.me/', '').replace('@', '')}
+                          Preview link: https://wa.me/{((allData.settings.socialWhatsapp || '9065033165').replace(/\D/g, '').length === 10 ? '91' : '') + (allData.settings.socialWhatsapp || '9065033165').replace(/\D/g, '')}
                         </span>
                       </div>
                     </div>

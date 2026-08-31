@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, ExternalLink, Send } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, MessageCircle } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { Footer } from '../components/Footer';
 
@@ -100,8 +100,8 @@ export const BioPage: React.FC<BioPageProps> = ({
               className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-[13px] whitespace-nowrap cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)] text-black font-['Inter',sans-serif] shrink-0"
               style={{ background: theme.primary }}
             >
-              <Send className="w-3.5 h-3.5 fill-black" />
-              <span>Telegram Chat</span>
+              <MessageCircle className="w-3.5 h-3.5" />
+              <span>Live Chat</span>
             </button>
           </div>
         </div>

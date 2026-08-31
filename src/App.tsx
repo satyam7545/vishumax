@@ -69,9 +69,10 @@ function AppContent() {
   }, [isAuthenticated, setIsAdminOpen, setIsLoginModalOpen]);
 
   const handleOpenBooking = () => {
-    const raw = siteData.contact?.telegramUrl || 'https://t.me/vishumax';
-    const tgUrl = raw.startsWith('http') ? raw : `https://t.me/${raw.replace('@', '')}`;
-    window.location.href = tgUrl;
+    const raw = siteData.contact?.whatsappNumber || '9065033165';
+    const clean = raw.replace(/\D/g, '');
+    const phone = clean.length === 10 ? `91${clean}` : (clean || '919065033165');
+    window.location.href = `https://wa.me/${phone}`;
   };
 
   const navigateToWorks = () => {
