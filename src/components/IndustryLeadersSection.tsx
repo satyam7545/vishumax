@@ -27,8 +27,8 @@ export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
         />
       </div>
 
-      {/* Dynamic Vertical Portrait Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-5 place-items-center sm:place-items-stretch">
+      {/* Dynamic Vertical Portrait Cards Grid (2-cols on mobile, 4 on desktop) */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 place-items-stretch">
         {siteData.leaders.map((leader, idx) => (
           <motion.div
             key={leader.id}
@@ -47,7 +47,7 @@ export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
             tabIndex={0}
             aria-label={`Leader card: ${leader.name}, ${leader.role}. Click to connect.`}
             whileHover={{ y: -6 }}
-            className="group relative w-full max-w-[310px] sm:max-w-none mx-auto aspect-[3/4] max-h-[390px] rounded-3xl overflow-hidden bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.95)] transition-all duration-300 flex flex-col justify-end cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            className="group relative w-full mx-auto aspect-[3/4] max-h-[390px] rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.95)] transition-all duration-300 flex flex-col justify-end cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >
             {/* Portrait Image */}
             <img
@@ -57,20 +57,20 @@ export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
               className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
             />
 
-            {/* Gradient Scrim — only covers bottom where text lives */}
-            <div className="absolute inset-x-0 bottom-0 h-[55%] bg-gradient-to-t from-black/95 via-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ease-out" />
+            {/* Gradient Scrim — visible on mobile, reveals on hover on desktop */}
+            <div className="absolute inset-x-0 bottom-0 h-[60%] sm:h-[55%] bg-gradient-to-t from-black/95 via-black/60 to-transparent opacity-90 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-300 ease-out" />
 
-            {/* Bottom Card Content (Name & Details Reveal Exclusively on Hover) */}
-            <div className="relative p-5 z-10 flex flex-col justify-end translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 ease-out pointer-events-none">
-              <h3 className="font-sans font-bold text-base sm:text-lg text-white tracking-tight">
+            {/* Bottom Card Content — visible on mobile touchscreens, reveals on hover on desktop */}
+            <div className="relative p-3 sm:p-5 z-10 flex flex-col justify-end translate-y-0 opacity-100 sm:translate-y-3 sm:opacity-0 sm:group-hover:translate-y-0 sm:group-hover:opacity-100 transition-all duration-300 ease-out pointer-events-none">
+              <h3 className="font-sans font-bold text-xs sm:text-base lg:text-lg text-white tracking-tight leading-tight">
                 {leader.name}
               </h3>
-              <p className="text-xs text-zinc-300 font-medium mt-0.5">
+              <p className="text-[10px] sm:text-xs text-zinc-300 font-medium mt-0.5 leading-tight">
                 {leader.role}
               </p>
               
               {leader.quote && (
-                <p className="text-[11px] font-sans text-zinc-300 italic line-clamp-2 leading-relaxed border-t border-white/10 pt-1.5 mt-2">
+                <p className="hidden sm:block text-[11px] font-sans text-zinc-300 italic line-clamp-2 leading-relaxed border-t border-white/10 pt-1.5 mt-2">
                   "{leader.quote}"
                 </p>
               )}

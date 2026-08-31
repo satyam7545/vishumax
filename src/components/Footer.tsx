@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUp } from 'lucide-react';
+import { ArrowUp, Send } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface FooterProps {
@@ -45,6 +45,10 @@ export const Footer: React.FC<FooterProps> = () => {
 
   const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
 
+  const rawTg = siteData.contact?.telegramUrl || 'https://t.me/vishumax';
+  const telegramUrl = rawTg.startsWith('http') ? rawTg : `https://t.me/${rawTg.replace('@', '')}`;
+  const telegramHandle = rawTg.startsWith('http') ? `@${rawTg.split('/').pop()}` : rawTg.startsWith('@') ? rawTg : `@${rawTg}`;
+
   return (
     <footer className="w-full bg-black border-t border-zinc-800/80 py-12 sm:py-16 text-zinc-400 font-sans relative z-10 overflow-hidden">
       {/* 1. Large Top Gradient Glow — rich radiant theme illumination */}
@@ -75,7 +79,7 @@ export const Footer: React.FC<FooterProps> = () => {
       <div className="max-w-7xl mx-auto px-6 sm:px-8 relative z-10">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-8">
 
-          {/* Brand + Email */}
+          {/* Brand + Telegram handle */}
           <div className="flex flex-col gap-1.5 select-none">
             <div className="flex items-center gap-3">
               {siteData.navbar.brandLogoImage ? (
@@ -94,27 +98,40 @@ export const Footer: React.FC<FooterProps> = () => {
               </span>
             </div>
             <a
-              href={`mailto:${siteData.contact?.email || 'hello@vishumax.in'}`}
-              className="text-xs text-zinc-500 hover:text-emerald-400 transition-colors ml-9"
+              href={telegramUrl}
+              className="text-xs text-zinc-400 hover:text-emerald-400 transition-colors ml-9 flex items-center gap-1.5 font-medium"
             >
-              {siteData.contact?.email || 'hello@vishumax.in'}
+              <Send className="w-3 h-3 text-sky-400" />
+              <span>{telegramHandle}</span>
             </a>
           </div>
 
-          {/* Social Links (replaced quick nav) */}
-          <div className="flex items-center gap-3">
-            {socials.map(({ label, icon, href }) => (
-              <a
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={label}
-                className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-zinc-500 hover:text-white transition-all duration-200"
-              >
-                {icon}
-              </a>
-            ))}
+          {/* Center / Action Section: Social Media Icons + Direct Telegram Chat */}
+          <div className="flex flex-wrap items-center gap-3 sm:gap-4">
+            {/* Social Media Links */}
+            <div className="flex items-center gap-2.5">
+              {socials.map(({ label, icon, href }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
+                  className="w-9 h-9 rounded-full bg-white/[0.05] hover:bg-white/[0.12] border border-white/[0.08] hover:border-white/20 flex items-center justify-center text-zinc-400 hover:text-white transition-all duration-200"
+                >
+                  {icon}
+                </a>
+              ))}
+            </div>
+
+            {/* Direct Telegram Chat button (Direct redirect in same window) */}
+            <a
+              href={telegramUrl}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 hover:border-emerald-500/50 text-emerald-300 hover:text-white font-semibold text-xs transition-all shadow-sm group"
+            >
+              <Send className="w-3.5 h-3.5 text-emerald-400 group-hover:scale-110 transition-transform" />
+              <span>Chat on Telegram</span>
+            </a>
           </div>
 
           {/* Back to top */}

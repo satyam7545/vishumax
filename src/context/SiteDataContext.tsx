@@ -164,7 +164,11 @@ const mapCMSPayloadToSiteData = (cms: CMSPublicPayload): SiteDataState => {
     leaders,
     faqs: DEFAULT_SITE_DATA.faqs,
     contact: {
-      telegramUrl: s?.socialTelegram || 'https://t.me/vishumax',
+      telegramUrl: s?.socialTelegram
+        ? (s.socialTelegram.startsWith('http')
+            ? s.socialTelegram
+            : `https://t.me/${s.socialTelegram.replace('@', '')}`)
+        : 'https://t.me/vishumax',
       whatsappNumber: s?.socialWhatsapp || '+91 98765 43210',
       discordUsername: s?.socialDiscord || 'vishumax',
       email: s?.contactEmail || 'contact@vishumax.in',

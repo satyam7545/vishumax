@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -162,11 +162,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </motion.div>
       </motion.nav>
 
-      {/* Live Chat — fixed top-right, fades in on scroll */}
+      {/* Telegram Chat — fixed top-right, fades in on scroll */}
       <AnimatePresence>
         {scrolled && (
           <motion.button
-            key="live-chat"
+            key="telegram-chat"
             type="button"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -175,72 +175,75 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onOpenBooking?.('Discovery Session')}
             className="pointer-events-auto hidden md:flex fixed top-5 sm:top-[1.85rem] right-6 z-50 items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black font-semibold text-[13px] whitespace-nowrap cursor-pointer transition-colors duration-200 shadow-[0_0_20px_rgba(16,185,129,0.5)] active:scale-95"
           >
-            {/* Live green dot */}
-            <span className="relative flex h-2 w-2 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black/40 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-black/50" />
-            </span>
-            Live Chat
+            <Send className="w-3.5 h-3.5 fill-black" />
+            <span>Telegram Chat</span>
           </motion.button>
         )}
       </AnimatePresence>
 
-      {/* Mobile Drawer Dropdown */}
+      {/* Mobile Backdrop & Drawer Dropdown */}
       {mobileMenuOpen && (
-        <div className="pointer-events-auto mt-2.5 w-full max-w-sm p-5 rounded-3xl bg-black/75 backdrop-blur-3xl border border-white/20 shadow-2xl flex flex-col gap-3.5 text-center md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
-          <a
-            href="#works"
-            onClick={(e) => {
-              e.preventDefault();
-              setMobileMenuOpen(false);
-              if (onNavigateToWorks) {
-                onNavigateToWorks();
-              } else {
-                window.location.hash = '#works';
-              }
-            }}
-            className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 border-b border-white/10 transition-colors"
-          >
-            Works
-          </a>
-          <a
-            href="#faq"
-            onClick={(e) => {
-              e.preventDefault();
-              scrollTo('faq');
-            }}
-            className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 border-b border-white/10 transition-colors"
-          >
-            FAQ?
-          </a>
-          <a
-            href="#bio"
-            onClick={(e) => {
-              e.preventDefault();
-              setMobileMenuOpen(false);
-              if (onNavigateToBio) {
-                onNavigateToBio();
-              } else {
-                window.location.hash = '#bio';
-              }
-            }}
-            className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 transition-colors cursor-pointer"
-          >
-            Bio
-          </a>
+        <>
+          <div
+            className="fixed inset-0 bg-black/70 backdrop-blur-md z-40 pointer-events-auto md:hidden"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          <div className="pointer-events-auto relative z-50 mt-2.5 w-full max-w-sm p-6 rounded-3xl bg-[#0a0a0f]/98 backdrop-blur-3xl border border-white/20 shadow-[0_25px_70px_rgba(0,0,0,0.95)] flex flex-col gap-3.5 text-center md:hidden animate-in fade-in slide-in-from-top-2 duration-200">
+            <a
+              href="#works"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                if (onNavigateToWorks) {
+                  onNavigateToWorks();
+                } else {
+                  window.location.hash = '#works';
+                }
+              }}
+              className="py-2.5 text-[15px] font-medium text-white/90 hover:text-emerald-400 border-b border-white/10 transition-colors"
+            >
+              Works
+            </a>
+            <a
+              href="#faq"
+              onClick={(e) => {
+                e.preventDefault();
+                scrollTo('faq');
+              }}
+              className="py-2.5 text-[15px] font-medium text-white/90 hover:text-emerald-400 border-b border-white/10 transition-colors"
+            >
+              FAQ?
+            </a>
+            <a
+              href="#bio"
+              onClick={(e) => {
+                e.preventDefault();
+                setMobileMenuOpen(false);
+                if (onNavigateToBio) {
+                  onNavigateToBio();
+                } else {
+                  window.location.hash = '#bio';
+                }
+              }}
+              className="py-2.5 text-[15px] font-medium text-white/90 hover:text-emerald-400 transition-colors cursor-pointer"
+            >
+              Bio
+            </a>
 
-          {/* Contact Now CTA in mobile drawer */}
-          <button
-            type="button"
-            onClick={() => {
-              setMobileMenuOpen(false);
-              onOpenBooking?.('Discovery Session');
-            }}
-            className="mt-1 w-full py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[15px] transition-colors shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95"
-          >
-            Live Chat
-          </button>
-        </div>
+            {/* Telegram CTA in mobile drawer */}
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onOpenBooking?.('Discovery Session');
+              }}
+              className="mt-2 w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[15px] transition-colors shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Send className="w-4 h-4 fill-black" />
+              <span>Chat on Telegram</span>
+            </button>
+          </div>
+        </>
       )}
     </header>
   );

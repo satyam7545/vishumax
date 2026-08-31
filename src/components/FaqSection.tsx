@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Plus, MessageCircle } from 'lucide-react';
+import { Plus, Send } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { DEFAULT_FAQS } from '../types/defaultSiteData';
 
@@ -118,7 +118,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 Still have questions?
               </p>
               <p className="text-xs sm:text-sm text-zinc-400 mt-0.5">
-                We're happy to walk you through everything on a quick call.
+                Chat directly with Vishal on Telegram for immediate answers.
               </p>
             </div>
             <button
@@ -129,8 +129,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
               }}
               className={`shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-xs sm:text-sm font-sans font-bold transition-all duration-200 hover:scale-105 active:scale-95 cursor-pointer shadow-md group ${theme.ctaTextColor}`}
             >
-              <MessageCircle className="w-4 h-4" />
-              <span>Let's Talk</span>
+              <Send className="w-4 h-4" />
+              <span>Chat on Telegram</span>
             </button>
           </motion.div>
         )}

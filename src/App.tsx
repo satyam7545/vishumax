@@ -6,7 +6,6 @@ import { StatsBar } from './components/StatsBar';
 import { TestimonialsSection } from './components/TestimonialsSection';
 import { IndustryLeadersSection } from './components/IndustryLeadersSection';
 import { FaqSection } from './components/FaqSection';
-import { BookCallModal } from './components/BookCallModal';
 import { CtaBanner } from './components/CtaBanner';
 import { Footer } from './components/Footer';
 import { WorksPage } from './pages/WorksPage';
@@ -22,11 +21,9 @@ const AdminLoginModal = lazy(() =>
 );
 
 function AppContent() {
-  const { theme, isAuthenticated, setIsAdminOpen, setIsLoginModalOpen } = useSiteData();
+  const { theme, siteData, isAuthenticated, setIsAdminOpen, setIsLoginModalOpen } = useSiteData();
 
   const [currentView, setCurrentView] = useState<'home' | 'works' | 'bio'>('home');
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-  const [bookingPrefill, setBookingPrefill] = useState<string | undefined>(undefined);
 
   // Route detection & navigation: /works, #works, /bio, #bio, /about, #about, /admin, #admin
   useEffect(() => {
@@ -71,9 +68,10 @@ function AppContent() {
     };
   }, [isAuthenticated, setIsAdminOpen, setIsLoginModalOpen]);
 
-  const handleOpenBooking = (prefillTitle?: string) => {
-    setBookingPrefill(prefillTitle);
-    setIsBookingOpen(true);
+  const handleOpenBooking = () => {
+    const raw = siteData.contact?.telegramUrl || 'https://t.me/vishumax';
+    const tgUrl = raw.startsWith('http') ? raw : `https://t.me/${raw.replace('@', '')}`;
+    window.location.href = tgUrl;
   };
 
   const navigateToWorks = () => {
@@ -200,13 +198,6 @@ function AppContent() {
           <Footer onOpenBooking={() => handleOpenBooking()} />
         </>
       )}
-
-      {/* Interactive Booking Strategy Modal */}
-      <BookCallModal
-        isOpen={isBookingOpen}
-        onClose={() => setIsBookingOpen(false)}
-        prefillThumbnail={bookingPrefill}
-      />
 
       {/* Admin Authentication Login Modal (Password & Email protected) */}
       <Suspense fallback={null}>

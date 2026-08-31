@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink, Send } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { Footer } from '../components/Footer';
 
@@ -26,10 +26,6 @@ export const BioPage: React.FC<BioPageProps> = ({
   }, [siteData]);
 
   const authorName = siteData.about.name || 'Vishal Gupta';
-  const headingText =
-    siteData.about.heading && siteData.about.heading !== 'About Ravi Franklin'
-      ? siteData.about.heading
-      : `About ${authorName}`;
 
   return (
     <div className="min-h-screen bg-[#07070a] text-zinc-100 flex flex-col selection:bg-emerald-500/30 selection:text-emerald-200">
@@ -97,17 +93,15 @@ export const BioPage: React.FC<BioPageProps> = ({
               <ArrowRight className="w-3.5 h-3.5 text-zinc-400" />
             </button>
 
+            {/* Right Action: Telegram Chat (Direct redirect) */}
             <button
               type="button"
               onClick={() => onOpenBooking('Creator Partnership')}
               className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-[13px] whitespace-nowrap cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)] text-black font-['Inter',sans-serif] shrink-0"
               style={{ background: theme.primary }}
             >
-              <span className="relative flex h-2 w-2 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black/40 opacity-75" />
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-black/60" />
-              </span>
-              <span>Live Chat</span>
+              <Send className="w-3.5 h-3.5 fill-black" />
+              <span>Telegram Chat</span>
             </button>
           </div>
         </div>
@@ -135,8 +129,8 @@ export const BioPage: React.FC<BioPageProps> = ({
                 <h1 className="font-sans font-bold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.15]">
                   {authorName}
                 </h1>
-                <p className="mt-3 font-serif italic text-lg sm:text-xl text-zinc-300 leading-snug">
-                  "{headingText}"
+                <p className="mt-2 text-sm sm:text-lg text-emerald-400 font-medium font-sans">
+                  {siteData.about.roleTitle || 'Creative Graphic Designer & Packaging Specialist'}
                 </p>
               </div>
 
@@ -152,8 +146,8 @@ export const BioPage: React.FC<BioPageProps> = ({
 
             {/* Studio Portrait Photo */}
             {siteData.about.portraitImage && (
-              <div className="md:col-span-5 lg:col-span-4 flex justify-center md:justify-end">
-                <div className="relative w-full max-w-[280px] sm:max-w-[320px] aspect-[4/5] rounded-3xl overflow-hidden border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.8)] group bg-zinc-950">
+              <div className="md:col-span-5 lg:col-span-4 flex justify-center md:justify-end mt-4 md:mt-0">
+                <div className="relative w-full max-w-[240px] sm:max-w-[320px] aspect-[4/5] rounded-2xl sm:rounded-3xl overflow-hidden border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.8)] group bg-zinc-950">
                   <img
                     src={siteData.about.portraitImage}
                     alt={authorName}

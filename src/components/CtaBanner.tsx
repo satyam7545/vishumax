@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, Send } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface CtaBannerProps {
@@ -121,7 +121,8 @@ export const CtaBanner: React.FC<CtaBannerProps> = ({ onOpenBooking }) => {
                 className="relative z-10 overflow-hidden inline-flex items-center gap-2.5 px-8 sm:px-11 py-3.5 rounded-full font-sans font-semibold text-sm sm:text-base tracking-tight cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
               >
                 <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-                <span className="relative z-10 font-medium">Let's work</span>
+                <Send className="relative z-10 w-4 h-4 text-sky-400" />
+                <span className="relative z-10 font-medium">Chat on Telegram</span>
                 <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform duration-200" />
               </button>
             </div>

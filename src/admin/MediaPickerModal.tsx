@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Upload, X, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Search, Upload, X, Check, Image as ImageIcon, Loader2, Crop } from 'lucide-react';
+import { ImageCropperModal } from './ImageCropperModal';
 import { type MediaFile } from './AdminDashboard';
 
 interface MediaPickerModalProps {
@@ -28,12 +29,44 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
   const [search, setSearch] = useState('');
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isCropperOpen, setIsCropperOpen] = useState(false);
+  const [cropperImageSrc, setCropperImageSrc] = useState('');
+  const [cropperFileName, setCropperFileName] = useState('image.png');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const getAuthToken = () =>
     localStorage.getItem('vishumax_auth_token') ||
     localStorage.getItem('admin_token') ||
     '';
+
+  const handleCropperSave = async (croppedDataUrl: string, name: string) => {
+    try {
+      const token = getAuthToken();
+      const res = await fetch('/api/cms/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: name,
+          type: 'image/png',
+          data: croppedDataUrl,
+        }),
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json.url) {
+          await fetchMedia();
+          onUploaded?.();
+          onSelect(json.url);
+          onClose();
+        }
+      }
+    } catch (err) {
+      console.error('Error saving cropped image in picker:', err);
+    }
+  };
 
   // Fetch media files from server
   const fetchMedia = useCallback(async () => {
@@ -289,6 +322,23 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
               >
                 Cancel
               </button>
+
+              {selectedFile && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCropperImageSrc(selectedFile.url);
+                    setCropperFileName(selectedFile.name);
+                    setIsCropperOpen(true);
+                  }}
+                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-emerald-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-all whitespace-nowrap"
+                  title="Crop and resize image before using"
+                >
+                  <Crop className="w-3.5 h-3.5" />
+                  <span>Crop & Use</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 disabled={!selectedFile}
@@ -306,6 +356,15 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
             </div>
           </div>
         </motion.div>
+
+        <ImageCropperModal
+          isOpen={isCropperOpen}
+          onClose={() => setIsCropperOpen(false)}
+          imageSrc={cropperImageSrc}
+          fileName={cropperFileName}
+          defaultAspect="16:9"
+          onSave={handleCropperSave}
+        />
       </div>
     </AnimatePresence>
   );

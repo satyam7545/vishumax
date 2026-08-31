@@ -15,7 +15,7 @@ function ScrollTestimonialCard({ item }: { item: TestimonialItemData; theme: { p
 
   return (
     <div
-      className="relative overflow-hidden rounded-[32px] sm:rounded-[36px] p-6 sm:p-8 flex flex-col shrink-0 transition-all duration-300 group hover:scale-[1.01] border border-white/40 text-left select-none"
+      className="relative overflow-hidden rounded-[24px] sm:rounded-[36px] p-5 sm:p-8 flex flex-col shrink-0 transition-all duration-300 group hover:scale-[1.01] border border-white/40 text-left select-none"
       style={{
         background: 'linear-gradient(135deg, #a7f3d0 0%, #86efac 40%, #4ade80 85%, #22c55e 100%)',
         boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 0 35px rgba(74,222,128,0.25)',
@@ -30,24 +30,24 @@ function ScrollTestimonialCard({ item }: { item: TestimonialItemData; theme: { p
       />
 
       {/* TOP: Author Profile with Avatar, Name, and @Handle */}
-      <div className="flex items-center gap-4 sm:gap-4.5 mb-5 sm:mb-6 relative z-10">
+      <div className="flex items-center gap-3 sm:gap-4.5 mb-4 sm:mb-6 relative z-10">
         <img
           src={item.avatar}
           alt={item.name}
-          className="w-14 h-14 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 shadow-md border border-black/10"
+          className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 shadow-md border border-black/10"
         />
         <div className="min-w-0">
-          <h4 className="font-['Inter',sans-serif] font-semibold text-[21px] sm:text-[23.5px] text-zinc-950 tracking-tight leading-tight truncate">
+          <h4 className="font-['Inter',sans-serif] font-semibold text-lg sm:text-[23.5px] text-zinc-950 tracking-tight leading-tight truncate">
             {item.name}
           </h4>
-          <p className="font-['Inter',sans-serif] text-[13.5px] sm:text-[14.5px] text-emerald-950 font-normal mt-0.5 leading-none truncate">
+          <p className="font-['Inter',sans-serif] text-xs sm:text-[14.5px] text-emerald-950 font-normal mt-0.5 leading-none truncate">
             {channelHandle}
           </p>
         </div>
       </div>
 
       {/* Testimonial Quote Text */}
-      <p className="font-['Inter',sans-serif] text-[14px] sm:text-[15.5px] leading-[1.65] text-zinc-950 font-normal relative z-10 text-left">
+      <p className="font-['Inter',sans-serif] text-xs sm:text-[15.5px] leading-relaxed text-zinc-950 font-normal relative z-10 text-left">
         {cleanQuote}
       </p>
     </div>
@@ -72,11 +72,11 @@ function ScrollColumn({
   };
 
   return (
-    <div className="relative overflow-hidden pause-on-hover h-[640px] sm:h-[700px]">
+    <div className="relative overflow-hidden pause-on-hover h-[420px] sm:h-[700px]">
       {/* Fade top */}
-      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-x-0 top-0 h-16 sm:h-20 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
       {/* Fade bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
+      <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
 
       <div className={`${animClass} flex flex-col gap-4`} style={animStyle}>
         {/* First copy */}
@@ -134,11 +134,15 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = () => {
         />
       </div>
 
-      {/* 3-column infinite scroll — columns 1 & 3 go up, col 2 goes down */}
+      {/* 3-column on desktop, single column on mobile */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
         <ScrollColumn items={pad(col0)} direction="up"   speed={30} theme={theme} />
-        <ScrollColumn items={pad(col1)} direction="down" speed={35} theme={theme} />
-        <ScrollColumn items={pad(col2)} direction="up"   speed={25} theme={theme} />
+        <div className="hidden sm:block">
+          <ScrollColumn items={pad(col1)} direction="down" speed={35} theme={theme} />
+        </div>
+        <div className="hidden sm:block">
+          <ScrollColumn items={pad(col2)} direction="up"   speed={25} theme={theme} />
+        </div>
       </div>
     </section>
   );

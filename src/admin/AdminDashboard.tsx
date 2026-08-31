@@ -36,14 +36,14 @@ import {
   CheckSquare,
   Square,
   Send,
-  MessageCircle,
-  Mail,
   Lock,
   UserCheck,
+  Crop,
 } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { THEMES, DEFAULT_THEME_ID, type ThemeDefinition } from '../types/theme';
 import { MediaPickerModal } from './MediaPickerModal';
+import { ImageCropperModal, type AspectRatioOption } from './ImageCropperModal';
 import type {
   CMSClient,
   CMSProject,
@@ -128,7 +128,65 @@ export const AdminDashboard: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3000);
   };
 
+  // Cropper Modal state for Media Library tab
+  const [cropperState, setCropperState] = useState<{
+    isOpen: boolean;
+    imageSrc: string;
+    fileName: string;
+    defaultAspect?: AspectRatioOption;
+    onSaveCallback?: (url: string) => void;
+  }>({
+    isOpen: false,
+    imageSrc: '',
+    fileName: '',
+    defaultAspect: '16:9',
+  });
+
+  const openCropperModal = (
+    imageSrc: string,
+    fileName: string,
+    defaultAspect: AspectRatioOption = '16:9',
+    onSaveCallback?: (url: string) => void
+  ) => {
+    setCropperState({
+      isOpen: true,
+      imageSrc,
+      fileName,
+      defaultAspect,
+      onSaveCallback,
+    });
+  };
+
   const getAuthToken = () => localStorage.getItem('vishumax_auth_token') || '';
+
+  const handleSaveCroppedMedia = async (base64Data: string, fileName: string): Promise<string | null> => {
+    try {
+      const res = await fetch('/api/cms/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({
+          name: fileName,
+          type: 'image/png',
+          data: base64Data,
+        }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success && json.url) {
+        notify('Cropped image saved successfully!');
+        await fetchMediaFiles();
+        return json.url;
+      } else {
+        notify(json.error || 'Failed to upload cropped image', 'error');
+        return null;
+      }
+    } catch {
+      notify('Network error uploading cropped image', 'error');
+      return null;
+    }
+  };
 
   // Fetch full CMS data and media files
   const fetchMediaFiles = useCallback(async () => {
@@ -430,6 +488,128 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
+  // Duplication handlers
+  const handleDuplicateProject = async (project: Partial<CMSProject>) => {
+    try {
+      const newProject = {
+        ...project,
+        id: `proj-${Date.now()}`,
+        title: `${project.title || 'Thumbnail'} (Copy)`,
+        slug: `${project.slug || 'proj'}-copy-${Date.now().toString().slice(-4)}`,
+        sort_order: (allData?.projects.length || 0) + 1,
+      };
+
+      const res = await fetch('/api/cms/projects', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify(newProject),
+      });
+
+      if (res.ok) {
+        notify(`Duplicated "${project.title || 'thumbnail'}"!`);
+        await fetchAllCMSData();
+        await refreshCMSData();
+      } else {
+        notify('Failed to duplicate project', 'error');
+      }
+    } catch {
+      notify('Network error duplicating project', 'error');
+    }
+  };
+
+  const handleDuplicateClient = async (client: Partial<CMSClient>) => {
+    try {
+      const newClient = {
+        ...client,
+        id: `client-${Date.now()}`,
+        name: `${client.name || 'Brand'} (Copy)`,
+        sort_order: (allData?.clients.length || 0) + 1,
+      };
+
+      const res = await fetch('/api/cms/clients', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify(newClient),
+      });
+
+      if (res.ok) {
+        notify(`Duplicated brand "${client.name}"!`);
+        await fetchAllCMSData();
+        await refreshCMSData();
+      } else {
+        notify('Failed to duplicate brand', 'error');
+      }
+    } catch {
+      notify('Network error duplicating brand', 'error');
+    }
+  };
+
+  const handleDuplicateTestimonial = async (item: Partial<CMSTestimonial>) => {
+    try {
+      const newTestimonial = {
+        ...item,
+        id: `test-${Date.now()}`,
+        name: `${item.name || 'Creator'} (Copy)`,
+        sort_order: (allData?.testimonials.length || 0) + 1,
+      };
+
+      const res = await fetch('/api/cms/testimonials', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify(newTestimonial),
+      });
+
+      if (res.ok) {
+        notify(`Duplicated review from "${item.name || 'Creator'}"!`);
+        await fetchAllCMSData();
+        await refreshCMSData();
+      } else {
+        notify('Failed to duplicate testimonial', 'error');
+      }
+    } catch {
+      notify('Network error duplicating testimonial', 'error');
+    }
+  };
+
+  const handleDuplicateLeader = async (leader: Partial<CMSLeader>) => {
+    try {
+      const newLeader = {
+        ...leader,
+        id: `lead-${Date.now()}`,
+        name: `${leader.name || 'Leader'} (Copy)`,
+        sort_order: (allData?.leaders.length || 0) + 1,
+      };
+
+      const res = await fetch('/api/cms/leaders', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify(newLeader),
+      });
+
+      if (res.ok) {
+        notify(`Duplicated leader "${leader.name}"!`);
+        await fetchAllCMSData();
+        await refreshCMSData();
+      } else {
+        notify('Failed to duplicate leader', 'error');
+      }
+    } catch {
+      notify('Network error duplicating leader', 'error');
+    }
+  };
+
   const handleUpdateInquiryStatus = async (id: number, status: string) => {
     try {
       const res = await fetch(`/api/inquiries/${id}/status`, {
@@ -530,18 +710,46 @@ export const AdminDashboard: React.FC = () => {
   }) => {
     const [uploading, setUploading] = useState(false);
     const [isPickerOpen, setIsPickerOpen] = useState(false);
+    const [isCropperOpen, setIsCropperOpen] = useState(false);
+    const [cropImageSrc, setCropImageSrc] = useState<string>('');
+    const [cropFileName, setCropFileName] = useState<string>('image.png');
     const fileRef = useRef<HTMLInputElement>(null);
 
-    const onFilePick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const aspectPreset: AspectRatioOption =
+      aspect === 'portrait' ? '4:5' : aspect === 'square' ? '1:1' : '16:9';
+
+    const onFilePick = (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      if (file.size > 50 * 1024 * 1024) {
+        notify(`"${file.name}" exceeds 50MB size limit`, 'error');
+        return;
+      }
+      // Read file and open directly in cropper modal for perfect card fit
+      const reader = new FileReader();
+      reader.onload = () => {
+        setCropImageSrc(reader.result as string);
+        setCropFileName(file.name);
+        setIsCropperOpen(true);
+      };
+      reader.readAsDataURL(file);
+      if (fileRef.current) fileRef.current.value = '';
+    };
+
+    const handleOpenCropperForExisting = () => {
+      if (!value) return;
+      setCropImageSrc(value);
+      setCropFileName(value.split('/').pop() || 'image.png');
+      setIsCropperOpen(true);
+    };
+
+    const handleCroppedSave = async (croppedDataUrl: string, croppedName: string) => {
       setUploading(true);
-      const uploadedUrl = await handleUploadSingleFile(file);
-      if (uploadedUrl) {
-        onChange(uploadedUrl);
+      const url = await handleSaveCroppedMedia(croppedDataUrl, croppedName);
+      if (url) {
+        onChange(url);
       }
       setUploading(false);
-      if (fileRef.current) fileRef.current.value = '';
     };
 
     const aspectClass =
@@ -624,6 +832,19 @@ export const AdminDashboard: React.FC = () => {
 
           {/* Action Buttons with shrink-0 and whitespace-nowrap */}
           <div className="flex items-center gap-1.5 shrink-0">
+            {/* Crop Button (active when an image is present) */}
+            {value && (
+              <button
+                type="button"
+                onClick={handleOpenCropperForExisting}
+                title="Crop / Resize current image to fit card"
+                className="px-2.5 sm:px-3 py-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer whitespace-nowrap"
+              >
+                <Crop className="w-3.5 h-3.5 shrink-0" />
+                <span className="hidden sm:inline">Crop</span>
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => setIsPickerOpen(true)}
@@ -638,7 +859,7 @@ export const AdminDashboard: React.FC = () => {
               type="button"
               disabled={uploading}
               onClick={() => fileRef.current?.click()}
-              title="Upload new image from device"
+              title="Upload & crop new image from device"
               className="px-2.5 sm:px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-black text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer shadow-xs whitespace-nowrap"
             >
               {uploading ? (
@@ -664,6 +885,15 @@ export const AdminDashboard: React.FC = () => {
           title={`Select ${label}`}
           initialFiles={mediaFiles}
           onUploaded={fetchMediaFiles}
+        />
+
+        <ImageCropperModal
+          isOpen={isCropperOpen}
+          onClose={() => setIsCropperOpen(false)}
+          imageSrc={cropImageSrc}
+          fileName={cropFileName}
+          defaultAspect={aspectPreset}
+          onSave={handleCroppedSave}
         />
       </div>
     );
@@ -1295,6 +1525,13 @@ export const AdminDashboard: React.FC = () => {
                                 <td className="p-4 text-right whitespace-nowrap shrink-0">
                                   <div className="flex items-center justify-end gap-1.5 shrink-0">
                                     <button
+                                      onClick={() => handleDuplicateProject(proj)}
+                                      className="p-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 transition-colors cursor-pointer"
+                                      title="Duplicate thumbnail"
+                                    >
+                                      <Copy className="w-4 h-4" />
+                                    </button>
+                                    <button
                                       onClick={() => setEditingProject(proj)}
                                       className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
                                       title="Edit project"
@@ -1384,6 +1621,13 @@ export const AdminDashboard: React.FC = () => {
                             title="Move Down"
                           >
                             <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            onClick={() => handleDuplicateClient(client)}
+                            className="p-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 transition-colors cursor-pointer"
+                            title="Duplicate brand"
+                          >
+                            <Copy className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setEditingClient(client)}
@@ -1482,6 +1726,13 @@ export const AdminDashboard: React.FC = () => {
                               <ArrowDown className="w-3.5 h-3.5" />
                             </button>
                             <button
+                              onClick={() => handleDuplicateTestimonial(t)}
+                              className="p-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 transition-colors cursor-pointer"
+                              title="Duplicate testimonial"
+                            >
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
+                            <button
                               onClick={() => setEditingTestimonial(t)}
                               className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
                               title="Edit testimonial"
@@ -1569,6 +1820,13 @@ export const AdminDashboard: React.FC = () => {
                                 title="Move Down"
                               >
                                 <ArrowDown className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleDuplicateLeader(leader)}
+                                className="p-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-zinc-300 hover:text-emerald-300 transition-colors cursor-pointer"
+                                title="Duplicate leader"
+                              >
+                                <Copy className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setEditingLeader(leader)}
@@ -1760,6 +2018,13 @@ export const AdminDashboard: React.FC = () => {
                                   className="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 cursor-pointer transition-colors"
                                 >
                                   <Sparkles className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={() => openCropperModal(file.url, file.name, '16:9')}
+                                  title="Crop & Resize Image to Fit Cards"
+                                  className="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 cursor-pointer transition-colors"
+                                >
+                                  <Crop className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleCopyUrl(file.url)}
@@ -2184,88 +2449,39 @@ export const AdminDashboard: React.FC = () => {
                       />
                     </div>
 
-                    {/* 5. Direct Messaging & Contact Channels */}
+                    {/* 5. Contact Channels (Telegram Only) */}
                     <div className="p-6 rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4">
                       <div className="flex items-center gap-2 text-sm font-semibold text-white">
                         <Send className="w-4 h-4 text-sky-400" />
-                        <span>Direct Messaging & Contact Channels</span>
+                        <span>Direct Telegram Contact</span>
                       </div>
+                      <p className="text-xs text-zinc-400">
+                        All contact and live chat buttons across the website redirect directly to this Telegram chat in the same window.
+                      </p>
 
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
-                            <Mail className="w-3.5 h-3.5 text-amber-400" />
-                            <span>Contact Email (Footer & Inquiry)</span>
-                          </label>
-                          <input
-                            type="email"
-                            value={allData.settings.contactEmail || 'contact@vishumax.in'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, contactEmail: e.target.value },
-                              })
-                            }
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
-                            <Send className="w-3.5 h-3.5 text-sky-400" />
-                            <span>Telegram Username or URL</span>
-                          </label>
+                      <div className="max-w-md">
+                        <label className="block text-xs text-zinc-300 mb-1.5 font-medium flex items-center gap-1.5">
+                          <Send className="w-3.5 h-3.5 text-sky-400" />
+                          <span>Telegram Username or Link *</span>
+                        </label>
+                        <div className="relative">
+                          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono text-zinc-500">t.me/</span>
                           <input
                             type="text"
-                            value={allData.settings.socialTelegram || 'vishumax'}
+                            value={(allData.settings.socialTelegram || 'vishumax').replace('https://t.me/', '').replace('http://t.me/', '').replace('@', '')}
                             onChange={(e) =>
                               setAllData({
                                 ...allData,
-                                settings: { ...allData.settings, socialTelegram: e.target.value },
+                                settings: { ...allData.settings, socialTelegram: e.target.value.trim() },
                               })
                             }
-                            placeholder="username"
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60"
+                            placeholder="vishumax"
+                            className="w-full pl-14 pr-3 py-2.5 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60 font-mono"
                           />
                         </div>
-
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
-                            <MessageCircle className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>WhatsApp Phone Number</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={allData.settings.socialWhatsapp || '+91 98765 43210'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, socialWhatsapp: e.target.value },
-                              })
-                            }
-                            placeholder="+91..."
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-xs text-zinc-400 mb-1 font-medium flex items-center gap-1.5">
-                            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                            <span>Discord Username</span>
-                          </label>
-                          <input
-                            type="text"
-                            value={allData.settings.socialDiscord || 'vishumax'}
-                            onChange={(e) =>
-                              setAllData({
-                                ...allData,
-                                settings: { ...allData.settings, socialDiscord: e.target.value },
-                              })
-                            }
-                            placeholder="username"
-                            className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white focus:outline-none focus:border-emerald-500/60"
-                          />
-                        </div>
+                        <span className="text-[11px] text-zinc-500 mt-1 block">
+                          Preview: https://t.me/{(allData.settings.socialTelegram || 'vishumax').replace('https://t.me/', '').replace('http://t.me/', '').replace('@', '')}
+                        </span>
                       </div>
                     </div>
 
@@ -2523,6 +2739,20 @@ export const AdminDashboard: React.FC = () => {
                 </label>
 
                 <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                  {editingProject.id && (
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        await handleDuplicateProject(editingProject);
+                        setEditingProject(null);
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-emerald-300 border border-white/10 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                      title="Duplicate this thumbnail as a new entry"
+                    >
+                      <Copy className="w-3.5 h-3.5" />
+                      <span className="hidden sm:inline">Duplicate</span>
+                    </button>
+                  )}
                   <button
                     type="button"
                     onClick={() => setEditingProject(null)}
@@ -2593,6 +2823,20 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-end gap-3">
+                {editingClient.id && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleDuplicateClient(editingClient);
+                      setEditingClient(null);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-emerald-300 border border-white/10 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                    title="Duplicate this brand as a new entry"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Duplicate</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setEditingClient(null)}
@@ -2674,6 +2918,20 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-end gap-3">
+                {editingTestimonial.id && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleDuplicateTestimonial(editingTestimonial);
+                      setEditingTestimonial(null);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-emerald-300 border border-white/10 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                    title="Duplicate this review as a new entry"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Duplicate</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setEditingTestimonial(null)}
@@ -2754,6 +3012,20 @@ export const AdminDashboard: React.FC = () => {
               </div>
 
               <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-end gap-3">
+                {editingLeader.id && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      await handleDuplicateLeader(editingLeader);
+                      setEditingLeader(null);
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-white/5 hover:bg-emerald-500/20 text-emerald-300 border border-white/10 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                    title="Duplicate this leader as a new entry"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                    <span>Duplicate</span>
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={() => setEditingLeader(null)}
@@ -2877,6 +3149,25 @@ export const AdminDashboard: React.FC = () => {
             </button>
           </div>
         </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* MODAL: IMAGE CROPPER & RESIZER (Media Library) */}
+      {/* ------------------------------------------------------------- */}
+      {cropperState.isOpen && (
+        <ImageCropperModal
+          isOpen={cropperState.isOpen}
+          onClose={() => setCropperState((prev) => ({ ...prev, isOpen: false }))}
+          imageSrc={cropperState.imageSrc}
+          fileName={cropperState.fileName}
+          defaultAspect={cropperState.defaultAspect || '16:9'}
+          onSave={async (croppedDataUrl, fileName) => {
+            const url = await handleSaveCroppedMedia(croppedDataUrl, fileName);
+            if (url && cropperState.onSaveCallback) {
+              cropperState.onSaveCallback(url);
+            }
+          }}
+        />
       )}
     </div>
   );

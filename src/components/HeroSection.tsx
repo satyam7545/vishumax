@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Send } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface HeroSectionProps {
@@ -242,11 +242,12 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             <button
               type="button"
               onClick={onOpenBooking}
-              className="relative z-10 overflow-hidden px-8 sm:px-10 py-3 sm:py-3.5 rounded-full font-sans font-semibold text-xs sm:text-sm tracking-normal flex items-center justify-center gap-2 cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
+              className="relative z-10 overflow-hidden px-8 sm:px-10 py-3 sm:py-3.5 rounded-full font-sans font-semibold text-xs sm:text-sm tracking-normal flex items-center justify-center gap-2.5 cursor-pointer bg-gradient-to-b from-zinc-800/90 via-zinc-900/95 to-zinc-950 hover:from-zinc-750 hover:via-zinc-850 hover:to-zinc-900 text-white border border-white/20 hover:border-white/35 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] transition-all duration-200"
             >
               {/* Shimmer sweep on hover */}
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-in-out" />
-              <span className="relative z-10 text-white font-medium">{siteData.hero.ctaText || 'Book a free discovery call'}</span>
+              <Send className="relative z-10 w-3.5 h-3.5 text-sky-400" />
+              <span className="relative z-10 text-white font-medium">{siteData.hero.ctaText || 'Chat on Telegram'}</span>
             </button>
           </div>
         </motion.div>

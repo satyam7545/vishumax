@@ -60,7 +60,7 @@ export const StatsBar: React.FC = () => {
         }}
       />
 
-      <div className="relative max-w-4xl mx-auto px-6 sm:px-12 flex items-center justify-center divide-x divide-white/[0.08]">
+      <div className="relative max-w-4xl mx-auto px-2 sm:px-12 grid grid-cols-3 divide-x divide-white/[0.08]">
         {STATS.map((stat, idx) => {
           const numericTarget = parseInt(stat.value, 10);
           return (
@@ -69,10 +69,10 @@ export const StatsBar: React.FC = () => {
               initial={{ opacity: 0, y: 10 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: idx * 0.1 }}
-              className="flex flex-col items-center text-center px-8 sm:px-16 gap-2"
+              className="flex flex-col items-center text-center px-1 sm:px-8 gap-1.5 sm:gap-2"
             >
               {/* Big number */}
-              <span className="font-sans font-light text-[3rem] sm:text-[4rem] lg:text-[4.75rem] text-white/90 leading-none tracking-tight">
+              <span className="font-sans font-light text-2xl sm:text-4xl lg:text-[4.75rem] text-white/90 leading-none tracking-tight">
                 {isInView ? (
                   <AnimatedCounter target={numericTarget} suffix={stat.suffix || ''} />
                 ) : (
@@ -81,7 +81,7 @@ export const StatsBar: React.FC = () => {
               </span>
 
               {/* Label */}
-              <span className="text-[11px] sm:text-xs font-sans font-normal text-zinc-500 tracking-wide">
+              <span className="text-[10px] sm:text-xs font-sans font-normal text-zinc-400 sm:text-zinc-500 tracking-tight sm:tracking-wide">
                 {stat.label}
               </span>
             </motion.div>
