@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Sparkles, MessageSquare, Mail, Send, ArrowRight, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ExternalLink } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { Footer } from '../components/Footer';
 
@@ -115,17 +115,6 @@ export const BioPage: React.FC<BioPageProps> = ({
 
       {/* Main Bio Showcase Content */}
       <main className="relative z-10 flex-1 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16 w-full flex flex-col items-center font-['Inter',sans-serif]">
-        {/* Intro Badge */}
-        <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-zinc-300 mb-6 backdrop-blur-md shadow-xs"
-        >
-          <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
-          <span className="font-semibold text-white">Creator Bio & Packaging Philosophy</span>
-        </motion.div>
-
         {/* Hero Bio Card */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -143,9 +132,6 @@ export const BioPage: React.FC<BioPageProps> = ({
             {/* Bio Information */}
             <div className={`${siteData.about.portraitImage ? 'md:col-span-7 lg:col-span-8' : 'md:col-span-12'} flex flex-col justify-center space-y-5 text-left`}>
               <div>
-                <span className="text-xs font-mono tracking-wider uppercase text-emerald-400 font-semibold block mb-2">
-                  Meet The Strategist
-                </span>
                 <h1 className="font-sans font-bold text-3xl sm:text-4xl lg:text-5xl text-white tracking-tight leading-[1.15]">
                   {authorName}
                 </h1>
@@ -162,41 +148,6 @@ export const BioPage: React.FC<BioPageProps> = ({
                   <p className="text-zinc-400">{siteData.about.bioParagraph2}</p>
                 )}
               </div>
-
-              {/* Direct Channels */}
-              <div className="pt-3 flex items-center gap-3 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => onOpenBooking('Project Inquiry')}
-                  className="px-5 py-2.5 rounded-full font-bold text-xs sm:text-sm text-black flex items-center gap-2 cursor-pointer shadow-[0_0_20px_rgba(16,185,129,0.3)] hover:scale-105 active:scale-95 transition-all"
-                  style={{ background: theme.primary }}
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  <span>Connect with {authorName.split(' ')[0]}</span>
-                </button>
-
-                {siteData.contact?.telegramUrl && (
-                  <a
-                    href={siteData.contact.telegramUrl.startsWith('http') ? siteData.contact.telegramUrl : `https://t.me/${siteData.contact.telegramUrl.replace('@', '')}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs sm:text-sm text-zinc-200 font-medium flex items-center gap-2 transition-all"
-                  >
-                    <Send className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Telegram</span>
-                  </a>
-                )}
-
-                {siteData.contact?.email && (
-                  <a
-                    href={`mailto:${siteData.contact.email}`}
-                    className="px-4 py-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-xs sm:text-sm text-zinc-200 font-medium flex items-center gap-2 transition-all"
-                  >
-                    <Mail className="w-3.5 h-3.5 text-amber-400" />
-                    <span>Email</span>
-                  </a>
-                )}
-              </div>
             </div>
 
             {/* Studio Portrait Photo */}
@@ -208,11 +159,6 @@ export const BioPage: React.FC<BioPageProps> = ({
                     alt={authorName}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent pointer-events-none" />
-                  <div className="absolute bottom-4 left-4 right-4 p-3 rounded-2xl bg-black/60 backdrop-blur-md border border-white/10">
-                    <p className="text-xs font-bold text-white">{authorName}</p>
-                    <p className="text-[10px] text-zinc-400">YouTube Packaging Specialist</p>
-                  </div>
                 </div>
               </div>
             )}
