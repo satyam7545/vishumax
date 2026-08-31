@@ -69,40 +69,40 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
             className="mb-5 sm:mb-6 flex flex-col items-center gap-2.5 w-full"
           >
             <div
-              className="relative w-full max-w-3xl overflow-hidden py-0.5"
+              className="relative w-full max-w-4xl overflow-hidden py-1"
               style={{
                 maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
                 WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
               }}
             >
-              <div className="flex w-max animate-marquee">
+              <div className="flex w-max animate-marquee items-center">
                 {/* Track A */}
-                <div className="flex shrink-0 items-center gap-2.5 pr-2.5">
+                <div className="flex shrink-0 items-center gap-3 pr-3">
                   {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
                     <div
                       key={`p-a-${brand.id}-${idx}`}
-                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
+                      className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/60 border border-white/15 text-left select-none shrink-0 backdrop-blur-md shadow-xs hover:border-white/30 transition-colors"
                     >
                       {brand.logo ? (
                         <img
                           src={brand.logo}
                           alt={brand.name}
-                          className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
+                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full object-cover border border-white/20 shrink-0 block"
                         />
                       ) : (
                         <span
-                          className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
+                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold shrink-0 leading-none"
                           style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
                         >
                           {brand.name.charAt(0)}
                         </span>
                       )}
-                      <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
+                      <span className="font-sans font-bold text-xs sm:text-[13px] text-white uppercase tracking-wider leading-none flex items-center">
                         {brand.name}
                       </span>
                       {brand.badge && (
                         <span
-                          className="text-[9px] font-mono font-semibold"
+                          className="text-[10px] sm:text-[11px] font-mono font-bold leading-none flex items-center"
                           style={{ color: theme.primary }}
                         >
                           {brand.badge}
@@ -113,32 +113,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                 </div>
 
                 {/* Track B (Exact Duplicate for Seamless Loop) */}
-                <div className="flex shrink-0 items-center gap-2.5 pr-2.5" aria-hidden="true">
+                <div className="flex shrink-0 items-center gap-3 pr-3" aria-hidden="true">
                   {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
                     <div
                       key={`p-b-${brand.id}-${idx}`}
-                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
+                      className="inline-flex items-center gap-2.5 px-3.5 sm:px-4 py-1.5 rounded-full bg-black/60 border border-white/15 text-left select-none shrink-0 backdrop-blur-md shadow-xs hover:border-white/30 transition-colors"
                     >
                       {brand.logo ? (
                         <img
                           src={brand.logo}
                           alt={brand.name}
-                          className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
+                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full object-cover border border-white/20 shrink-0 block"
                         />
                       ) : (
                         <span
-                          className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
+                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold shrink-0 leading-none"
                           style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
                         >
                           {brand.name.charAt(0)}
                         </span>
                       )}
-                      <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
+                      <span className="font-sans font-bold text-xs sm:text-[13px] text-white uppercase tracking-wider leading-none flex items-center">
                         {brand.name}
                       </span>
                       {brand.badge && (
                         <span
-                          className="text-[9px] font-mono font-semibold"
+                          className="text-[10px] sm:text-[11px] font-mono font-bold leading-none flex items-center"
                           style={{ color: theme.primary }}
                         >
                           {brand.badge}
