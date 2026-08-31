@@ -6,11 +6,13 @@ import { useSiteData } from '../context/SiteDataContext';
 interface NavbarProps {
   onOpenBooking?: (prefill?: string) => void;
   onNavigateToWorks?: () => void;
+  onNavigateToBio?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
   onOpenBooking,
   onNavigateToWorks,
+  onNavigateToBio,
 }) => {
   const { siteData } = useSiteData();
   const [scrolled, setScrolled] = useState(false);
@@ -110,12 +112,16 @@ export const Navbar: React.FC<NavbarProps> = ({
             FAQ?
           </a>
           <a
-            href="#about"
+            href="#bio"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('about');
+              if (onNavigateToBio) {
+                onNavigateToBio();
+              } else {
+                window.location.hash = '#bio';
+              }
             }}
-            className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]"
+            className="text-white/90 hover:text-white transition-all whitespace-nowrap font-sans hover:drop-shadow-[0_0_10px_rgba(255,255,255,0.6)] cursor-pointer"
           >
             Bio
           </a>
@@ -210,12 +216,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             FAQ?
           </a>
           <a
-            href="#about"
+            href="#bio"
             onClick={(e) => {
               e.preventDefault();
-              scrollTo('about');
+              setMobileMenuOpen(false);
+              if (onNavigateToBio) {
+                onNavigateToBio();
+              } else {
+                window.location.hash = '#bio';
+              }
             }}
-            className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 transition-colors"
+            className="py-2 text-[15px] font-medium text-white/90 hover:text-amber-300 transition-colors cursor-pointer"
           >
             Bio
           </a>

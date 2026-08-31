@@ -10,6 +10,7 @@ import { BookCallModal } from './components/BookCallModal';
 import { CtaBanner } from './components/CtaBanner';
 import { Footer } from './components/Footer';
 import { WorksPage } from './pages/WorksPage';
+import { BioPage } from './pages/BioPage';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 
 // Code-split heavy admin suite
@@ -23,11 +24,11 @@ const AdminLoginModal = lazy(() =>
 function AppContent() {
   const { theme, isAuthenticated, setIsAdminOpen, setIsLoginModalOpen } = useSiteData();
 
-  const [currentView, setCurrentView] = useState<'home' | 'works'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'works' | 'bio'>('home');
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingPrefill, setBookingPrefill] = useState<string | undefined>(undefined);
 
-  // Route detection & navigation: /works, #works, /admin, #admin
+  // Route detection & navigation: /works, #works, /bio, #bio, /about, #about, /admin, #admin
   useEffect(() => {
     const handleRouteChange = () => {
       const path = window.location.pathname.toLowerCase();
@@ -40,6 +41,8 @@ function AppContent() {
         }
       } else if (path === '/works' || path === '/works/' || hash === '#works') {
         setCurrentView('works');
+      } else if (path === '/bio' || path === '/bio/' || path === '/about' || path === '/about/' || hash === '#bio' || hash === '#about') {
+        setCurrentView('bio');
       } else {
         setCurrentView('home');
       }
@@ -79,6 +82,12 @@ function AppContent() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const navigateToBio = () => {
+    window.location.hash = '#bio';
+    setCurrentView('bio');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   const navigateToHome = () => {
     window.location.hash = '';
     if (window.location.pathname !== '/') {
@@ -95,12 +104,19 @@ function AppContent() {
           onNavigateHome={navigateToHome}
           onOpenBooking={handleOpenBooking}
         />
+      ) : currentView === 'bio' ? (
+        <BioPage
+          onNavigateHome={navigateToHome}
+          onNavigateToWorks={navigateToWorks}
+          onOpenBooking={handleOpenBooking}
+        />
       ) : (
         <>
           {/* Navigation Header */}
           <Navbar
             onOpenBooking={() => handleOpenBooking()}
             onNavigateToWorks={navigateToWorks}
+            onNavigateToBio={navigateToBio}
           />
 
           {/* UNIFIED HERO & THUMBNAILS TOP BANNER */}

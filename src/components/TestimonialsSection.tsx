@@ -1,5 +1,4 @@
 import React from 'react';
-import { AboutRaviCard } from './AboutRaviCard';
 import { useSiteData } from '../context/SiteDataContext';
 import { type TestimonialItemData } from '../types/siteData';
 
@@ -99,13 +98,8 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = () => {
 
   const all = siteData.testimonials || [];
 
-  // If no testimonials exist yet, just render the About card cleanly
   if (all.length === 0) {
-    return (
-      <section id="testimonials" className="w-full py-4 space-y-10">
-        <AboutRaviCard />
-      </section>
-    );
+    return null;
   }
 
   // Distribute across 3 columns; if not enough, cycle through all
@@ -145,11 +139,6 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = () => {
         <ScrollColumn items={pad(col0)} direction="up"   speed={30} theme={theme} />
         <ScrollColumn items={pad(col1)} direction="down" speed={35} theme={theme} />
         <ScrollColumn items={pad(col2)} direction="up"   speed={25} theme={theme} />
-      </div>
-
-      {/* About card below */}
-      <div className="pt-2">
-        <AboutRaviCard />
       </div>
     </section>
   );
