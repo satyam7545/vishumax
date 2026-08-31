@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# SQLite database companions & temp journals
+*.db-wal
+*.db-shm
+*.db-journal
