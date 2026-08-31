@@ -91,18 +91,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                         />
                       ) : (
                         <span
-                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold shrink-0 leading-none"
+                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold shrink-0 leading-none font-neue-montreal"
                           style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
                         >
                           {brand.name.charAt(0)}
                         </span>
                       )}
-                      <span className="font-sans font-bold text-xs sm:text-[13px] text-white uppercase tracking-wider leading-none flex items-center">
+                      <span className="font-neue-montreal font-bold text-xs sm:text-[13px] text-white uppercase tracking-wider leading-none flex items-center">
                         {brand.name}
                       </span>
                       {brand.badge && (
                         <span
-                          className="text-[10px] sm:text-[11px] font-mono font-bold leading-none flex items-center"
+                          className="text-[10px] sm:text-[11px] font-neue-montreal font-bold leading-none flex items-center"
                           style={{ color: theme.primary }}
                         >
                           {brand.badge}
@@ -127,18 +127,18 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
                         />
                       ) : (
                         <span
-                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold shrink-0 leading-none"
+                          className="w-5 h-5 sm:w-5.5 sm:h-5.5 rounded-full border flex items-center justify-center text-[9px] sm:text-[10px] font-bold shrink-0 leading-none font-neue-montreal"
                           style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
                         >
                           {brand.name.charAt(0)}
                         </span>
                       )}
-                      <span className="font-sans font-bold text-xs sm:text-[13px] text-white uppercase tracking-wider leading-none flex items-center">
+                      <span className="font-neue-montreal font-bold text-xs sm:text-[13px] text-white uppercase tracking-wider leading-none flex items-center">
                         {brand.name}
                       </span>
                       {brand.badge && (
                         <span
-                          className="text-[10px] sm:text-[11px] font-mono font-bold leading-none flex items-center"
+                          className="text-[10px] sm:text-[11px] font-neue-montreal font-bold leading-none flex items-center"
                           style={{ color: theme.primary }}
                         >
                           {brand.badge}
@@ -209,7 +209,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.25 }}
-          className="mt-3 text-xs sm:text-sm text-zinc-300 font-medium drop-shadow-md tabular-nums"
+          className="mt-3 text-xs sm:text-sm text-zinc-300 font-neue-montreal font-bold drop-shadow-md tabular-nums"
         >
           {num > 0 ? (
             <>

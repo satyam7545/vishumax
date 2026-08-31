@@ -3,16 +3,25 @@ import { motion } from 'framer-motion';
 import { useSiteData } from '../context/SiteDataContext';
 
 interface IndustryLeadersSectionProps {
-  onOpenBooking: () => void;
+  onOpenBooking?: () => void;
+  onNavigateToWorks?: () => void;
 }
 
 export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
-  onOpenBooking,
+  onNavigateToWorks,
 }) => {
   const { siteData, theme } = useSiteData();
   if (!siteData.leaders || siteData.leaders.length === 0) {
     return null;
   }
+
+  const handleLeaderClick = () => {
+    if (onNavigateToWorks) {
+      onNavigateToWorks();
+    } else {
+      window.location.hash = '#works';
+    }
+  };
 
   return (
     <section id="leaders" className="w-full relative py-4 space-y-8">
@@ -36,16 +45,16 @@ export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: idx * 0.08, duration: 0.4 }}
-            onClick={onOpenBooking}
+            onClick={handleLeaderClick}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                onOpenBooking();
+                handleLeaderClick();
               }
             }}
             role="button"
             tabIndex={0}
-            aria-label={`Leader card: ${leader.name}, ${leader.role}. Click to connect.`}
+            aria-label={`Leader card: ${leader.name}, ${leader.role}. Click to view works portfolio.`}
             whileHover={{ y: -6 }}
             className="group relative w-full mx-auto aspect-[3/4] max-h-[390px] rounded-2xl sm:rounded-3xl overflow-hidden bg-zinc-950 border border-zinc-800/80 hover:border-zinc-700 shadow-[0_10px_35px_rgba(0,0,0,0.7)] hover:shadow-[0_20px_45px_rgba(0,0,0,0.95)] transition-all duration-300 flex flex-col justify-end cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
           >

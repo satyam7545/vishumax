@@ -20,6 +20,7 @@
   --font-display: "Poppins", sans-serif;
   --font-serif: "Playfair Display", Georgia, serif;
   --font-mono: "JetBrains Mono", monospace;
+  --font-neue: "Neue Montreal", "PP Neue Montreal", "NeueMontreal", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 
   --shadow-glow-red: 0 0 40px -10px rgba(234, 56, 41, 0.55);
   --shadow-glow-orange: 0 0 40px -10px rgba(242, 85, 44, 0.5);
@@ -53,6 +54,12 @@ html, body {
 /* Utility: smooth momentum scrolling on iOS */
 .touch-scroll {
   -webkit-overflow-scrolling: touch;
+}
+
+/* Font: Neue Montreal */
+.font-neue-montreal {
+  font-family: "Neue Montreal", "PP Neue Montreal", "NeueMontreal", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-weight: 700;
 }
 
 /* Premium Dark Background Patterns */

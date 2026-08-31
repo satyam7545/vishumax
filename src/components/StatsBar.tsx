@@ -8,9 +8,9 @@ interface Stat {
 }
 
 const STATS: Stat[] = [
-  { value: '2', suffix: 'B+', label: 'Thumbnail Clicks' },
-  { value: '14', suffix: 'k+', label: 'Reviews on Fiverr' },
-  { value: '1280', suffix: '+', label: 'Happy Creators' },
+  { value: '150', suffix: 'M+', label: 'Clicks' },
+  { value: '20', suffix: '+', label: 'Worked with Brand' },
+  { value: '200', suffix: '+', label: 'Creators' },
 ];
 
 function AnimatedCounter({ target, suffix }: { target: number; suffix: string }) {

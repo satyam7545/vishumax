@@ -14,17 +14,66 @@ import { THEMES, DEFAULT_THEME_ID, type ThemeId, type ThemeDefinition } from '..
 const AUTH_TOKEN_KEY = 'vishumax_auth_token';
 const CMS_CACHE_KEY = 'vishumax_live_cms_data';
 
-// Helper to update the browser favicon dynamically in real-time
+// Helper to update the browser favicon dynamically in real-time with circular clipping
 const updateFavicon = (url?: string) => {
   if (!url) return;
-  let link: HTMLLinkElement | null = document.querySelector("#site-favicon") || document.querySelector("link[rel*='icon']");
-  if (!link) {
-    link = document.createElement('link');
-    link.rel = 'icon';
-    link.id = 'site-favicon';
-    document.head.appendChild(link);
+
+  const setFaviconHref = (href: string) => {
+    let link: HTMLLinkElement | null = document.querySelector("#site-favicon") || document.querySelector("link[rel*='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      link.id = 'site-favicon';
+      document.head.appendChild(link);
+    }
+    link.href = href;
+  };
+
+  // If already an SVG circle data URI, use directly
+  if (url.startsWith('data:image/svg+xml') && url.includes('<circle')) {
+    setFaviconHref(url);
+    return;
   }
-  link.href = url;
+
+  // Draw image in a circular clip path on canvas to ensure a round favicon
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    try {
+      const canvas = document.createElement('canvas');
+      const size = 64; // Standard high-DPI crisp favicon size
+      canvas.width = size;
+      canvas.height = size;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        setFaviconHref(url);
+        return;
+      }
+
+      ctx.clearRect(0, 0, size, size);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(size / 2, size / 2, size / 2 - 1, 0, Math.PI * 2, true);
+      ctx.closePath();
+      ctx.clip();
+
+      // Cover-crop the image into the circle without distortion
+      const minDim = Math.min(img.width, img.height);
+      const sx = (img.width - minDim) / 2;
+      const sy = (img.height - minDim) / 2;
+      ctx.drawImage(img, sx, sy, minDim, minDim, 0, 0, size, size);
+      ctx.restore();
+
+      const circularUrl = canvas.toDataURL('image/png');
+      setFaviconHref(circularUrl);
+    } catch {
+      setFaviconHref(url);
+    }
+  };
+  img.onerror = () => {
+    setFaviconHref(url);
+  };
+  img.src = url;
 };
 
 export interface AdminUser {
@@ -126,6 +175,8 @@ const mapCMSPayloadToSiteData = (cms: CMSPublicPayload): SiteDataState => {
   }
   if (s?.faviconUrl) {
     updateFavicon(s.faviconUrl);
+  } else {
+    updateFavicon("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%2310b981'/><circle cx='50' cy='50' r='38' fill='%23000000'/><circle cx='50' cy='50' r='24' fill='%2310b981'/></svg>");
   }
 
   return {

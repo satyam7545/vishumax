@@ -178,7 +178,7 @@ function AppContent() {
 
             {/* Trusted by Industry Leaders Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <IndustryLeadersSection onOpenBooking={() => handleOpenBooking()} />
+              <IndustryLeadersSection onNavigateToWorks={navigateToWorks} onOpenBooking={() => handleOpenBooking()} />
             </div>
 
             {/* Testimonials — What Creators Say */}
