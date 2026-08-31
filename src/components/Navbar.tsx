@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, Send } from 'lucide-react';
+import { Menu, X, MessageCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -162,11 +162,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </motion.div>
       </motion.nav>
 
-      {/* Telegram Chat — fixed top-right, fades in on scroll */}
+      {/* Live Chat — fixed top-right, fades in on scroll */}
       <AnimatePresence>
         {scrolled && (
           <motion.button
-            key="telegram-chat"
+            key="live-chat"
             type="button"
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -175,8 +175,8 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onOpenBooking?.('Discovery Session')}
             className="pointer-events-auto hidden md:flex fixed top-5 sm:top-[1.85rem] right-6 z-50 items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black font-semibold text-[13px] whitespace-nowrap cursor-pointer transition-colors duration-200 shadow-[0_0_20px_rgba(16,185,129,0.5)] active:scale-95"
           >
-            <Send className="w-3.5 h-3.5 fill-black" />
-            <span>Telegram Chat</span>
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>Live Chat</span>
           </motion.button>
         )}
       </AnimatePresence>
@@ -230,7 +230,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               Bio
             </a>
 
-            {/* Telegram CTA in mobile drawer */}
+            {/* Live Chat CTA in mobile drawer */}
             <button
               type="button"
               onClick={() => {
@@ -239,8 +239,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               className="mt-2 w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[15px] transition-colors shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <Send className="w-4 h-4 fill-black" />
-              <span>Chat on Telegram</span>
+              <MessageCircle className="w-4 h-4" />
+              <span>Live Chat</span>
             </button>
           </div>
         </>

@@ -175,14 +175,14 @@ function AppContent() {
             {/* 4. Soft Vignette Mask */}
             <div className="absolute inset-0 bg-gradient-to-b from-black via-transparent to-black pointer-events-none opacity-60" />
 
-            {/* Testimonials 3D Flip System + About Vishal Gupta */}
-            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <TestimonialsSection onOpenBooking={() => handleOpenBooking()} />
-            </div>
-
             {/* Trusted by Industry Leaders Section */}
             <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <IndustryLeadersSection onOpenBooking={() => handleOpenBooking()} />
+            </div>
+
+            {/* Testimonials — What Creators Say */}
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <TestimonialsSection onOpenBooking={() => handleOpenBooking()} />
             </div>
 
             {/* FAQs Accordion Section */}

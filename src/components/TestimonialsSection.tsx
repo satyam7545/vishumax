@@ -6,22 +6,22 @@ interface TestimonialsSectionProps {
   onOpenBooking: () => void;
 }
 
-// ── Minimal static card used inside the scrolling columns ──────────────────
-function ScrollTestimonialCard({ item }: { item: TestimonialItemData; theme: { primary: string; glowColor?: string; gradientDivider: string } }) {
-  const cleanQuote = item.quote ? item.quote.replace(/^["'“]|["'”]$/g, '').trim() : '';
+// ── Individual card in the horizontal marquee ─────────────────────────────
+function MarqueeTestimonialCard({ item }: { item: TestimonialItemData }) {
+  const cleanQuote = item.quote ? item.quote.replace(/^["'""]|["'""]$/g, '').trim() : '';
   const channelHandle = item.channel
     ? (item.channel.startsWith('@') ? item.channel : `@${item.channel.replace(/\s+/g, '')}`)
     : `@${item.name.replace(/\s+/g, '')}`;
 
   return (
     <div
-      className="relative overflow-hidden rounded-[24px] sm:rounded-[36px] p-5 sm:p-8 flex flex-col shrink-0 transition-all duration-300 group hover:scale-[1.01] border border-white/40 text-left select-none"
+      className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-7 flex flex-col shrink-0 w-[300px] sm:w-[360px] border border-white/40 text-left select-none"
       style={{
         background: 'linear-gradient(135deg, #a7f3d0 0%, #86efac 40%, #4ade80 85%, #22c55e 100%)',
-        boxShadow: '0 24px 60px rgba(0,0,0,0.65), 0 0 35px rgba(74,222,128,0.25)',
+        boxShadow: '0 20px 50px rgba(0,0,0,0.6), 0 0 30px rgba(74,222,128,0.2)',
       }}
     >
-      {/* Subtle diagonal ambient light ray matching the screenshot */}
+      {/* Subtle diagonal ambient light */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
@@ -29,119 +29,83 @@ function ScrollTestimonialCard({ item }: { item: TestimonialItemData; theme: { p
         }}
       />
 
-      {/* TOP: Author Profile with Avatar, Name, and @Handle */}
-      <div className="flex items-center gap-3 sm:gap-4.5 mb-4 sm:mb-6 relative z-10">
+      {/* Author row */}
+      <div className="flex items-center gap-3 mb-4 relative z-10">
         <img
           src={item.avatar}
           alt={item.name}
-          className="w-12 h-12 sm:w-16 sm:h-16 rounded-full object-cover shrink-0 shadow-md border border-black/10"
+          loading="lazy"
+          decoding="async"
+          className="w-11 h-11 sm:w-13 sm:h-13 rounded-full object-cover shrink-0 shadow-md border border-black/10"
         />
         <div className="min-w-0">
-          <h4 className="font-['Inter',sans-serif] font-semibold text-lg sm:text-[23.5px] text-zinc-950 tracking-tight leading-tight truncate">
+          <h4 className="font-['Inter',sans-serif] font-semibold text-base sm:text-lg text-zinc-950 tracking-tight leading-tight truncate">
             {item.name}
           </h4>
-          <p className="font-['Inter',sans-serif] text-xs sm:text-[14.5px] text-emerald-950 font-normal mt-0.5 leading-none truncate">
+          <p className="font-['Inter',sans-serif] text-xs text-emerald-950 font-normal mt-0.5 leading-none truncate">
             {channelHandle}
           </p>
         </div>
       </div>
 
-      {/* Testimonial Quote Text */}
-      <p className="font-['Inter',sans-serif] text-xs sm:text-[15.5px] leading-relaxed text-zinc-950 font-normal relative z-10 text-left">
+      {/* Quote */}
+      <p className="font-['Inter',sans-serif] text-xs sm:text-sm leading-relaxed text-zinc-950 font-normal relative z-10 line-clamp-4">
         {cleanQuote}
       </p>
     </div>
   );
 }
 
-// ── Column: wraps cards into a seamless infinite vertical scroll ───────────
-function ScrollColumn({
-  items,
-  direction,
-  speed = 28,
-  theme,
-}: {
-  items: TestimonialItemData[];
-  direction: 'up' | 'down';
-  speed?: number;
-  theme: { primary: string; gradientDivider: string };
-}) {
-  const animClass = direction === 'up' ? 'animate-scroll-up' : 'animate-scroll-down';
-  const animStyle = {
-    animationDuration: `${speed}s`,
-  };
-
-  return (
-    <div className="relative overflow-hidden pause-on-hover h-[420px] sm:h-[700px]">
-      {/* Fade top */}
-      <div className="absolute inset-x-0 top-0 h-16 sm:h-20 bg-gradient-to-b from-black to-transparent z-10 pointer-events-none" />
-      {/* Fade bottom */}
-      <div className="absolute inset-x-0 bottom-0 h-16 sm:h-20 bg-gradient-to-t from-black to-transparent z-10 pointer-events-none" />
-
-      <div className={`${animClass} flex flex-col gap-4`} style={animStyle}>
-        {/* First copy */}
-        {items.map((item, i) => (
-          <ScrollTestimonialCard key={`a-${item.id}-${i}`} item={item} theme={theme} />
-        ))}
-        {/* Duplicate for seamless loop */}
-        {items.map((item, i) => (
-          <ScrollTestimonialCard key={`b-${item.id}-${i}`} item={item} theme={theme} />
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// ── Main section ────────────────────────────────────────────────────────────
+// ── Main section ─────────────────────────────────────────────────────────────
 export const TestimonialsSection: React.FC<TestimonialsSectionProps> = () => {
   const { siteData, theme } = useSiteData();
 
   const all = siteData.testimonials || [];
+  if (all.length === 0) return null;
 
-  if (all.length === 0) {
-    return null;
-  }
-
-  // Distribute across 3 columns; if not enough, cycle through all
-  const col0 = all.filter((_, i) => i % 3 === 0).length > 0
-    ? all.filter((_, i) => i % 3 === 0)
-    : all;
-  const col1 = all.filter((_, i) => i % 3 === 1).length > 0
-    ? all.filter((_, i) => i % 3 === 1)
-    : all;
-  const col2 = all.filter((_, i) => i % 3 === 2).length > 0
-    ? all.filter((_, i) => i % 3 === 2)
-    : all;
-
-  // Pad short columns by repeating so the loop duration feels even
-  const pad = (arr: TestimonialItemData[], min = 3) => {
-    if (!arr || arr.length === 0) return [];
-    const result = [...arr];
-    while (result.length < min) result.push(...arr);
-    return result;
-  };
+  // Ensure enough cards for a seamless loop (min 4 before doubling)
+  const padded = [...all];
+  while (padded.length < 4) padded.push(...all);
 
   return (
-    <section id="testimonials" className="w-full py-4 space-y-10">
+    <section id="testimonials" className="w-full py-4 space-y-8 sm:space-y-10">
       {/* Header */}
       <div className="flex flex-col items-center text-center">
         <h2 className="font-sans font-bold text-3xl sm:text-4xl text-white tracking-tight">
           What <span className="font-serif italic font-normal text-zinc-300">Creators</span> Say
         </h2>
         <div
-          className="mt-6 h-px w-24 mx-auto"
+          className="mt-5 sm:mt-6 h-px w-24 mx-auto"
           style={{ background: theme.gradientDivider }}
         />
       </div>
 
-      {/* 3-column on desktop, single column on mobile */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <ScrollColumn items={pad(col0)} direction="up"   speed={30} theme={theme} />
-        <div className="hidden sm:block">
-          <ScrollColumn items={pad(col1)} direction="down" speed={35} theme={theme} />
-        </div>
-        <div className="hidden sm:block">
-          <ScrollColumn items={pad(col2)} direction="up"   speed={25} theme={theme} />
+      {/* Single horizontal marquee row */}
+      <div className="relative w-full overflow-hidden pause-on-hover">
+        {/* Left fade edge */}
+        <div
+          className="absolute top-0 bottom-0 left-0 w-10 sm:w-20 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to right, black, transparent)' }}
+        />
+        {/* Right fade edge */}
+        <div
+          className="absolute top-0 bottom-0 right-0 w-10 sm:w-20 z-10 pointer-events-none"
+          style={{ background: 'linear-gradient(to left, black, transparent)' }}
+        />
+
+        <div className="flex w-max animate-marquee-slow items-stretch gap-4 sm:gap-5 py-2">
+          {/* Track A */}
+          <div className="flex shrink-0 items-stretch gap-4 sm:gap-5 pr-4 sm:pr-5">
+            {padded.map((item, i) => (
+              <MarqueeTestimonialCard key={`a-${item.id}-${i}`} item={item} />
+            ))}
+          </div>
+          {/* Track B — exact duplicate for seamless infinite loop */}
+          <div className="flex shrink-0 items-stretch gap-4 sm:gap-5 pr-4 sm:pr-5" aria-hidden="true">
+            {padded.map((item, i) => (
+              <MarqueeTestimonialCard key={`b-${item.id}-${i}`} item={item} />
+            ))}
+          </div>
         </div>
       </div>
     </section>
