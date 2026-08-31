@@ -552,41 +552,66 @@ export const AdminDashboard: React.FC = () => {
         : 'w-14 aspect-video rounded-lg';
 
     return (
-      <div>
-        <div className="flex items-center justify-between mb-1">
-          <label className="block text-xs text-zinc-400 font-medium">{label}</label>
-          <button
-            type="button"
-            onClick={() => setIsPickerOpen(true)}
-            className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer transition-colors"
-          >
-            <Images className="w-3 h-3" />
-            <span>Select from Media Library</span>
-          </button>
+      <div className="space-y-1.5 w-full">
+        {/* Label & Optional Clear Action (Wraps cleanly without overlapping) */}
+        <div className="flex items-center justify-between gap-2 flex-wrap">
+          <label className="block text-xs text-zinc-300 font-medium truncate max-w-[70%]">
+            {label}
+          </label>
+          {value ? (
+            <button
+              type="button"
+              onClick={() => onChange('')}
+              className="text-[11px] text-zinc-500 hover:text-rose-400 cursor-pointer transition-colors shrink-0"
+            >
+              Clear
+            </button>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setIsPickerOpen(true)}
+              className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 font-semibold cursor-pointer transition-colors shrink-0"
+            >
+              <Images className="w-3 h-3" />
+              <span>Browse Library</span>
+            </button>
+          )}
         </div>
 
-        <div className="flex items-center gap-2">
-          <div className={`${aspectClass} bg-zinc-950 border border-white/10 overflow-hidden flex items-center justify-center shrink-0 shadow-inner`}>
+        {/* Input & Buttons Row */}
+        <div className="flex items-center gap-2 w-full">
+          {/* Visual Thumbnail */}
+          <div
+            onClick={() => setIsPickerOpen(true)}
+            title="Click to change image"
+            className={`${aspectClass} bg-zinc-950 border border-white/10 hover:border-emerald-500/50 overflow-hidden flex items-center justify-center shrink-0 shadow-inner cursor-pointer relative group/preview transition-colors`}
+          >
             {value ? (
-              <img
-                src={value}
-                alt=""
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  (e.target as HTMLElement).style.display = 'none';
-                }}
-              />
+              <>
+                <img
+                  src={value}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    (e.target as HTMLElement).style.display = 'none';
+                  }}
+                />
+                <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex items-center justify-center">
+                  <Images className="w-3.5 h-3.5 text-emerald-400" />
+                </div>
+              </>
             ) : (
-              <ImageIcon className="w-4 h-4 text-zinc-600" />
+              <ImageIcon className="w-4 h-4 text-zinc-600 group-hover/preview:text-emerald-400 transition-colors" />
             )}
           </div>
 
+          {/* Text Input with min-w-0 */}
           <input
             type="text"
             value={value || ''}
             onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder || 'Paste URL or Select / Upload ->'}
-            className="flex-1 px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white font-mono placeholder:text-zinc-600 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 focus:outline-none transition-all"
+            placeholder={placeholder || 'Paste URL or select...'}
+            className="flex-1 min-w-0 px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white font-mono placeholder:text-zinc-600 focus:border-emerald-500/60 focus:ring-1 focus:ring-emerald-500/30 focus:outline-none transition-all"
           />
 
           <input
@@ -597,34 +622,38 @@ export const AdminDashboard: React.FC = () => {
             className="hidden"
           />
 
-          <button
-            type="button"
-            onClick={() => setIsPickerOpen(true)}
-            title="Browse Media Library"
-            className="px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer border border-white/10"
-          >
-            <Images className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Library</span>
-          </button>
+          {/* Action Buttons with shrink-0 and whitespace-nowrap */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => setIsPickerOpen(true)}
+              title="Select from Media Library"
+              className="px-2.5 sm:px-3 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-zinc-200 text-xs font-semibold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer border border-white/10 whitespace-nowrap"
+            >
+              <Images className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+              <span className="hidden sm:inline">Library</span>
+            </button>
 
-          <button
-            type="button"
-            disabled={uploading}
-            onClick={() => fileRef.current?.click()}
-            className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-black text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer shadow-xs"
-          >
-            {uploading ? (
-              <>
-                <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                <span>Uploading...</span>
-              </>
-            ) : (
-              <>
-                <Upload className="w-3.5 h-3.5" />
-                <span>Upload</span>
-              </>
-            )}
-          </button>
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => fileRef.current?.click()}
+              title="Upload new image from device"
+              className="px-2.5 sm:px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-black text-xs font-bold flex items-center gap-1.5 shrink-0 transition-all cursor-pointer shadow-xs whitespace-nowrap"
+            >
+              {uploading ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin shrink-0" />
+                  <span className="hidden sm:inline">Uploading</span>
+                </>
+              ) : (
+                <>
+                  <Upload className="w-3.5 h-3.5 shrink-0" />
+                  <span className="hidden sm:inline">Upload</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
         <MediaPickerModal
@@ -633,6 +662,8 @@ export const AdminDashboard: React.FC = () => {
           onSelect={(url) => onChange(url)}
           currentUrl={value}
           title={`Select ${label}`}
+          initialFiles={mediaFiles}
+          onUploaded={fetchMediaFiles}
         />
       </div>
     );
@@ -663,9 +694,17 @@ export const AdminDashboard: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* Mobile Sidebar Backdrop Overlay */}
+      {isMobileSidebarOpen && (
+        <div
+          onClick={() => setIsMobileSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-black/75 backdrop-blur-xs md:hidden transition-opacity"
+        />
+      )}
+
       {/* SIDEBAR (Luxury Dark Glassmorphic Studio Theme) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0a0a0e]/95 backdrop-blur-2xl border-r border-white/10 flex flex-col justify-between transition-transform duration-300 md:static md:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 w-64 bg-[#0a0a0e]/98 backdrop-blur-2xl border-r border-white/10 flex flex-col justify-between transition-transform duration-300 md:static md:translate-x-0 ${
           isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -908,38 +947,51 @@ export const AdminDashboard: React.FC = () => {
       {/* MAIN CONTENT WORKSPACE */}
       <div className="flex-1 flex flex-col h-full overflow-hidden bg-black relative">
         {/* Top Navbar */}
-        <header className="h-16 border-b border-white/10 bg-[#0a0a0e]/80 backdrop-blur-xl px-4 sm:px-8 flex items-center justify-between shrink-0 z-10">
-          <div className="flex items-center gap-3">
+        <header className="h-16 border-b border-white/10 bg-[#0a0a0e]/90 backdrop-blur-xl px-4 sm:px-8 flex items-center justify-between shrink-0 z-10 gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
             <button
               onClick={() => setIsMobileSidebarOpen(true)}
-              className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white"
+              className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-zinc-300 hover:text-white shrink-0 cursor-pointer"
+              title="Open Navigation Menu"
             >
               <Menu className="w-5 h-5" />
             </button>
-            <h1 className="text-base font-bold text-white capitalize font-sans tracking-tight">
+            <h1 className="text-sm sm:text-base font-bold text-white capitalize font-sans tracking-tight truncate">
               {activeNav === 'overview' && 'Dashboard Overview'}
               {activeNav === 'projects' && 'Thumbnails Showcase & Works'}
               {activeNav === 'clients' && 'Client Roster & Proof Logos'}
-              {activeNav === 'testimonials' && 'What Creators Say (Flip Cards)'}
+              {activeNav === 'testimonials' && 'What Creators Say'}
               {activeNav === 'leaders' && 'Industry Leaders Portfolio'}
               {activeNav === 'media' && 'Media Library & Uploads'}
-              {activeNav === 'inquiries' && 'Contact Inquiries & Discovery Leads'}
-              {activeNav === 'settings' && 'Site Settings, Themes & Messaging Channels'}
+              {activeNav === 'inquiries' && 'Contact Inquiries & Leads'}
+              {activeNav === 'settings' && 'Site Settings & Branding'}
               {activeNav === 'security' && 'Admin Account & Security'}
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+            {activeNav === 'settings' && (
+              <button
+                type="button"
+                onClick={handleSaveSettings}
+                className="px-3 sm:px-4 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs flex items-center gap-1.5 shadow-md cursor-pointer transition-all shrink-0 whitespace-nowrap"
+              >
+                <Check className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Save Changes</span>
+                <span className="sm:hidden">Save</span>
+              </button>
+            )}
             <button
               onClick={handleResetDefaults}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/40 text-zinc-400 hover:text-rose-400 text-xs transition-colors cursor-pointer"
+              className="hidden lg:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-950/40 border border-white/10 hover:border-rose-500/40 text-zinc-400 hover:text-rose-400 text-xs transition-colors cursor-pointer shrink-0 whitespace-nowrap"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Reset Defaults</span>
             </button>
             <button
               onClick={handleClose}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              title="Close Admin Panel"
             >
               <X className="w-5 h-5" />
             </button>
@@ -994,11 +1046,11 @@ export const AdminDashboard: React.FC = () => {
 
                     <div className="p-5 rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-2 hover:border-teal-500/30 transition-all">
                       <div className="flex items-center justify-between text-zinc-400 text-xs">
-                        <span>Views Driven</span>
-                        <Sparkles className="w-4 h-4 text-teal-400" />
+                        <span>Creator Reviews</span>
+                        <MessageSquare className="w-4 h-4 text-teal-400" />
                       </div>
-                      <div className="text-2xl font-bold text-white font-mono">{allData.settings.aboutViewsDriven || '100M+'}</div>
-                      <div className="text-[11px] text-zinc-400">Lifetime client impact</div>
+                      <div className="text-2xl font-bold text-white font-mono">{allData.testimonials.length}</div>
+                      <div className="text-[11px] text-zinc-400">Published reviews</div>
                     </div>
                   </div>
 
@@ -1099,28 +1151,26 @@ export const AdminDashboard: React.FC = () => {
                           category: 'Documentary',
                           cover_image: '',
                           avatar: '',
-                          video_duration: '12:00',
-                          views_count: '2.4M Views',
-                          ctr_before: '4.5%',
-                          ctr_after: '14.8%',
-                          ctr_gain: '+19.2% CTR',
-                          channel: '@Creator',
-                          niche: 'Education',
-                          hook: 'High-contrast psychological packaging hook triggering instant curiosity.',
-                          strategy_breakdown: [
-                            'Focused visual hierarchy with high contrast',
-                            'Optimized for mobile YouTube dark mode feed',
-                          ],
+                          video_duration: '',
+                          views_count: '1.2M Views',
+                          ctr_before: '',
+                          ctr_after: '',
+                          ctr_gain: '',
+                          channel: '',
+                          niche: '',
+                          hook: '',
+                          strategy_breakdown: [],
                           graphic_type: 'custom',
                           featured: true,
                           published: true,
+                          link: '',
                           sort_order: allData.projects.length + 1,
                         })
                       }
                       className="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs flex items-center justify-center gap-2 transition-all shadow-md cursor-pointer"
                     >
                       <Plus className="w-4 h-4" />
-                      <span>Add Thumbnail Case Study</span>
+                      <span>Add Thumbnail</span>
                     </button>
                   </div>
 
@@ -1143,19 +1193,18 @@ export const AdminDashboard: React.FC = () => {
                   </div>
 
                   {/* Projects Table */}
-                  <div className="rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 overflow-hidden">
+                  <div className="rounded-3xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 overflow-hidden shadow-xl">
                     <div className="overflow-x-auto">
-                      <table className="w-full text-left text-xs">
+                      <table className="w-full text-left text-xs min-w-[720px]">
                         <thead>
                           <tr className="bg-zinc-950/60 border-b border-white/10 text-zinc-400">
-                            <th className="p-4 font-semibold">Order</th>
-                            <th className="p-4 font-semibold">Thumbnail</th>
-                            <th className="p-4 font-semibold">Channel & Title</th>
-                            <th className="p-4 font-semibold">Category</th>
-                            <th className="p-4 font-semibold">Views Metric</th>
-                            <th className="p-4 font-semibold">CTR Gain</th>
-                            <th className="p-4 font-semibold">Status</th>
-                            <th className="p-4 text-right font-semibold">Actions</th>
+                            <th className="p-4 font-semibold w-20">Order</th>
+                            <th className="p-4 font-semibold w-24">Thumbnail</th>
+                            <th className="p-4 font-semibold min-w-[220px]">Channel & Title</th>
+                            <th className="p-4 font-semibold w-28">Category</th>
+                            <th className="p-4 font-semibold w-24">Views</th>
+                            <th className="p-4 font-semibold w-20">Status</th>
+                            <th className="p-4 text-right font-semibold w-24 shrink-0">Actions</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800/80">
@@ -1192,7 +1241,7 @@ export const AdminDashboard: React.FC = () => {
                                 </td>
 
                                 <td className="p-4">
-                                  <div className="w-20 aspect-video rounded-lg overflow-hidden bg-zinc-950 border border-white/10 relative">
+                                  <div className="w-20 aspect-video rounded-lg overflow-hidden bg-zinc-950 border border-white/10 relative shrink-0">
                                     {proj.cover_image ? (
                                       <img
                                         src={proj.cover_image}
@@ -1207,39 +1256,33 @@ export const AdminDashboard: React.FC = () => {
                                   </div>
                                 </td>
 
-                                <td className="p-4">
-                                  <div className="flex items-center gap-2 mb-1">
+                                <td className="p-4 max-w-[260px]">
+                                  <div className="flex items-center gap-2 mb-1 min-w-0">
                                     {proj.avatar ? (
-                                      <img src={proj.avatar} alt="" className="w-5 h-5 rounded-full object-cover border border-white/10" />
+                                      <img src={proj.avatar} alt="" className="w-5 h-5 rounded-full object-cover border border-white/10 shrink-0" />
                                     ) : (
-                                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold">
+                                      <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] flex items-center justify-center font-bold shrink-0">
                                         {(proj.channel || 'C')[0]}
                                       </div>
                                     )}
-                                    <span className="text-[11px] font-semibold text-zinc-400">{proj.channel || '@Channel'}</span>
+                                    <span className="text-[11px] font-semibold text-zinc-400 truncate">{proj.channel || '@Channel'}</span>
                                   </div>
-                                  <div className="font-semibold text-white line-clamp-1">{proj.title}</div>
+                                  <div className="font-semibold text-white truncate" title={proj.title}>{proj.title}</div>
                                 </td>
 
                                 <td className="p-4">
-                                  <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 font-medium text-[11px]">
+                                  <span className="px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-300 font-medium text-[11px] whitespace-nowrap">
                                     {proj.category || 'Documentary'}
                                   </span>
                                 </td>
 
-                                <td className="p-4 font-mono font-bold text-white text-[11px]">
+                                <td className="p-4 font-mono font-bold text-white text-[11px] whitespace-nowrap">
                                   {proj.views_count || '1.2M Views'}
                                 </td>
 
-                                <td className="p-4 font-mono">
-                                  <span className="px-2 py-0.5 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 font-bold text-[11px]">
-                                    {proj.ctr_gain || `${proj.ctr_before} → ${proj.ctr_after}`}
-                                  </span>
-                                </td>
-
-                                <td className="p-4">
+                                <td className="p-4 whitespace-nowrap">
                                   <span
-                                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold ${
+                                    className={`px-2 py-0.5 rounded-full text-[10px] font-mono font-semibold whitespace-nowrap ${
                                       proj.published
                                         ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
                                         : 'bg-zinc-800 text-zinc-400'
@@ -1249,8 +1292,8 @@ export const AdminDashboard: React.FC = () => {
                                   </span>
                                 </td>
 
-                                <td className="p-4 text-right">
-                                  <div className="flex items-center justify-end gap-2">
+                                <td className="p-4 text-right whitespace-nowrap shrink-0">
+                                  <div className="flex items-center justify-end gap-1.5 shrink-0">
                                     <button
                                       onClick={() => setEditingProject(proj)}
                                       className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
@@ -1309,27 +1352,28 @@ export const AdminDashboard: React.FC = () => {
                     {allData.clients.map((client, idx) => (
                       <div
                         key={client.id}
-                        className="p-5 rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 flex items-center justify-between gap-3 hover:border-emerald-500/30 transition-all"
+                        className="p-4 sm:p-5 rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 flex items-center justify-between gap-3 hover:border-emerald-500/30 transition-all min-w-0"
                       >
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-950 border border-white/10 flex items-center justify-center shrink-0">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl overflow-hidden bg-zinc-950 border border-white/10 flex items-center justify-center shrink-0">
                             {client.logo ? (
                               <img src={client.logo} alt={client.name} className="w-full h-full object-cover" />
                             ) : (
                               <Layers className="w-5 h-5 text-zinc-600" />
                             )}
                           </div>
-                          <div>
-                            <h4 className="font-bold text-white text-sm">{client.name}</h4>
-                            <span className="text-[11px] text-zinc-400 font-mono">{client.audience || client.category}</span>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="font-bold text-white text-sm truncate" title={client.name}>{client.name}</h4>
+                            <span className="text-[11px] text-emerald-400 font-mono block truncate">{client.badge ? client.badge : 'Proof Brand'}</span>
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-1.5">
+                        <div className="flex items-center gap-1 shrink-0">
                           <button
                             onClick={() => handleReorder('clients', allData.clients, idx, 'up')}
                             disabled={idx === 0}
                             className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                            title="Move Up"
                           >
                             <ArrowUp className="w-3.5 h-3.5" />
                           </button>
@@ -1337,20 +1381,23 @@ export const AdminDashboard: React.FC = () => {
                             onClick={() => handleReorder('clients', allData.clients, idx, 'down')}
                             disabled={idx === allData.clients.length - 1}
                             className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                            title="Move Down"
                           >
                             <ArrowDown className="w-3.5 h-3.5" />
                           </button>
                           <button
                             onClick={() => setEditingClient(client)}
-                            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white cursor-pointer"
+                            className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                            title="Edit brand"
                           >
-                            <Edit className="w-3.5 h-3.5" />
+                            <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setDeleteConfirm({ type: 'clients', id: client.id, name: client.name })}
-                            className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 cursor-pointer"
+                            className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors cursor-pointer"
+                            title="Delete brand"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -1363,21 +1410,21 @@ export const AdminDashboard: React.FC = () => {
               {activeNav === 'testimonials' && allData && (
                 <div className="space-y-6 max-w-6xl">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-zinc-300">Creator Flip Card Testimonials</h2>
+                    <h2 className="text-sm font-semibold text-zinc-300">Creator Reviews & Testimonials</h2>
                     <button
                       onClick={() =>
                         setEditingTestimonial({
                           name: '',
-                          role: 'Creator & Founder',
+                          role: '@Creator',
                           company: 'YouTube Channel',
-                          channel: 'Channel Name',
+                          channel: '@Creator',
                           avatar: '',
                           rating: 5,
                           quote: 'Working with VishuMax completely leveled up our video packaging.',
-                          detailed_bio: 'YouTube Creator focused on high growth.',
-                          subscribers: '1.2M Subs',
-                          impact_metrics: ['+28% CTR Growth', '3.5x More Views'],
-                          stats: [{ label: 'CTR Growth', value: '+28%' }],
+                          detailed_bio: '',
+                          subscribers: '',
+                          impact_metrics: [],
+                          stats: [],
                           sort_order: allData.testimonials.length + 1,
                           published: true,
                         })
@@ -1393,38 +1440,36 @@ export const AdminDashboard: React.FC = () => {
                     {allData.testimonials.map((t, idx) => (
                       <div
                         key={t.id}
-                        className="p-5 rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4 hover:border-emerald-500/30 transition-all flex flex-col justify-between"
+                        className="p-5 rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 space-y-4 hover:border-emerald-500/30 transition-all flex flex-col justify-between min-w-0"
                       >
                         <div className="space-y-3">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full overflow-hidden bg-zinc-950 border border-white/10">
-                                {t.avatar ? (
-                                  <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center font-bold text-xs text-zinc-400">
-                                    {t.name.charAt(0)}
-                                  </div>
-                                )}
-                              </div>
-                              <div>
-                                <h4 className="font-bold text-white text-sm">{t.name}</h4>
-                                <span className="text-[11px] text-zinc-400">{t.role}</span>
-                              </div>
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-10 h-10 rounded-full overflow-hidden bg-zinc-950 border border-white/10 shrink-0">
+                              {t.avatar ? (
+                                <img src={t.avatar} alt={t.name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center font-bold text-xs text-zinc-400">
+                                  {t.name.charAt(0)}
+                                </div>
+                              )}
                             </div>
-                            <span className="font-mono text-xs text-amber-400 font-bold">★ {t.rating || 5}.0</span>
+                            <div className="min-w-0 flex-1">
+                              <h4 className="font-bold text-white text-sm truncate" title={t.name}>{t.name}</h4>
+                              <span className="text-[11px] text-zinc-400 block truncate">{t.role}</span>
+                            </div>
                           </div>
 
                           <p className="text-xs text-zinc-300 italic line-clamp-3">"{t.quote}"</p>
                         </div>
 
-                        <div className="pt-3 border-t border-white/10 flex items-center justify-between">
-                          <span className="text-[11px] font-mono text-emerald-400 font-semibold">{t.subscribers || t.company}</span>
-                          <div className="flex items-center gap-1.5">
+                        <div className="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+                          <span className="text-[11px] font-mono text-emerald-400 font-semibold truncate min-w-0 flex-1 mr-2">{t.role || '@Creator'}</span>
+                          <div className="flex items-center gap-1 shrink-0">
                             <button
                               onClick={() => handleReorder('testimonials', allData.testimonials, idx, 'up')}
                               disabled={idx === 0}
                               className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                              title="Move Up"
                             >
                               <ArrowUp className="w-3.5 h-3.5" />
                             </button>
@@ -1432,20 +1477,23 @@ export const AdminDashboard: React.FC = () => {
                               onClick={() => handleReorder('testimonials', allData.testimonials, idx, 'down')}
                               disabled={idx === allData.testimonials.length - 1}
                               className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                              title="Move Down"
                             >
                               <ArrowDown className="w-3.5 h-3.5" />
                             </button>
                             <button
                               onClick={() => setEditingTestimonial(t)}
-                              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white cursor-pointer"
+                              className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                              title="Edit testimonial"
                             >
-                              <Edit className="w-3.5 h-3.5" />
+                              <Edit className="w-4 h-4" />
                             </button>
                             <button
                               onClick={() => setDeleteConfirm({ type: 'testimonials', id: t.id, name: t.name })}
-                              className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 cursor-pointer"
+                              className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 transition-colors cursor-pointer"
+                              title="Delete testimonial"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Trash2 className="w-4 h-4" />
                             </button>
                           </div>
                         </div>
@@ -1459,17 +1507,17 @@ export const AdminDashboard: React.FC = () => {
               {activeNav === 'leaders' && allData && (
                 <div className="space-y-6 max-w-6xl">
                   <div className="flex items-center justify-between">
-                    <h2 className="text-sm font-semibold text-zinc-300">Trusted Industry Leaders</h2>
+                    <h2 className="text-sm font-semibold text-zinc-300">Trusted by Industry Leaders</h2>
                     <button
                       onClick={() =>
                         setEditingLeader({
                           name: '',
                           role: 'Tech Founder & Investor',
-                          channel: 'Channel (1.5M)',
-                          ctr_gain: '+24.5% CTR',
+                          channel: '',
+                          ctr_gain: '',
                           image: '',
                           quote: 'VishuMax delivers packaging at a world-class level.',
-                          featured_topic: 'Strategy',
+                          featured_topic: '',
                           sort_order: allData.leaders.length + 1,
                           published: true,
                         })
@@ -1485,9 +1533,9 @@ export const AdminDashboard: React.FC = () => {
                     {allData.leaders.map((leader, idx) => (
                       <div
                         key={leader.id}
-                        className="rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 overflow-hidden flex flex-col justify-between hover:border-emerald-500/30 transition-all"
+                        className="rounded-2xl bg-[#0e0e14]/90 backdrop-blur-xl border border-white/10 overflow-hidden flex flex-col justify-between hover:border-emerald-500/30 transition-all min-w-0"
                       >
-                        <div className="aspect-[3/4] w-full bg-zinc-950 relative overflow-hidden">
+                        <div className="aspect-[3/4] w-full bg-zinc-950 relative overflow-hidden shrink-0">
                           {leader.image ? (
                             <img src={leader.image} alt={leader.name} className="w-full h-full object-cover" />
                           ) : (
@@ -1495,25 +1543,22 @@ export const AdminDashboard: React.FC = () => {
                               <Users className="w-8 h-8" />
                             </div>
                           )}
-                          <div className="absolute top-2 right-2 px-2 py-0.5 rounded-full bg-black/70 backdrop-blur-md text-[10px] font-mono font-bold text-emerald-400 border border-emerald-500/30">
-                            {leader.ctr_gain}
-                          </div>
                         </div>
 
-                        <div className="p-4 space-y-2">
+                        <div className="p-4 space-y-2 flex-1 flex flex-col justify-between">
                           <div>
-                            <h4 className="font-bold text-white text-sm">{leader.name}</h4>
-                            <span className="text-[11px] text-zinc-400 block">{leader.role}</span>
-                            <span className="text-[10px] text-zinc-500 font-mono block">{leader.channel}</span>
+                            <h4 className="font-bold text-white text-sm truncate" title={leader.name}>{leader.name}</h4>
+                            <span className="text-[11px] text-zinc-400 block truncate">{leader.role}</span>
                           </div>
 
-                          <div className="pt-2 border-t border-white/10 flex items-center justify-between">
-                            <span className="text-[10px] font-mono text-zinc-500">#{idx + 1}</span>
-                            <div className="flex items-center gap-1.5">
+                          <div className="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono text-zinc-500 shrink-0">#{idx + 1}</span>
+                            <div className="flex items-center gap-1 shrink-0">
                               <button
                                 onClick={() => handleReorder('leaders', allData.leaders, idx, 'up')}
                                 disabled={idx === 0}
                                 className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                                title="Move Up"
                               >
                                 <ArrowUp className="w-3.5 h-3.5" />
                               </button>
@@ -1521,18 +1566,21 @@ export const AdminDashboard: React.FC = () => {
                                 onClick={() => handleReorder('leaders', allData.leaders, idx, 'down')}
                                 disabled={idx === allData.leaders.length - 1}
                                 className="p-1 rounded hover:bg-white/10 text-zinc-400 hover:text-white disabled:opacity-30 cursor-pointer"
+                                title="Move Down"
                               >
                                 <ArrowDown className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setEditingLeader(leader)}
                                 className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 hover:text-white cursor-pointer"
+                                title="Edit leader"
                               >
                                 <Edit className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => setDeleteConfirm({ type: 'leaders', id: leader.id, name: leader.name })}
                                 className="p-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 cursor-pointer"
+                                title="Delete leader"
                               >
                                 <Trash2 className="w-3.5 h-3.5" />
                               </button>
@@ -1683,7 +1731,7 @@ export const AdminDashboard: React.FC = () => {
                               </div>
 
                               {/* Hover overlay actions */}
-                              <div className="absolute inset-0 bg-black/75 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-2 pointer-events-none group-hover:pointer-events-auto">
+                              <div className="absolute inset-0 bg-black/80 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5 p-1.5 flex-wrap pointer-events-none group-hover:pointer-events-auto">
                                 <button
                                   onClick={() => {
                                     setEditingProject({
@@ -1692,49 +1740,47 @@ export const AdminDashboard: React.FC = () => {
                                       category: 'Documentary',
                                       cover_image: file.url,
                                       avatar: '',
-                                      video_duration: '12:00',
-                                      views_count: '2.4M Views',
-                                      ctr_before: '4.5%',
-                                      ctr_after: '14.8%',
-                                      ctr_gain: '+19.2% CTR',
-                                      channel: '@Creator',
-                                      niche: 'Education',
-                                      hook: 'High-contrast psychological packaging hook.',
-                                      strategy_breakdown: [
-                                        'Focused visual hierarchy with clear contrast',
-                                        'Optimized for mobile YouTube dark mode feed',
-                                      ],
+                                      video_duration: '',
+                                      views_count: '1.2M Views',
+                                      ctr_before: '',
+                                      ctr_after: '',
+                                      ctr_gain: '',
+                                      channel: '@Channel',
+                                      niche: '',
+                                      hook: '',
+                                      strategy_breakdown: [],
                                       graphic_type: 'custom',
                                       featured: true,
                                       published: true,
+                                      link: '',
                                       sort_order: (allData?.projects.length || 0) + 1,
                                     });
                                   }}
-                                  title="Feature this in Works Showcase"
-                                  className="p-2 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 cursor-pointer transition-colors"
+                                  title="Feature in Works Showcase"
+                                  className="p-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/40 text-emerald-300 cursor-pointer transition-colors"
                                 >
-                                  <Sparkles className="w-4 h-4" />
+                                  <Sparkles className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleCopyUrl(file.url)}
                                   title="Copy Image URL"
-                                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
+                                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
                                 >
-                                  {copiedUrl === file.url ? <Check className="w-4 h-4 text-emerald-400" /> : <Copy className="w-4 h-4" />}
+                                  {copiedUrl === file.url ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                                 </button>
                                 <button
                                   onClick={() => setPreviewMedia(file)}
                                   title="Preview Image"
-                                  className="p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
+                                  className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white cursor-pointer transition-colors"
                                 >
-                                  <Eye className="w-4 h-4" />
+                                  <Eye className="w-3.5 h-3.5" />
                                 </button>
                                 <button
                                   onClick={() => handleDeleteMedia(file.id)}
                                   title="Delete Image"
-                                  className="p-2 rounded-xl bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 cursor-pointer transition-colors"
+                                  className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500/40 text-rose-300 cursor-pointer transition-colors"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-3.5 h-3.5" />
                                 </button>
                               </div>
                             </div>
@@ -2352,157 +2398,121 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL: EDIT/ADD THUMBNAIL PROJECT */}
       {/* ------------------------------------------------------------- */}
       {editingProject && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl overflow-y-auto">
-          <div className="w-full max-w-2xl bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto space-y-4 text-zinc-100">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="font-bold text-sm text-white flex items-center gap-2">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto">
+          <div className="w-full max-w-2xl bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto text-zinc-100 flex flex-col max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-sm sm:text-base text-white flex items-center gap-2">
                 <Sparkles className="w-4 h-4 text-emerald-400" />
                 <span>{editingProject.id ? 'Edit Thumbnail Case Study' : 'New Thumbnail Case Study'}</span>
               </h3>
-              <button onClick={() => setEditingProject(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
+              <button onClick={() => setEditingProject(null)} className="p-1 text-zinc-400 hover:text-white cursor-pointer transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProject} className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Video / Thumbnail Title *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingProject.title || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
-                  placeholder="e.g. Inside India's Floating Slum..."
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              {/* Category Selection with Quick Chips */}
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Category *</label>
-                <div className="flex items-center gap-1.5 flex-wrap mb-2">
-                  {['Documentary', 'Tech', 'Travel', 'Podcast/Interviews', 'Health'].map((cat) => (
-                    <button
-                      key={cat}
-                      type="button"
-                      onClick={() => setEditingProject({ ...editingProject, category: cat })}
-                      className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-colors ${
-                        editingProject.category === cat
-                          ? 'bg-emerald-500 text-black font-bold'
-                          : 'bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10'
-                      }`}
-                    >
-                      {cat}
-                    </button>
-                  ))}
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={editingProject.category || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
-                  placeholder="Type or select a category above..."
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Modal Form */}
+            <form onSubmit={handleSaveProject} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Channel Name / Handle *</label>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Video / Thumbnail Title *</label>
                   <input
                     type="text"
                     required
-                    value={editingProject.channel || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, channel: e.target.value })}
-                    placeholder="e.g. @KKCreate"
+                    value={editingProject.title || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, title: e.target.value })}
+                    placeholder="e.g. Inside India's Floating Slum..."
                     className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
+
+                {/* Category Selection with Quick Chips */}
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Views Count Metric</label>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Category *</label>
+                  <div className="flex items-center gap-1.5 flex-wrap mb-2">
+                    {['Documentary', 'Tech', 'Travel', 'Podcast/Interviews', 'Health'].map((cat) => (
+                      <button
+                        key={cat}
+                        type="button"
+                        onClick={() => setEditingProject({ ...editingProject, category: cat })}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-colors ${
+                          editingProject.category === cat
+                            ? 'bg-emerald-500 text-black font-bold'
+                            : 'bg-white/5 hover:bg-white/10 text-zinc-300 border border-white/10'
+                        }`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
                   <input
                     type="text"
-                    value={editingProject.views_count || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, views_count: e.target.value })}
-                    placeholder="e.g. 9.5M Views"
+                    required
+                    value={editingProject.category || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, category: e.target.value })}
+                    placeholder="Type or select a category above..."
                     className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
-              </div>
 
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">
-                  Attached Redirect Link / Video URL (Opens when user clicks card)
-                </label>
-                <input
-                  type="text"
-                  value={editingProject.link || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, link: e.target.value })}
-                  placeholder="https://youtube.com/watch?v=... or custom link"
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white placeholder:text-zinc-600 font-mono"
-                />
-              </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1 font-medium">Channel Name / Handle *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingProject.channel || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, channel: e.target.value })}
+                      placeholder="e.g. @KKCreate"
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1 font-medium">Views Count Metric</label>
+                    <input
+                      type="text"
+                      value={editingProject.views_count || ''}
+                      onChange={(e) => setEditingProject({ ...editingProject, views_count: e.target.value })}
+                      placeholder="e.g. 9.5M Views"
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                    />
+                  </div>
+                </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <ImageFieldInput
-                  label="Channel / Creator Avatar Logo"
-                  value={editingProject.avatar || ''}
-                  onChange={(val) => setEditingProject({ ...editingProject, avatar: val })}
-                  placeholder="Pick avatar or paste URL..."
-                  aspect="square"
-                />
-                <ImageFieldInput
-                  label="Thumbnail High-Res Graphic Cover"
-                  value={editingProject.cover_image || ''}
-                  onChange={(val) => setEditingProject({ ...editingProject, cover_image: val })}
-                  placeholder="Pick thumbnail or paste URL..."
-                  aspect="video"
-                />
-              </div>
-
-              <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-[10px] text-zinc-400 mb-1 font-medium">CTR Before</label>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">
+                    Attached Redirect Link / Video URL (Opens when user clicks card)
+                  </label>
                   <input
                     type="text"
-                    value={editingProject.ctr_before || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, ctr_before: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-zinc-300 font-mono"
+                    value={editingProject.link || ''}
+                    onChange={(e) => setEditingProject({ ...editingProject, link: e.target.value })}
+                    placeholder="https://youtube.com/watch?v=... or custom link"
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white placeholder:text-zinc-600 font-mono"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] text-zinc-400 mb-1 font-medium">CTR After</label>
-                  <input
-                    type="text"
-                    value={editingProject.ctr_after || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, ctr_after: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-emerald-400 font-mono font-bold"
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <ImageFieldInput
+                    label="Channel / Creator Avatar Logo"
+                    value={editingProject.avatar || ''}
+                    onChange={(val) => setEditingProject({ ...editingProject, avatar: val })}
+                    placeholder="Pick avatar or paste URL..."
+                    aspect="square"
                   />
-                </div>
-                <div>
-                  <label className="block text-[10px] text-zinc-400 mb-1 font-medium">CTR Uplift Badge</label>
-                  <input
-                    type="text"
-                    value={editingProject.ctr_gain || ''}
-                    onChange={(e) => setEditingProject({ ...editingProject, ctr_gain: e.target.value })}
-                    className="w-full px-2.5 py-1.5 rounded-lg bg-zinc-950 border border-white/10 text-xs text-emerald-400 font-mono font-bold"
+                  <ImageFieldInput
+                    label="Thumbnail High-Res Graphic Cover"
+                    value={editingProject.cover_image || ''}
+                    onChange={(val) => setEditingProject({ ...editingProject, cover_image: val })}
+                    placeholder="Pick thumbnail or paste URL..."
+                    aspect="video"
                   />
                 </div>
               </div>
 
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Packaging Psychology Hook</label>
-                <textarea
-                  rows={2}
-                  value={editingProject.hook || ''}
-                  onChange={(e) => setEditingProject({ ...editingProject, hook: e.target.value })}
-                  placeholder="Describe the curiosity gap, focal point, and contrast strategy..."
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer">
+              {/* Modal Fixed Footer */}
+              <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-between gap-3 flex-wrap">
+                <label className="flex items-center gap-2 text-xs text-zinc-300 cursor-pointer select-none">
                   <input
                     type="checkbox"
                     checked={editingProject.published !== false}
@@ -2512,17 +2522,17 @@ export const AdminDashboard: React.FC = () => {
                   <span>Publish to Live Works Showcase</span>
                 </label>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
                   <button
                     type="button"
                     onClick={() => setEditingProject(null)}
-                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                    className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
+                    className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer transition-all"
                   >
                     Save Thumbnail
                   </button>
@@ -2537,69 +2547,62 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL: EDIT/ADD BRAND CLIENT */}
       {/* ------------------------------------------------------------- */}
       {editingClient && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div className="w-full max-w-md bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-zinc-100">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="font-bold text-sm text-white">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto">
+          <div className="w-full max-w-md bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto text-zinc-100 flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-sm sm:text-base text-white">
                 {editingClient.id ? 'Edit Brand Partner' : 'Add Brand Partner'}
               </h3>
-              <button onClick={() => setEditingClient(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
+              <button onClick={() => setEditingClient(null)} className="p-1 text-zinc-400 hover:text-white cursor-pointer transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveClient} className="space-y-4">
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Brand / Channel Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingClient.name || ''}
-                  onChange={(e) => setEditingClient({ ...editingClient, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+            <form onSubmit={handleSaveClient} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Brand / Channel Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingClient.name || ''}
+                    onChange={(e) => setEditingClient({ ...editingClient, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                  />
+                </div>
+
+                <ImageFieldInput
+                  label="Channel Icon / Brand Logo"
+                  value={editingClient.logo || ''}
+                  onChange={(val) => setEditingClient({ ...editingClient, logo: val })}
+                  placeholder="Upload logo or paste image URL..."
+                  aspect="square"
                 />
-              </div>
 
-              <ImageFieldInput
-                label="Channel Icon / Brand Logo"
-                value={editingClient.logo || ''}
-                onChange={(val) => setEditingClient({ ...editingClient, logo: val })}
-                placeholder="Upload logo or paste image URL..."
-                aspect="square"
-              />
-
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Subtext (e.g. MEDIA)</label>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Badge Tag (Optional)</label>
                   <input
                     type="text"
-                    value={editingClient.subtext || ''}
-                    onChange={(e) => setEditingClient({ ...editingClient, subtext: e.target.value })}
+                    value={editingClient.badge || ''}
+                    onChange={(e) => setEditingClient({ ...editingClient, badge: e.target.value })}
+                    placeholder="e.g. PARTNER, CREATOR, or leave empty"
                     className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
-                </div>
-                <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Audience (e.g. 1.8M)</label>
-                  <input
-                    type="text"
-                    value={editingClient.audience || ''}
-                    onChange={(e) => setEditingClient({ ...editingClient, audience: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                  />
+                  <span className="text-[10px] text-zinc-500 mt-1 block">Renders a subtle glowing tag next to brand name in live marquee</span>
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setEditingClient(null)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer transition-all"
                 >
                   Save Brand
                 </button>
@@ -2613,95 +2616,74 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL: EDIT/ADD TESTIMONIAL */}
       {/* ------------------------------------------------------------- */}
       {editingTestimonial && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div className="w-full max-w-lg bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-zinc-100">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="font-bold text-sm text-white">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto">
+          <div className="w-full max-w-lg bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto text-zinc-100 flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-sm sm:text-base text-white">
                 {editingTestimonial.id ? 'Edit Creator Review' : 'Add Creator Review'}
               </h3>
-              <button onClick={() => setEditingTestimonial(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
+              <button onClick={() => setEditingTestimonial(null)} className="p-1 text-zinc-400 hover:text-white cursor-pointer transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveTestimonial} className="space-y-4">
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Creator Name *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingTestimonial.name || ''}
-                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                  />
+            <form onSubmit={handleSaveTestimonial} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1 font-medium">Creator Name *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingTestimonial.name || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, name: e.target.value })}
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs text-zinc-400 mb-1 font-medium">Role / Handle *</label>
+                    <input
+                      type="text"
+                      required
+                      value={editingTestimonial.role || ''}
+                      onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
+                      placeholder="e.g. @AliAbdaal"
+                      className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Role / Channel *</label>
-                  <input
-                    type="text"
-                    required
-                    value={editingTestimonial.role || ''}
-                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, role: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                  />
-                </div>
-              </div>
 
-              <ImageFieldInput
-                label="Creator Portrait Avatar"
-                value={editingTestimonial.avatar || ''}
-                onChange={(val) => setEditingTestimonial({ ...editingTestimonial, avatar: val })}
-                placeholder="Upload avatar or paste image URL..."
-                aspect="square"
-              />
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Creator Review / Quote *</label>
-                <textarea
-                  rows={3}
-                  required
-                  value={editingTestimonial.quote || ''}
-                  onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                <ImageFieldInput
+                  label="Creator Portrait Avatar"
+                  value={editingTestimonial.avatar || ''}
+                  onChange={(val) => setEditingTestimonial({ ...editingTestimonial, avatar: val })}
+                  placeholder="Upload avatar or paste image URL..."
+                  aspect="square"
                 />
-              </div>
 
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Subscribers / Channel Info</label>
-                  <input
-                    type="text"
-                    value={editingTestimonial.subscribers || ''}
-                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, subscribers: e.target.value })}
-                    placeholder="1.2M Subs"
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white font-mono"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Rating (1 to 5 Stars)</label>
-                  <input
-                    type="number"
-                    min={1}
-                    max={5}
-                    value={editingTestimonial.rating || 5}
-                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, rating: parseInt(e.target.value, 10) })}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white font-mono"
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Creator Review / Quote *</label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={editingTestimonial.quote || ''}
+                    onChange={(e) => setEditingTestimonial({ ...editingTestimonial, quote: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setEditingTestimonial(null)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer transition-all"
                 >
                   Save Review
                 </button>
@@ -2715,30 +2697,30 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL: EDIT/ADD INDUSTRY LEADER */}
       {/* ------------------------------------------------------------- */}
       {editingLeader && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div className="w-full max-w-md bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-zinc-100">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
-              <h3 className="font-bold text-sm text-white">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto">
+          <div className="w-full max-w-md bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto text-zinc-100 flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between shrink-0">
+              <h3 className="font-bold text-sm sm:text-base text-white">
                 {editingLeader.id ? 'Edit Industry Leader' : 'Add Industry Leader'}
               </h3>
-              <button onClick={() => setEditingLeader(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
+              <button onClick={() => setEditingLeader(null)} className="p-1 text-zinc-400 hover:text-white cursor-pointer transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveLeader} className="space-y-4">
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Leader Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={editingLeader.name || ''}
-                  onChange={(e) => setEditingLeader({ ...editingLeader, name: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
+            <form onSubmit={handleSaveLeader} className="flex flex-col flex-1 overflow-hidden min-h-0">
+              <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1">
+                <div>
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Leader Name *</label>
+                  <input
+                    type="text"
+                    required
+                    value={editingLeader.name || ''}
+                    onChange={(e) => setEditingLeader({ ...editingLeader, name: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
+                  />
+                </div>
 
-              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs text-zinc-400 mb-1 font-medium">Role / Title *</label>
                   <input
@@ -2746,59 +2728,42 @@ export const AdminDashboard: React.FC = () => {
                     required
                     value={editingLeader.role || ''}
                     onChange={(e) => setEditingLeader({ ...editingLeader, role: e.target.value })}
+                    placeholder="e.g. Tech Founder & Investor"
                     className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
+
+                <ImageFieldInput
+                  label="Portrait Image (3:4 Vertical)"
+                  value={editingLeader.image || ''}
+                  onChange={(val) => setEditingLeader({ ...editingLeader, image: val })}
+                  placeholder="Upload portrait or paste image URL..."
+                  aspect="portrait"
+                />
+
                 <div>
-                  <label className="block text-xs text-zinc-400 mb-1 font-medium">CTR Gain</label>
-                  <input
-                    type="text"
-                    value={editingLeader.ctr_gain || ''}
-                    onChange={(e) => setEditingLeader({ ...editingLeader, ctr_gain: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl bg-zinc-950 border border-white/10 text-xs text-emerald-400 font-mono font-bold"
+                  <label className="block text-xs text-zinc-400 mb-1 font-medium">Quote / Endorsement (Optional)</label>
+                  <textarea
+                    rows={2}
+                    value={editingLeader.quote || ''}
+                    onChange={(e) => setEditingLeader({ ...editingLeader, quote: e.target.value })}
+                    placeholder="Brief quote or highlight..."
+                    className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
                   />
                 </div>
               </div>
 
-              <ImageFieldInput
-                label="Portrait Image (3:4 Vertical)"
-                value={editingLeader.image || ''}
-                onChange={(val) => setEditingLeader({ ...editingLeader, image: val })}
-                placeholder="Upload portrait or paste image URL..."
-                aspect="portrait"
-              />
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Channel / Platform</label>
-                <input
-                  type="text"
-                  value={editingLeader.channel || ''}
-                  onChange={(e) => setEditingLeader({ ...editingLeader, channel: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs text-zinc-400 mb-1 font-medium">Quote / Endorsement</label>
-                <textarea
-                  rows={2}
-                  value={editingLeader.quote || ''}
-                  onChange={(e) => setEditingLeader({ ...editingLeader, quote: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl bg-zinc-950/80 border border-white/10 text-xs text-white"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
+              <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={() => setEditingLeader(null)}
-                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                  className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-black font-bold text-xs shadow-md cursor-pointer transition-all"
                 >
                   Save Leader
                 </button>
@@ -2812,23 +2777,23 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL: VIEW INQUIRY */}
       {/* ------------------------------------------------------------- */}
       {viewingInquiry && (
-        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div className="w-full max-w-lg bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-8 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-zinc-100">
-            <div className="flex items-center justify-between pb-3 border-b border-white/10">
+        <div className="fixed inset-0 z-[1200] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl overflow-y-auto">
+          <div className="w-full max-w-lg bg-[#0a0a0e]/98 backdrop-blur-2xl border border-white/15 rounded-3xl shadow-[0_25px_80px_rgba(0,0,0,0.9)] my-auto text-zinc-100 flex flex-col max-h-[90vh] overflow-hidden">
+            <div className="p-5 sm:p-6 border-b border-white/10 flex items-center justify-between shrink-0">
               <div>
                 <h3 className="font-bold text-base text-white">{viewingInquiry.name}</h3>
                 <span className="text-xs text-zinc-400 font-mono">{viewingInquiry.email}</span>
               </div>
-              <button onClick={() => setViewingInquiry(null)} className="text-zinc-400 hover:text-white cursor-pointer">
-                <X className="w-4 h-4" />
+              <button onClick={() => setViewingInquiry(null)} className="p-1 text-zinc-400 hover:text-white cursor-pointer transition-colors">
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-2xl bg-zinc-950 border border-white/10">
+            <div className="p-5 sm:p-6 overflow-y-auto space-y-4 flex-1 text-xs">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-2xl bg-zinc-950 border border-white/10">
                 <div>
                   <span className="text-zinc-500 font-medium block">Channel / Social</span>
-                  <span className="text-white font-semibold">{viewingInquiry.channel_url || '—'}</span>
+                  <span className="text-white font-semibold break-all">{viewingInquiry.channel_url || '—'}</span>
                 </div>
                 <div>
                   <span className="text-zinc-500 font-medium block">Project Type</span>
@@ -2844,13 +2809,13 @@ export const AdminDashboard: React.FC = () => {
               )}
             </div>
 
-            <div className="flex items-center justify-between pt-3 border-t border-white/10">
+            <div className="p-4 sm:p-5 border-t border-white/10 bg-zinc-950/90 shrink-0 flex items-center justify-between gap-3 flex-wrap">
               <span className="text-[11px] text-zinc-500 font-mono">
                 Received: {new Date(viewingInquiry.created_at).toLocaleString()}
               </span>
               <button
                 onClick={() => setViewingInquiry(null)}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 border border-white/10 text-white text-xs font-semibold cursor-pointer transition-colors"
               >
                 Close
               </button>
@@ -2863,25 +2828,29 @@ export const AdminDashboard: React.FC = () => {
       {/* MODAL: DELETE CONFIRMATION */}
       {/* ------------------------------------------------------------- */}
       {deleteConfirm && (
-        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl">
-          <div className="w-full max-w-sm bg-[#0a0a0e]/98 backdrop-blur-2xl border border-rose-500/30 rounded-3xl p-6 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-center text-zinc-100">
-            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto">
+        <div className="fixed inset-0 z-[1300] flex items-center justify-center p-4 bg-black/85 backdrop-blur-xl overflow-y-auto">
+          <div className="w-full max-w-sm bg-[#0a0a0e]/98 backdrop-blur-2xl border border-rose-500/30 rounded-3xl p-6 shadow-[0_25px_80px_rgba(0,0,0,0.9)] space-y-4 text-center text-zinc-100 my-auto">
+            <div className="w-12 h-12 rounded-2xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 mx-auto shrink-0">
               <Trash2 className="w-6 h-6" />
             </div>
-            <h3 className="font-bold text-base text-white">Delete "{deleteConfirm.name}"?</h3>
-            <p className="text-xs text-zinc-400">
-              This action will permanently delete this item from the SQLite database.
-            </p>
+            <div className="space-y-1">
+              <h3 className="font-bold text-base text-white truncate px-2" title={deleteConfirm.name}>
+                Delete "{deleteConfirm.name}"?
+              </h3>
+              <p className="text-xs text-zinc-400">
+                This action will permanently delete this item from the SQLite database.
+              </p>
+            </div>
             <div className="flex items-center justify-center gap-3 pt-2">
               <button
                 onClick={() => setDeleteConfirm(null)}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-300 text-xs font-semibold cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteItem}
-                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold shadow-md cursor-pointer transition-colors whitespace-nowrap"
               >
                 Delete Permanently
               </button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Upload, X, Check, Image as ImageIcon, Loader2 } from 'lucide-react';
 import { type MediaFile } from './AdminDashboard';
@@ -9,6 +10,8 @@ interface MediaPickerModalProps {
   onSelect: (url: string, file?: MediaFile) => void;
   title?: string;
   currentUrl?: string;
+  initialFiles?: MediaFile[];
+  onUploaded?: () => void;
 }
 
 export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
@@ -17,24 +20,34 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
   onSelect,
   title = 'Select Media from Library',
   currentUrl = '',
+  initialFiles,
+  onUploaded,
 }) => {
-  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>([]);
+  const [mediaFiles, setMediaFiles] = useState<MediaFile[]>(initialFiles || []);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedFile, setSelectedFile] = useState<MediaFile | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const getAuthToken = () =>
+    localStorage.getItem('vishumax_auth_token') ||
+    localStorage.getItem('admin_token') ||
+    '';
+
   // Fetch media files from server
   const fetchMedia = useCallback(async () => {
     setLoading(true);
     try {
+      const token = getAuthToken();
       const res = await fetch('/api/cms/media', {
-        headers: { Authorization: `Bearer ${localStorage.getItem('admin_token') || ''}` },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (res.ok) {
         const data = await res.json();
-        setMediaFiles(data.files || []);
+        if (Array.isArray(data.files)) {
+          setMediaFiles(data.files);
+        }
       }
     } catch (err) {
       console.error('Error fetching media:', err);
@@ -45,43 +58,60 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      if (initialFiles && initialFiles.length > 0) {
+        setMediaFiles(initialFiles);
+      }
       fetchMedia();
       setSelectedFile(null);
       setSearch('');
     }
-  }, [isOpen, fetchMedia]);
+  }, [isOpen, initialFiles, fetchMedia]);
 
-  // Handle single file upload inside modal
+  // Handle file upload inside modal using base64 JSON
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     setIsUploading(true);
-    const token = localStorage.getItem('admin_token') || '';
+    const token = getAuthToken();
 
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        const formData = new FormData();
-        formData.append('file', file);
+        if (file.size > 50 * 1024 * 1024) continue;
+
+        const base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
 
         const res = await fetch('/api/cms/upload', {
           method: 'POST',
-          headers: { Authorization: `Bearer ${token}` },
-          body: formData,
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: file.name,
+            type: file.type || 'image/png',
+            data: base64,
+          }),
         });
 
         if (res.ok) {
           const json = await res.json();
-          if (i === 0 && json.url) {
-            // Auto select uploaded image
+          if (i === 0 && json.url && files.length === 1) {
             onSelect(json.url);
+            onUploaded?.();
             onClose();
             return;
           }
         }
       }
       await fetchMedia();
+      onUploaded?.();
     } catch (err) {
       console.error('Error uploading media:', err);
     } finally {
@@ -96,10 +126,10 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
+  const modalNode = (
     <AnimatePresence>
       <div
-        className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md select-none"
+        className="fixed inset-0 z-[1350] flex items-center justify-center p-3 sm:p-6 bg-black/85 backdrop-blur-xl select-none overflow-y-auto"
         onClick={onClose}
       >
         <motion.div
@@ -108,16 +138,16 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
           exit={{ scale: 0.94, opacity: 0, y: 15 }}
           transition={{ type: 'spring', damping: 25, stiffness: 300 }}
           onClick={(e) => e.stopPropagation()}
-          className="relative w-full max-w-4xl rounded-3xl bg-[#0e0e14] border border-white/15 p-6 sm:p-8 shadow-2xl overflow-hidden flex flex-col max-h-[88vh]"
+          className="relative w-full max-w-4xl rounded-3xl bg-[#0e0e14] border border-white/15 p-5 sm:p-7 shadow-[0_25px_80px_rgba(0,0,0,0.95)] overflow-hidden flex flex-col max-h-[90vh] my-auto"
         >
           {/* Header */}
           <div className="flex items-center justify-between gap-4 pb-4 border-b border-white/10 shrink-0">
-            <div>
-              <h3 className="font-sans font-bold text-lg sm:text-xl text-white tracking-tight flex items-center gap-2">
-                <ImageIcon className="w-5 h-5 text-emerald-400" />
-                <span>{title}</span>
+            <div className="min-w-0 flex-1">
+              <h3 className="font-sans font-bold text-lg sm:text-xl text-white tracking-tight flex items-center gap-2 truncate">
+                <ImageIcon className="w-5 h-5 text-emerald-400 shrink-0" />
+                <span className="truncate">{title}</span>
               </h3>
-              <p className="text-xs text-zinc-400 mt-0.5">
+              <p className="text-xs text-zinc-400 mt-0.5 truncate">
                 Choose an image from your server media library or upload a new high-res graphic.
               </p>
             </div>
@@ -125,16 +155,17 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
             <button
               type="button"
               onClick={onClose}
-              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-full bg-white/10 hover:bg-white/20 text-zinc-400 hover:text-white transition-colors cursor-pointer shrink-0"
+              title="Close picker"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Search & Actions Bar */}
-          <div className="py-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
+          <div className="py-3.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 shrink-0">
             {/* Search input */}
-            <div className="relative flex-1 max-w-md">
+            <div className="relative flex-1 min-w-0 max-w-md">
               <Search className="w-4 h-4 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
@@ -146,7 +177,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
             </div>
 
             {/* Upload Button */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <input
                 type="file"
                 ref={fileInputRef}
@@ -159,7 +190,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                 type="button"
                 disabled={isUploading}
                 onClick={() => fileInputRef.current?.click()}
-                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md"
+                className="px-4 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-black font-bold text-xs flex items-center gap-2 transition-all cursor-pointer shadow-md shrink-0 whitespace-nowrap"
               >
                 {isUploading ? (
                   <>
@@ -239,22 +270,22 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
           </div>
 
           {/* Footer Bar */}
-          <div className="pt-4 mt-2 border-t border-white/10 flex items-center justify-between gap-4 shrink-0">
-            <div className="text-xs text-zinc-400 truncate">
+          <div className="pt-3.5 mt-2 border-t border-white/10 flex items-center justify-between gap-3 shrink-0 flex-wrap">
+            <div className="text-xs text-zinc-400 truncate min-w-0 flex-1">
               {selectedFile ? (
-                <span className="text-emerald-400 font-medium font-mono">
+                <span className="text-emerald-400 font-medium font-mono truncate block">
                   Selected: {selectedFile.name}
                 </span>
               ) : (
-                <span>Click an image to select, or double-click to confirm</span>
+                <span className="truncate block">Click an image to select, or double-click to confirm</span>
               )}
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5 shrink-0 whitespace-nowrap">
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold cursor-pointer"
+                className="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-zinc-300 text-xs font-semibold cursor-pointer transition-colors"
               >
                 Cancel
               </button>
@@ -267,7 +298,7 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
                     onClose();
                   }
                 }}
-                className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md transition-all"
+                className="px-5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-40 text-black font-bold text-xs flex items-center gap-2 cursor-pointer shadow-md transition-all whitespace-nowrap"
               >
                 <Check className="w-3.5 h-3.5" />
                 <span>Use Selected Image</span>
@@ -278,4 +309,6 @@ export const MediaPickerModal: React.FC<MediaPickerModalProps> = ({
       </div>
     </AnimatePresence>
   );
+
+  return typeof document !== 'undefined' ? createPortal(modalNode, document.body) : modalNode;
 };
