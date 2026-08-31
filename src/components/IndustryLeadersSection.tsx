@@ -10,6 +10,9 @@ export const IndustryLeadersSection: React.FC<IndustryLeadersSectionProps> = ({
   onOpenBooking,
 }) => {
   const { siteData, theme } = useSiteData();
+  if (!siteData.leaders || siteData.leaders.length === 0) {
+    return null;
+  }
 
   return (
     <section id="leaders" className="w-full relative py-4 space-y-8">

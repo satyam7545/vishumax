@@ -60,96 +60,97 @@ export const HeroSection: React.FC<HeroSectionProps> = ({
     <section className="relative w-full pt-28 sm:pt-32 pb-4 sm:pb-6 flex flex-col items-center justify-center text-center bg-transparent">
       {/* Main Content Container */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-8 flex flex-col items-center w-full">
-        {/* Proof Lives in Our Work Marquee */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-          className="mb-5 sm:mb-6 flex flex-col items-center gap-2.5 w-full"
-        >
-
-          <div
-            className="relative w-full max-w-3xl overflow-hidden py-0.5"
-            style={{
-              maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-              WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
-            }}
+        {/* Proof Lives in Our Work Marquee (Only rendered when clients exist) */}
+        {siteData.proofLogos && siteData.proofLogos.length > 0 && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            className="mb-5 sm:mb-6 flex flex-col items-center gap-2.5 w-full"
           >
-            <div className="flex w-max animate-marquee">
-              {/* Track A */}
-              <div className="flex shrink-0 items-center gap-2.5 pr-2.5">
-                {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
-                  <div
-                    key={`p-a-${brand.id}-${idx}`}
-                    className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
-                  >
-                    {brand.logo ? (
-                      <img
-                        src={brand.logo}
-                        alt={brand.name}
-                        className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
-                      />
-                    ) : (
-                      <span
-                        className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
-                        style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
-                      >
-                        {brand.name.charAt(0)}
+            <div
+              className="relative w-full max-w-3xl overflow-hidden py-0.5"
+              style={{
+                maskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+                WebkitMaskImage: 'linear-gradient(to right, transparent, black 8%, black 92%, transparent)',
+              }}
+            >
+              <div className="flex w-max animate-marquee">
+                {/* Track A */}
+                <div className="flex shrink-0 items-center gap-2.5 pr-2.5">
+                  {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
+                    <div
+                      key={`p-a-${brand.id}-${idx}`}
+                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
+                    >
+                      {brand.logo ? (
+                        <img
+                          src={brand.logo}
+                          alt={brand.name}
+                          className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
+                        />
+                      ) : (
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
+                          style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
+                        >
+                          {brand.name.charAt(0)}
+                        </span>
+                      )}
+                      <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
+                        {brand.name}
                       </span>
-                    )}
-                    <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
-                      {brand.name}
-                    </span>
-                    {brand.badge && (
-                      <span
-                        className="text-[9px] font-mono font-semibold"
-                        style={{ color: theme.primary }}
-                      >
-                        {brand.badge}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
+                      {brand.badge && (
+                        <span
+                          className="text-[9px] font-mono font-semibold"
+                          style={{ color: theme.primary }}
+                        >
+                          {brand.badge}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
 
-              {/* Track B (Exact Duplicate for Seamless Loop) */}
-              <div className="flex shrink-0 items-center gap-2.5 pr-2.5" aria-hidden="true">
-                {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
-                  <div
-                    key={`p-b-${brand.id}-${idx}`}
-                    className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
-                  >
-                    {brand.logo ? (
-                      <img
-                        src={brand.logo}
-                        alt={brand.name}
-                        className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
-                      />
-                    ) : (
-                      <span
-                        className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
-                        style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
-                      >
-                        {brand.name.charAt(0)}
+                {/* Track B (Exact Duplicate for Seamless Loop) */}
+                <div className="flex shrink-0 items-center gap-2.5 pr-2.5" aria-hidden="true">
+                  {[...siteData.proofLogos, ...siteData.proofLogos].map((brand, idx) => (
+                    <div
+                      key={`p-b-${brand.id}-${idx}`}
+                      className="flex items-center gap-2 px-3 py-1 rounded-full bg-black/50 border border-white/15 text-left select-none shrink-0 backdrop-blur-sm shadow-sm hover:border-white/30 transition-colors"
+                    >
+                      {brand.logo ? (
+                        <img
+                          src={brand.logo}
+                          alt={brand.name}
+                          className="w-4 h-4 rounded-full object-cover border border-white/20 shrink-0"
+                        />
+                      ) : (
+                        <span
+                          className="w-3.5 h-3.5 rounded-full border flex items-center justify-center text-[8px] font-bold shrink-0"
+                          style={{ background: theme.badgeBg, borderColor: theme.badgeBorder, color: theme.primary }}
+                        >
+                          {brand.name.charAt(0)}
+                        </span>
+                      )}
+                      <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
+                        {brand.name}
                       </span>
-                    )}
-                    <span className="font-sans font-semibold text-[11px] text-zinc-200 uppercase tracking-wider">
-                      {brand.name}
-                    </span>
-                    {brand.badge && (
-                      <span
-                        className="text-[9px] font-mono font-semibold"
-                        style={{ color: theme.primary }}
-                      >
-                        {brand.badge}
-                      </span>
-                    )}
-                  </div>
-                ))}
+                      {brand.badge && (
+                        <span
+                          className="text-[9px] font-mono font-semibold"
+                          style={{ color: theme.primary }}
+                        >
+                          {brand.badge}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        )}
 
         {/* Headline & Attribution Container */}
         <div className="w-full max-w-5xl flex flex-col items-center">

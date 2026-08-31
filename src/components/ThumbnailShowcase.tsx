@@ -6,6 +6,9 @@ export const ThumbnailShowcase: React.FC = () => {
   const { siteData } = useSiteData();
 
   const thumbs = siteData.thumbnails || [];
+  if (thumbs.length === 0) {
+    return null;
+  }
   const half = Math.ceil(thumbs.length / 2);
   const row1Thumbs = thumbs.length > 0 ? thumbs : [];
   // Row 2 shifts items by half so they aren't identical to row 1 at the same x position

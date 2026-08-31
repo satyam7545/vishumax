@@ -97,7 +97,16 @@ function ScrollColumn({
 export const TestimonialsSection: React.FC<TestimonialsSectionProps> = () => {
   const { siteData, theme } = useSiteData();
 
-  const all = siteData.testimonials;
+  const all = siteData.testimonials || [];
+
+  // If no testimonials exist yet, just render the About card cleanly
+  if (all.length === 0) {
+    return (
+      <section id="testimonials" className="w-full py-4 space-y-10">
+        <AboutRaviCard />
+      </section>
+    );
+  }
 
   // Distribute across 3 columns; if not enough, cycle through all
   const col0 = all.filter((_, i) => i % 3 === 0).length > 0
@@ -112,6 +121,7 @@ export const TestimonialsSection: React.FC<TestimonialsSectionProps> = () => {
 
   // Pad short columns by repeating so the loop duration feels even
   const pad = (arr: TestimonialItemData[], min = 3) => {
+    if (!arr || arr.length === 0) return [];
     const result = [...arr];
     while (result.length < min) result.push(...arr);
     return result;

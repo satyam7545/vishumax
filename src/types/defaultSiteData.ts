@@ -1,9 +1,4 @@
 import type { SiteDataState, FaqItemData } from './siteData';
-import { THUMBNAILS_DATA } from '../data/thumbnailsData';
-import { TESTIMONIALS_DATA } from '../data/testimonialsData';
-import { LEADERS_DATA } from '../data/leadersData';
-import { BRAND_LOGOS } from '../data/logosData';
-import { ASSETS } from '../assets/assets';
 
 export const DEFAULT_FAQS: FaqItemData[] = [
   {
@@ -30,7 +25,8 @@ export const DEFAULT_SITE_DATA: SiteDataState = {
   navbar: {
     brandLine1: 'Vishu',
     brandLine2: 'Max',
-    brandLogoImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&h=120&fit=crop',
+    brandLogoImage: '',
+    faviconUrl: '',
   },
   hero: {
     headlinePrefix: 'We make you believe in',
@@ -41,9 +37,9 @@ export const DEFAULT_SITE_DATA: SiteDataState = {
     ctaText: 'Book a free discovery call',
     ctaSubtext: 'Direct review by Vishal Gupta • No generic agency handoff',
   },
-  proofLogos: BRAND_LOGOS,
-  thumbnails: THUMBNAILS_DATA,
-  testimonials: TESTIMONIALS_DATA,
+  proofLogos: [],
+  thumbnails: [],
+  testimonials: [],
   about: {
     badgeText: 'Available for Select Channel Partnerships',
     heading: 'About Vishal Gupta',
@@ -52,12 +48,12 @@ export const DEFAULT_SITE_DATA: SiteDataState = {
     viewsDriven: '80M+',
     turnaroundTime: '< 24 Hours',
     ctaText: "Let's talk",
-    portraitImage: ASSETS.raviPortrait,
+    portraitImage: '',
     name: 'Vishal Gupta',
     roleTitle: 'Creative Graphic Designer',
     slotsRemaining: 2,
   },
-  leaders: LEADERS_DATA,
+  leaders: [],
   faqs: DEFAULT_FAQS,
   contact: {
     telegramUrl: 'https://t.me/vishumax',

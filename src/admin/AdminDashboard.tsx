@@ -1917,6 +1917,21 @@ export const AdminDashboard: React.FC = () => {
                           placeholder="Upload or pick logo..."
                           aspect="square"
                         />
+                        <ImageFieldInput
+                          label="Website Favicon (Browser Tab Icon)"
+                          value={allData.settings.faviconUrl || ''}
+                          onChange={(val) =>
+                            setAllData({
+                              ...allData,
+                              settings: { ...allData.settings, faviconUrl: val },
+                            })
+                          }
+                          placeholder="Upload or pick favicon (.png, .ico, .svg)..."
+                          aspect="square"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                           <label className="block text-xs text-zinc-400 mb-1 font-medium">Navbar Available Spots Count</label>
                           <input

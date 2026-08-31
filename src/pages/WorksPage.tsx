@@ -9,7 +9,7 @@ interface WorksPageProps {
   onOpenBooking: (prefill?: string) => void;
 }
 
-// Exactly the 6 categories from the reference image
+// Categories matching reference
 const CATEGORIES = [
   'All Designs',
   'Documentary',
@@ -18,15 +18,6 @@ const CATEGORIES = [
   'Podcast/Interviews',
   'Health',
 ] as const;
-
-// Fallback creator avatars
-const FALLBACK_AVATARS = [
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&h=100&fit=crop',
-  'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100&h=100&fit=crop',
-];
 
 export const WorksPage: React.FC<WorksPageProps> = ({
   onNavigateHome,
@@ -181,12 +172,10 @@ export const WorksPage: React.FC<WorksPageProps> = ({
         <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
           <AnimatePresence mode="popLayout">
             {filteredThumbnails.map((item, idx) => {
-              const avatarUrl =
-                item.avatar ||
-                FALLBACK_AVATARS[idx % FALLBACK_AVATARS.length];
               const channelHandle = item.channel?.startsWith('@')
                 ? item.channel
                 : `@${item.channel || 'Creator'}`;
+              const channelInitial = (item.channel || item.title || 'C').replace('@', '').charAt(0).toUpperCase();
 
               return (
                 <motion.div
@@ -223,11 +212,17 @@ export const WorksPage: React.FC<WorksPageProps> = ({
                   {/* Middle: Channel Avatar + Title & Verified Handle */}
                   <div className="mt-3.5 sm:mt-4 flex items-start gap-2.5 sm:gap-3">
                     {/* Channel Avatar */}
-                    <img
-                      src={avatarUrl}
-                      alt={item.channel || 'Channel Avatar'}
-                      className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 border border-slate-200 shadow-sm mt-0.5"
-                    />
+                    {item.avatar ? (
+                      <img
+                        src={item.avatar}
+                        alt={item.channel || 'Channel Avatar'}
+                        className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover shrink-0 border border-slate-200 shadow-sm mt-0.5"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-slate-900 text-white font-bold flex items-center justify-center text-xs shrink-0 border border-slate-200 shadow-sm mt-0.5">
+                        {channelInitial}
+                      </div>
+                    )}
 
                     {/* Title & Verified Handle */}
                     <div className="flex-1 min-w-0">

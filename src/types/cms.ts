@@ -121,6 +121,7 @@ export interface CMSSiteSettings {
   brandLine1: string;
   brandLine2: string;
   brandLogoImage?: string;
+  faviconUrl?: string;
   
   // Hero
   heroHeadlinePrefix: string;

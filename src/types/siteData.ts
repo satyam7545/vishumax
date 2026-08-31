@@ -13,6 +13,7 @@ export interface NavbarConfig {
   brandLine1: string;
   brandLine2: string;
   brandLogoImage?: string;
+  faviconUrl?: string;
 }
 
 export interface AboutConfig {

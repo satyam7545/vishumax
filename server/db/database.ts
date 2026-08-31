@@ -213,7 +213,8 @@ export function initDatabase() {
     const defaultSettings = {
       brandLine1: 'Vishu',
       brandLine2: 'Max',
-      brandLogoImage: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=120&h=120&fit=crop',
+      brandLogoImage: '',
+      faviconUrl: '',
       heroHeadlinePrefix: 'We make you believe in',
       heroHeadlineAccent: 'Power of packaging.',
       heroAttributionPrefix: '—',
@@ -284,22 +285,6 @@ export function initDatabase() {
 
     for (const client of initialClients) {
       insertClient.run(client);
-    }
-  } else {
-    // Populate placeholder logos for existing clients if null
-    const placeholderLogos: Record<string, string> = {
-      'client-1': 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&h=80&fit=crop',
-      'client-2': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop',
-      'client-3': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop',
-      'client-4': 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=80&h=80&fit=crop',
-      'client-5': 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=80&h=80&fit=crop',
-      'client-6': 'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=80&h=80&fit=crop',
-      'client-7': 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=80&h=80&fit=crop',
-      'client-8': 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop',
-    };
-    const updateLogo = db.prepare("UPDATE clients SET logo = ? WHERE id = ? AND (logo IS NULL OR logo = '')");
-    for (const [id, url] of Object.entries(placeholderLogos)) {
-      updateLogo.run(url, id);
     }
   }
 
@@ -753,6 +738,23 @@ export function initDatabase() {
       insertService.run(serv);
     }
   }
+
+  // One-time cleanup: purge any lingering dummy unsplash images from database
+  try {
+    const row = db.prepare("SELECT value FROM site_settings WHERE key = 'global_settings'").get() as { value: string } | undefined;
+    if (row?.value) {
+      const parsed = JSON.parse(row.value);
+      let updated = false;
+      if (parsed.brandLogoImage && parsed.brandLogoImage.includes('unsplash.com')) {
+        parsed.brandLogoImage = '';
+        updated = true;
+      }
+      if (updated) {
+        db.prepare("UPDATE site_settings SET value = ? WHERE key = 'global_settings'").run(JSON.stringify(parsed));
+      }
+    }
+    db.prepare("UPDATE clients SET logo = NULL WHERE logo LIKE '%unsplash.com%'").run();
+  } catch {}
 }
 
 export { db };
