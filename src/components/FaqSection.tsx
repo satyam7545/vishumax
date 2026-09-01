@@ -51,6 +51,8 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 {/* Question Header Button */}
                 <button
                   onClick={() => toggleFaq(faq.id)}
+                  aria-expanded={isOpen}
+                  aria-controls={`faq-answer-${faq.id}`}
                   className="w-full py-5 sm:py-6 flex items-center gap-4 text-left cursor-pointer select-none group"
                 >
                   {/* Icon toggles: theme-colored when open, subtle when closed */}
@@ -87,6 +89,7 @@ export const FaqSection: React.FC<FaqSectionProps> = ({
                 <AnimatePresence initial={false}>
                   {isOpen && (
                     <motion.div
+                      id={`faq-answer-${faq.id}`}
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
