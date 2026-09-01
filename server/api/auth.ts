@@ -2,7 +2,9 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { db } from '../db/database.ts';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'vishumax_jwt_secret_key_2026';
+import crypto from 'crypto';
+
+const JWT_SECRET = process.env.JWT_SECRET || crypto.randomBytes(32).toString('hex');
 
 export interface AdminUser {
   id: number;

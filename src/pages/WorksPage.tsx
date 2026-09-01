@@ -26,7 +26,7 @@ export const WorksPage: React.FC<WorksPageProps> = ({
   const { siteData, theme } = useSiteData();
   const [selectedCategory, setSelectedCategory] = useState<string>('All Designs');
 
-  const thumbnails = siteData.thumbnails || [];
+  const thumbnails = React.useMemo(() => siteData.thumbnails || [], [siteData.thumbnails]);
 
   // Filter thumbnails matching selected category
   const filteredThumbnails = useMemo(() => {
