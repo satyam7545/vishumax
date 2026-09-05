@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, MessageCircle } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSiteData } from '../context/SiteDataContext';
 
@@ -175,7 +175,11 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => onOpenBooking?.('Discovery Session')}
             className="pointer-events-auto hidden md:flex fixed top-5 sm:top-[1.85rem] right-6 z-50 items-center gap-2 px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-black font-semibold text-[13px] whitespace-nowrap cursor-pointer transition-colors duration-200 shadow-[0_0_20px_rgba(16,185,129,0.5)] active:scale-95"
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            {/* Glowing Radar Dot like in Spot Remaining badge */}
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black/60 opacity-80" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-black" />
+            </span>
             <span>Live Chat</span>
           </motion.button>
         )}
@@ -239,7 +243,11 @@ export const Navbar: React.FC<NavbarProps> = ({
               }}
               className="mt-2 w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-[15px] transition-colors shadow-[0_0_20px_rgba(16,185,129,0.4)] active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
             >
-              <MessageCircle className="w-4 h-4" />
+              {/* Glowing Radar Dot like in Spot Remaining badge */}
+              <span className="relative flex h-2.5 w-2.5 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black/60 opacity-80" />
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-black" />
+              </span>
               <span>Live Chat</span>
             </button>
           </div>

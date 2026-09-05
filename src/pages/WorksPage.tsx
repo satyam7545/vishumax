@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, ArrowLeft, MessageCircle } from 'lucide-react';
+import { Eye, ArrowLeft } from 'lucide-react';
 import { useSiteData } from '../context/SiteDataContext';
 import { Footer } from '../components/Footer';
 
@@ -109,14 +109,18 @@ export const WorksPage: React.FC<WorksPageProps> = ({
             </button>
           </div>
 
-          {/* Right Action: Telegram Chat (Direct redirect) */}
+          {/* Right Action: Live Chat (Direct redirect) */}
           <button
             type="button"
             onClick={() => onOpenBooking('Custom Thumbnail Strategy')}
             className="flex items-center gap-1.5 sm:gap-2 px-3.5 sm:px-5 py-1.5 sm:py-2 rounded-full font-bold text-xs sm:text-[13px] whitespace-nowrap cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(16,185,129,0.35)] text-black font-['Inter',sans-serif] shrink-0"
             style={{ background: theme.primary }}
           >
-            <MessageCircle className="w-3.5 h-3.5" />
+            {/* Glowing Radar Dot like in Spot Remaining badge */}
+            <span className="relative flex h-2 w-2 shrink-0">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-black/60 opacity-80" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-black" />
+            </span>
             <span>Live Chat</span>
           </button>
         </div>
