@@ -72,7 +72,7 @@ function AppContent() {
     const raw = siteData.contact?.whatsappNumber || '9065033165';
     const clean = raw.replace(/\D/g, '');
     const phone = clean.length === 10 ? `91${clean}` : (clean || '919065033165');
-    window.location.href = `https://wa.me/${phone}`;
+    window.open(`https://wa.me/${phone}`, '_blank');
   };
 
   const navigateToWorks = () => {
