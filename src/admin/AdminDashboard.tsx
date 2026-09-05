@@ -2275,7 +2275,7 @@ export const AdminDashboard: React.FC = () => {
                           />
                         </div>
                         <span className="text-[11px] text-zinc-500 mt-1 block">
-                          Preview link: https://wa.me/{((allData.settings.socialWhatsapp || '9065033165').replace(/\D/g, '').length === 10 ? '91' : '') + (allData.settings.socialWhatsapp || '9065033165').replace(/\D/g, '')}
+                          Preview link: https://wa.me/{((allData.settings.socialWhatsapp || '9065033165').replace(/\D/g, '').length === 10 ? '91' : '') + (allData.settings.socialWhatsapp || '9065033165').replace(/\D/g, '')}?text={encodeURIComponent('Hi, I want to work with you.')}
                         </span>
                       </div>
                     </div>

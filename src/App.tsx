@@ -72,7 +72,8 @@ function AppContent() {
     const raw = siteData.contact?.whatsappNumber || '9065033165';
     const clean = raw.replace(/\D/g, '');
     const phone = clean.length === 10 ? `91${clean}` : (clean || '919065033165');
-    window.open(`https://wa.me/${phone}`, '_blank');
+    const text = encodeURIComponent('Hi, I want to work with you.');
+    window.open(`https://wa.me/${phone}?text=${text}`, '_blank');
   };
 
   const navigateToWorks = () => {
